@@ -14,7 +14,18 @@ Zusätzlich `spielwelt`: Abenteuer-Ansicht (Ich-Perspektive), Gebiete, Monster, 
 - Wert-Formeln (Schaden, Angriffstempo, HP, Krit) gehören `charakter`; `spielwelt` nutzt sie.
 - Gemeinsamer Vertrag: `data/GameState.kt`, `data/GameRepository.kt` (`GameJson`). Nur abwärtskompatibel erweitern (Felder mit Default), nie umbenennen/entfernen.
 - Strings pro Feld in eigener Datei (`res/values/strings_<feld>.xml`), damit parallele Agenten nicht kollidieren.
-- Theme (`ui/theme`) und Datenmodell gehören dem Haupt-Thread, nicht einem Feld-Agenten.
+- Theme (`ui/theme`), Datenmodell und `IdleRpgApp` gehören dem Haupt-Thread, nicht einem Feld-Agenten.
+
+## Datenvertrag (Stand)
+- `GameState`: `character`, `equipment`, `gold`, `starterWeaponGranted`, `world: WorldState` (Zone, freigeschaltete Zonen, Kills, `lastActiveEpochMillis`).
+- `Item.damageMin/damageMax`: Grundschaden für Waffen.
+- `IdleRpgApp.onCreate` gibt einmalig den Startdolch (`StarterItems.ensureStarterWeapon`).
+- Kampf-API (`charakter`): `CombatStats.of(state)`, `rollHit()`, `attackIntervalMillis`, `Progression.applyXp`, `spendPoint`.
+- Dolch-Grafik (`charakter`): `ui/character/weapon` — `DaggerImage`, `FirstPersonDagger(attackTrigger, onStabImpact)`.
+- `Item.baseType` (Grafik/Name-Stamm, "" = Altbestand → Waffe=Dolch), `Item.itemLevel`, `Item.isNew` ("Neu"-Badge).
+- Beute-API (`ausruestung`, `domain/equipment`): `ItemGenerator.roll(itemLevel, random, minRarity, rarityBoost, slot?)`, `Inventory.addToInventory(state, item)` (voll bei 40 → Auto-Verkauf für `price`; `tryAdd` liefert Info), `equip/unequip/sell/compare`. Grafik: `ui/equipment/ItemIcon(item)`.
+- Kampfschleife/Welt (`spielwelt`): `domain/world`, `domain/combat`, `ui/adventure/AdventureViewModel`.
+- `WorldState` (spielwelt): `heroHp` (-1 = voll/unbekannt), `defeatedBossIds`, `bossDefeatedAtKills` (Zone→Kills beim letzten Bosssieg); Zonen: wiese/wald/sumpf/gebirge/hoehle, nächste Zone via Bosssieg (`WorldProgress`), Drops via `Loot` (nutzt `ItemGenerator`/`Inventory.tryAdd`).
 
 ## Stack
 - Kotlin 2.0.21, Jetpack Compose (BOM 2024.12.01), Material3
@@ -28,6 +39,10 @@ Zusätzlich `spielwelt`: Abenteuer-Ansicht (Ich-Perspektive), Gebiete, Monster, 
 - Android SDK: `D:\Android\Sdk` (User-Env `ANDROID_HOME`, in `local.properties`)
 - Emulator AVD: `Pixel_API35` (Android 35, google_apis x86_64)
 - Kein Android Studio installiert — Build/Run per CLI.
+
+## Repo
+- GitHub (privat): https://github.com/Ilitrius/rpg-game-app, Branch `master`
+- Git-Identität nur repo-lokal gesetzt (Ilitrius / rene.puf@gmail.com)
 
 ## Befehle
 - Build: `.\gradlew.bat assembleDebug`

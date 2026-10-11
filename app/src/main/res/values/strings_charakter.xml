@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="character_level">Stufe %1$d</string>
+    <string name="character_xp">%1$s / %2$s EP</string>
+    <string name="character_xp_max">Höchststufe erreicht</string>
+    <string name="character_gold">%1$s Gold</string>
+    <string name="character_unspent_points">%1$d Punkte zu verteilen</string>
+    <string name="character_no_points">Keine freien Punkte – Stufenaufstieg gibt %1$d neue.</string>
+
+    <string name="character_weapon_title">Waffe</string>
+    <string name="character_weapon_damage">Schaden %1$d–%2$d</string>
+    <string name="character_weapon_none">Keine Waffe – du kämpfst mit bloßen Fäusten.</string>
+    <string name="character_weapon_fists">Fäuste</string>
+    <string name="character_weapon_image">Abbildung der ausgerüsteten Waffe</string>
+
+    <string name="character_stats_title">Attribute</string>
+    <string name="character_stat_strength">Stärke</string>
+    <string name="character_stat_dexterity">Geschick</string>
+    <string name="character_stat_vitality">Vitalität</string>
+    <string name="character_stat_luck">Glück</string>
+    <string name="character_stat_strength_hint">Schaden pro Treffer</string>
+    <string name="character_stat_dexterity_hint">Angriffstempo</string>
+    <string name="character_stat_vitality_hint">Lebenspunkte</string>
+    <string name="character_stat_luck_hint">Kritische Treffer</string>
+    <string name="character_stat_bonus">+%1$d</string>
+    <string name="character_stat_spend">%1$s um 1 erhöhen</string>
+
+    <string name="character_derived_title">Kampfwerte</string>
+    <string name="character_derived_damage">Schaden</string>
+    <string name="character_derived_damage_value">%1$d–%2$d</string>
+    <string name="character_derived_aps">Angriffe/Sek.</string>
+    <string name="character_derived_hp">Leben</string>
+    <string name="character_derived_crit">Krit-Chance</string>
+    <string name="character_derived_crit_mult">Krit-Schaden</string>
+    <string name="character_derived_dps">Schaden/Sek. (Ø)</string>
+
+    <string name="character_rarity_common">Gewöhnlich</string>
+    <string name="character_rarity_uncommon">Ungewöhnlich</string>
+    <string name="character_rarity_rare">Selten</string>
+    <string name="character_rarity_epic">Episch</string>
+    <string name="character_rarity_legendary">Legendär</string>
+</resources>

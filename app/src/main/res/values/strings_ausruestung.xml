@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings des Ausrüstung-Tabs (eigene Datei, damit parallele Feature-Agenten nicht kollidieren). -->
+<resources>
+    <string name="equipment_title">Ausrüstung</string>
+    <string name="equipment_gold">%1$s Gold</string>
+
+    <!-- Slots -->
+    <string name="equipment_slot_weapon">Waffe</string>
+    <string name="equipment_slot_helmet">Helm</string>
+    <string name="equipment_slot_armor">Rüstung</string>
+    <string name="equipment_slot_gloves">Handschuhe</string>
+    <string name="equipment_slot_boots">Stiefel</string>
+    <string name="equipment_slot_ring">Ring</string>
+    <string name="equipment_slot_amulet">Amulett</string>
+    <string name="equipment_slot_empty">%1$s – leer</string>
+
+    <!-- Attribute -->
+    <string name="equipment_stat_strength">Stärke</string>
+    <string name="equipment_stat_dexterity">Geschick</string>
+    <string name="equipment_stat_vitality">Vitalität</string>
+    <string name="equipment_stat_luck">Glück</string>
+
+    <!-- Seltenheit -->
+    <string name="equipment_rarity_common">Gewöhnlich</string>
+    <string name="equipment_rarity_uncommon">Ungewöhnlich</string>
+    <string name="equipment_rarity_rare">Selten</string>
+    <string name="equipment_rarity_epic">Episch</string>
+    <string name="equipment_rarity_legendary">Legendär</string>
+
+    <!-- Bonus-Übersicht -->
+    <string name="equipment_bonus_title">Ausrüstungsbonus</string>
+    <string name="equipment_bonus_weapon_damage">Waffenschaden</string>
+    <string name="equipment_bonus_dps">Schaden/Sek. (Ø)</string>
+    <string name="equipment_fists">Fäuste</string>
+
+    <!-- Inventar -->
+    <string name="equipment_inventory_title">Inventar</string>
+    <string name="equipment_inventory_count">%1$d / %2$d</string>
+    <string name="equipment_inventory_empty">Noch keine Beute – besiege Monster, um Gegenstände zu finden.</string>
+    <string name="equipment_inventory_full">Inventar voll – neue Beute wird automatisch verkauft.</string>
+    <string name="equipment_new_badge">Neu</string>
+    <string name="equipment_level_short">St. %1$d</string>
+
+    <!-- Detail -->
+    <string name="equipment_detail_level">Stufe %1$d</string>
+    <string name="equipment_detail_damage">Schaden %1$d–%2$d</string>
+    <string name="equipment_detail_value">Wert: %1$s Gold</string>
+    <string name="equipment_detail_equipped">Ausgerüstet</string>
+    <string name="equipment_detail_no_bonus">Keine Attributsboni</string>
+    <string name="equipment_compare_title">Vergleich mit %1$s</string>
+    <string name="equipment_compare_empty_slot">Vergleich: Slot ist leer</string>
+    <string name="equipment_compare_same">Keine Änderung der Werte</string>
+    <string name="equipment_compare_damage">Schaden</string>
+    <string name="equipment_compare_dps">Schaden/Sek.: %1$s → %2$s</string>
+    <string name="equipment_action_equip">Anlegen</string>
+    <string name="equipment_action_unequip">Ablegen</string>
+    <string name="equipment_action_sell">Verkaufen (%1$s Gold)</string>
+    <string name="equipment_unequip_full">Inventar voll – zum Ablegen erst Platz schaffen.</string>
+</resources>

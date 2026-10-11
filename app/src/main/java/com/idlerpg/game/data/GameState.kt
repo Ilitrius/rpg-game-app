@@ -12,6 +12,10 @@ data class GameState(
     val character: CharacterState = CharacterState(),
     val equipment: EquipmentState = EquipmentState(),
     val gold: Long = 0,
+    /** True once the starter weapon was handed out (see domain/character/StarterItems). */
+    val starterWeaponGranted: Boolean = false,
+    /** World/adventure progress (zone, kills, last-active time). Owned by the Spielwelt area. */
+    val world: WorldState = WorldState(),
 ) {
     companion object {
         const val SCHEMA_VERSION = 1
@@ -57,10 +61,46 @@ data class Item(
     val rarity: Rarity = Rarity.COMMON,
     val bonus: Stats = Stats(),
     val price: Long = 0,
+    /** Weapon base damage per hit (only meaningful for [EquipmentSlot.WEAPON]; 0 = none). */
+    val damageMin: Int = 0,
+    val damageMax: Int = 0,
+    /**
+     * Base type id (see domain/equipment/ItemBaseTypes), picks name stem and graphic.
+     * "" = legacy/unknown item (a WEAPON without base type is shown as dagger).
+     */
+    val baseType: String = "",
+    /** Level the item was generated for (stats/damage/price scale with it). */
+    val itemLevel: Int = 1,
+    /** True until the player looked at the item in the Ausrüstung tab ("Neu"-badge). */
+    val isNew: Boolean = false,
 )
 
 @Serializable
 data class EquipmentState(
     val equipped: Map<EquipmentSlot, Item> = emptyMap(),
     val inventory: List<Item> = emptyList(),
+)
+
+/**
+ * Persistent world progress of the adventure (Spielwelt).
+ *
+ * @property currentZoneId id of the zone the hero is fighting in (see domain/world/Zones)
+ * @property unlockedZoneIds zones the hero may travel to
+ * @property totalKills all monsters ever killed (online + offline)
+ * @property zoneKills kills per zone id
+ * @property lastActiveEpochMillis wall-clock time the adventure was last running (0 = never); base for offline progress
+ * @property heroHp hero's current hit points when last saved (-1 = unknown/full)
+ * @property defeatedBossIds zone ids whose boss has been defeated at least once
+ * @property bossDefeatedAtKills zone kill counter at the last boss victory per zone (next challenge needs more kills)
+ */
+@Serializable
+data class WorldState(
+    val currentZoneId: String = "wiese",
+    val unlockedZoneIds: List<String> = listOf("wiese"),
+    val totalKills: Long = 0,
+    val zoneKills: Map<String, Long> = emptyMap(),
+    val lastActiveEpochMillis: Long = 0,
+    val heroHp: Int = -1,
+    val defeatedBossIds: List<String> = emptyList(),
+    val bossDefeatedAtKills: Map<String, Long> = emptyMap(),
 )

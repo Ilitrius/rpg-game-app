@@ -19,6 +19,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.idlerpg.game.R
+import com.idlerpg.game.ui.adventure.AdventureScreen
+import com.idlerpg.game.ui.character.CharacterScreen
+import com.idlerpg.game.ui.equipment.EquipmentScreen
+import com.idlerpg.game.ui.options.OptionsScreen
 
 /**
  * Root screen: adventure view on top, menu bar at the bottom.
@@ -37,7 +41,8 @@ fun MainScreen() {
         },
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-            AdventureView()
+            // Owned by the Spielwelt agent (ui/adventure).
+            AdventureScreen()
             selectedTab?.let { TabPanel(it) }
         }
     }
@@ -58,22 +63,15 @@ private fun MainMenuBar(selected: MainTab?, onSelect: (MainTab) -> Unit) {
     }
 }
 
-@Composable
-private fun AdventureView() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(stringResource(R.string.adventure_placeholder), style = MaterialTheme.typography.headlineSmall)
-    }
-}
-
 /** Routes each tab to its feature screen. Each branch is owned by that tab's agent (.claude/agents). */
 @Composable
 private fun TabPanel(tab: MainTab) {
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
         when (tab) {
-            MainTab.CHARACTER -> PlaceholderPanel(tab)
-            MainTab.EQUIPMENT -> PlaceholderPanel(tab)
+            MainTab.CHARACTER -> CharacterScreen()
+            MainTab.EQUIPMENT -> EquipmentScreen()
             MainTab.SHOP -> PlaceholderPanel(tab)
-            MainTab.OPTIONS -> com.idlerpg.game.ui.options.OptionsScreen()
+            MainTab.OPTIONS -> OptionsScreen()
         }
     }
 }

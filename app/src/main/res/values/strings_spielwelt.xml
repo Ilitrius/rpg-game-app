@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Zones -->
+    <string name="zone_wiese">Wiese</string>
+    <string name="zone_wald">Wald</string>
+    <string name="zone_sumpf">Sumpf</string>
+    <string name="zone_gebirge">Gebirge</string>
+    <string name="zone_hoehle">Höhle</string>
+    <string name="zone_number">Gebiet %1$d</string>
+
+    <!-- Monsters -->
+    <string name="monster_schleim">Schleim</string>
+    <string name="monster_riesenratte">Riesenratte</string>
+    <string name="monster_wildschwein">Wildschwein</string>
+    <string name="monster_wolf">Grauwolf</string>
+    <string name="monster_waldspinne">Waldspinne</string>
+    <string name="monster_pilzling">Pilzling</string>
+    <string name="monster_giftschleim">Giftschleim</string>
+    <string name="monster_moorkroete">Moorkröte</string>
+    <string name="monster_irrlicht">Irrlicht</string>
+    <string name="monster_steingolem">Steingolem</string>
+    <string name="monster_schneewolf">Schneewolf</string>
+    <string name="monster_eisgeist">Eisgeist</string>
+    <string name="monster_fledermaus">Riesenfledermaus</string>
+    <string name="monster_hoehlenspinne">Höhlenspinne</string>
+    <string name="monster_kristallgolem">Kristallgolem</string>
+    <string name="monster_schleimkoenig">Schleimkönig</string>
+    <string name="monster_baumhueter">Uralter Baumhüter</string>
+    <string name="monster_sumpfhydra">Sumpfhydra</string>
+    <string name="monster_yeti">Frostyeti</string>
+    <string name="monster_hoehlendrache">Höhlendrache</string>
+    <string name="monster_level">Stufe %1$d</string>
+
+    <!-- HUD -->
+    <string name="hp_value">%1$d / %2$d</string>
+    <string name="xp_value">EP %1$d / %2$d</string>
+    <string name="hero_label">%1$s · Stufe %2$d</string>
+    <string name="crit_label">KRIT!</string>
+    <string name="kill_reward">+%1$d EP   +%2$d Gold</string>
+    <string name="damage_taken">−%1$d</string>
+    <string name="adventure_scene_description">Abenteuer: Kampf gegen %1$s</string>
+
+    <!-- Defeat -->
+    <string name="defeated_title">Besiegt</string>
+    <string name="defeated_subtitle">Du sammelst neue Kräfte …</string>
+
+    <!-- Offline progress -->
+    <string name="welcome_back_title">Willkommen zurück!</string>
+    <string name="welcome_back_away">Du warst %1$s unterwegs.</string>
+    <string name="welcome_back_capped">Angerechnet werden höchstens %1$d Stunden.</string>
+    <string name="welcome_back_kills">Besiegte Monster: %1$s</string>
+    <string name="welcome_back_xp">Erfahrung: +%1$s EP</string>
+    <string name="welcome_back_gold">Gold: +%1$s</string>
+    <string name="welcome_back_levels">Stufenaufstiege: +%1$d</string>
+    <string name="welcome_back_ok">Weiter</string>
+    <string name="duration_hours_minutes">%1$d Std. %2$d Min.</string>
+    <string name="duration_minutes">%1$d Min.</string>
+    <!-- Zones / travel -->
+    <string name="zone_levels">Stufe %1$d–%2$d</string>
+    <string name="zone_sheet_title">Gebiete</string>
+    <string name="zone_sheet_subtitle">Besiege den Boss eines Gebiets, um das nächste freizuschalten.</string>
+    <string name="zone_locked_requirement">Gesperrt – besiege %1$s (%2$s)</string>
+    <string name="zone_current">Du bist hier</string>
+    <string name="zone_boss_defeated">Boss besiegt</string>
+    <string name="zone_boss_open">Boss: %1$s</string>
+    <string name="zone_boss_progress">Boss: %1$d/%2$d Kills</string>
+    <string name="zone_boss_ready">Boss bereit!</string>
+    <string name="zone_travel">Reise nach %1$s …</string>
+    <string name="zone_change_hint">Gebiet wechseln</string>
+    <string name="zone_locked_cd">Gesperrt</string>
+
+    <!-- Boss -->
+    <string name="boss_challenge">Boss herausfordern</string>
+    <string name="boss_badge">BOSS</string>
+    <string name="boss_time_left">%1$d s</string>
+    <string name="boss_victory_title">Boss besiegt!</string>
+    <string name="boss_victory_unlocked">Neues Gebiet freigeschaltet: %1$s</string>
+    <string name="boss_failed_timeout">Zeit abgelaufen!</string>
+    <string name="boss_failed_defeat">Der Boss war zu stark</string>
+    <string name="boss_failed_hint">Der Boss zieht sich zurück – versuch es erneut.</string>
+
+    <!-- Loot -->
+    <string name="loot_title">Beute: %1$s</string>
+    <string name="loot_level">Gegenstandsstufe %1$d</string>
+    <string name="loot_autosold">Inventar voll – für %1$s Gold verkauft</string>
+    <string name="welcome_back_items">Beute: %1$d Gegenstände</string>
+    <string name="welcome_back_items_sold">davon %1$d verkauft (+%2$s Gold, Inventar voll)</string>
+</resources>
