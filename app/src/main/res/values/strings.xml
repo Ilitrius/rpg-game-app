@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Idle RPG</string>
+    <string name="tab_character">Charakter</string>
+    <string name="tab_equipment">Ausrüstung</string>
+    <string name="tab_options">Optionen</string>
+    <string name="tab_shop">Shop</string>
+    <string name="adventure_placeholder">Abenteuer-Ansicht</string>
+    <string name="panel_placeholder">%1$s – kommt bald</string>
+</resources>

@@ -1,0 +1,3 @@
+<resources>
+    <style name="Theme.IdleRPG" parent="android:Theme.Material.NoActionBar" />
+</resources>

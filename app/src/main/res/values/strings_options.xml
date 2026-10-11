@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings des Optionen-Tabs (eigene Datei, damit parallele Feature-Agenten strings.xml nicht kollidierend bearbeiten). -->
+<resources>
+    <string name="options_title">Optionen</string>
+
+    <!-- Spielstand -->
+    <string name="options_save_title">Spielstand</string>
+    <string name="options_save_description">Sichere deinen kompletten Fortschritt – Charakterwerte, Level, Ausrüstung, Inventar und Gold – als JSON-Datei oder übertrage ihn auf ein anderes Gerät.</string>
+    <string name="options_export_header">Exportieren</string>
+    <string name="options_import_header">Importieren</string>
+    <string name="options_export_file">Als Datei speichern</string>
+    <string name="options_export_clipboard">In Zwischenablage kopieren</string>
+    <string name="options_import_file">Aus Datei laden</string>
+    <string name="options_import_clipboard">Aus Zwischenablage einfügen</string>
+
+    <!-- Weitere Einstellungen (Platzhalter) -->
+    <string name="options_more_title">Weitere Einstellungen</string>
+    <string name="options_more_description">Ton, Benachrichtigungen und Sprache folgen in einem späteren Update.</string>
+
+    <!-- Feedback -->
+    <string name="options_export_file_success">Spielstand gespeichert.</string>
+    <string name="options_export_file_error">Spielstand konnte nicht gespeichert werden.</string>
+    <string name="options_export_clipboard_success">Spielstand in die Zwischenablage kopiert.</string>
+    <string name="options_import_read_error">Datei konnte nicht gelesen werden.</string>
+    <string name="options_import_success">Spielstand erfolgreich importiert.</string>
+    <string name="options_import_write_error">Import fehlgeschlagen – der bisherige Spielstand bleibt erhalten.</string>
+    <string name="options_import_clipboard_empty">Die Zwischenablage enthält keinen Text.</string>
+    <string name="options_no_file_app">Keine App zur Dateiauswahl gefunden.</string>
+
+    <!-- Bestätigungsdialog -->
+    <string name="options_confirm_title">Spielstand importieren?</string>
+    <string name="options_confirm_summary">Name: %1$s\nLevel: %2$d\nGold: %3$s\nItems: %4$d</string>
+    <string name="options_confirm_warning">Dein aktueller Fortschritt wird dabei unwiderruflich überschrieben.</string>
+    <string name="options_confirm_ok">Überschreiben</string>
+    <string name="options_confirm_cancel">Abbrechen</string>
+
+    <!-- Fehlermeldungen beim Import -->
+    <string name="options_error_empty">Ungültiger Spielstand: Die Eingabe ist leer.</string>
+    <string name="options_error_too_large">Ungültiger Spielstand: Die Datei ist zu groß.</string>
+    <string name="options_error_malformed">Ungültiger Spielstand: Das ist kein lesbarer Idle-RPG-Spielstand (fehlerhaftes JSON).</string>
+    <string name="options_error_newer_version">Dieser Spielstand stammt aus einer neueren App-Version (Format %1$d, unterstützt bis %2$d). Bitte aktualisiere die App.</string>
+    <string name="options_error_invalid_version">Ungültiger Spielstand: Unbekannte Formatversion.</string>
+    <string name="options_error_level">Ungültiger Spielstand: Das Level muss mindestens 1 sein.</string>
+    <string name="options_error_negative">Ungültiger Spielstand: Der Wert „%1$s“ darf nicht negativ sein.</string>
+    <string name="options_error_slot">Ungültiger Spielstand: Ein Gegenstand vom Typ %2$s ist im Platz %1$s ausgerüstet.</string>
+</resources>
