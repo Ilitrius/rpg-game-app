@@ -73,9 +73,28 @@ data class AdventureUiState(
     val equippedWeapon: Item? = null,
 ) {
     val killsTowardsBoss: Long get() = WorldProgress.killsTowardsBoss(world, zone)
+
+    /**
+     * True while a boss is visible (approaching, fighting or fading out). Covers the moments around
+     * [bossFight] (e.g. the boss's death before the victory is saved) so the HUD never offers the
+     * boss again while it is still on screen.
+     */
+    val bossOnScreen: Boolean get() = monster?.stats?.type?.isBoss == true && phase != MonsterPhase.GONE
+
+    /** What the zone label says about the zone boss. */
+    val bossHudStatus: BossHudStatus
+        get() = when {
+            bossFight || bossOnScreen -> BossHudStatus.FIGHTING
+            killsTowardsBoss >= WorldProgress.BOSS_KILLS_REQUIRED -> BossHudStatus.READY
+            else -> BossHudStatus.PROGRESS
+        }
+
     val canChallengeBoss: Boolean
-        get() = !bossFight && travelingTo == null && !defeated && WorldProgress.canChallengeBoss(world, zone)
+        get() = !bossFight && !bossOnScreen && travelingTo == null && !defeated && WorldProgress.canChallengeBoss(world, zone)
 }
+
+/** Boss line of the zone label: kill progress, "Boss bereit!" or the running boss fight. */
+enum class BossHudStatus { PROGRESS, READY, FIGHTING }
 
 /** One-shot combat events for visual effects. */
 sealed interface AdventureEvent {
@@ -100,6 +119,16 @@ const val TRAVEL_TRANSITION_MILLIS = 1400L
 
 /** Hero HP is saved at most this often while playing (plus on every kill and in the background). */
 private const val HP_SAVE_INTERVAL_MILLIS = 5_000L
+
+/**
+ * The "Willkommen zurück" summary only appears after at least this long away; shorter absences
+ * (switching apps) are credited silently — offline yields only ~1 minute of fighting per hour.
+ */
+const val WELCOME_BACK_MIN_MILLIS = 30L * 60 * 1000
+
+/** True if [reward] is worth a "Willkommen zurück" dialog (long enough away and something to tell). */
+fun shouldShowWelcomeBack(reward: OfflineReward?): Boolean =
+    reward != null && reward.awayMillis >= WELCOME_BACK_MIN_MILLIS && (reward.kills > 0 || reward.heroTooWeak)
 
 private enum class FightResult { KILL, DEFEAT, TIMEOUT }
 
@@ -258,7 +287,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
                 lastSavedHp = restoredHp
                 publishHeroHp()
             }
-            reward?.takeIf { it.kills > 0 }?.let { r -> _ui.update { it.copy(welcomeBack = r) } }
+            reward?.takeIf { shouldShowWelcomeBack(it) }?.let { r -> _ui.update { it.copy(welcomeBack = r) } }
         }
     }
 

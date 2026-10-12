@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -56,6 +55,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -146,7 +146,11 @@ internal fun BossTimer(timeLeftMillis: Long, modifier: Modifier = Modifier) {
 
 // ------------------------------------------------------------------ loot popup
 
-/** Card with the dropped item that slides in, stays ~2.6 s and fades out; then [onDone]. */
+/**
+ * Compact card with the dropped item: grows in from its bottom-left corner, stays ~2.5 s and fades
+ * out upwards; then [onDone]. Meant for the bottom-left HUD slot above the hero block — the caller
+ * limits the width (see LOOT_MAX_WIDTH_FRACTION) so the card stays left of the resting weapon.
+ */
 @Composable
 internal fun LootPopup(drop: LootDrop, modifier: Modifier = Modifier, onDone: () -> Unit) {
     val p = remember { Animatable(0f) }
@@ -159,44 +163,54 @@ internal fun LootPopup(drop: LootDrop, modifier: Modifier = Modifier, onDone: ()
     val exit = ((t - 0.85f) / 0.15f).coerceIn(0f, 1f)
     val color = rarityColor(drop.item.rarity)
     val fmt = { n: Long -> String.format(Locale.GERMANY, "%,d", n) }
-    Box(Modifier.fillMaxSize()) {
-        Row(
-            modifier
-                .graphicsLayer {
-                    alpha = enter * (1f - exit)
-                    translationY = (1f - FastOutSlowInEasing.transform(enter)) * 40.dp.toPx() - exit * 16.dp.toPx()
-                    val s = 0.9f + 0.1f * enter
-                    scaleX = s
-                    scaleY = s
-                }
-                .widthIn(max = 330.dp)
-                .clip(RoundedCornerShape(14.dp))
-                .background(
-                    Brush.verticalGradient(listOf(Color(0xF02A2620), Color(0xF0171411))),
+    val shape = RoundedCornerShape(12.dp)
+    Row(
+        modifier
+            .graphicsLayer {
+                val e = FastOutSlowInEasing.transform(enter)
+                alpha = enter * (1f - exit)
+                translationX = (1f - e) * -14.dp.toPx()
+                translationY = (1f - e) * 10.dp.toPx() - exit * 10.dp.toPx()
+                val s = 0.9f + 0.1f * e
+                scaleX = s
+                scaleY = s
+                transformOrigin = TransformOrigin(0f, 1f)
+            }
+            .drawBehind {
+                // soft rarity glow behind the card
+                drawRoundRect(
+                    Brush.radialGradient(
+                        listOf(color.copy(alpha = 0.28f), Color.Transparent),
+                        center = Offset(size.height * 0.5f, size.height * 0.5f), radius = size.height * 1.1f,
+                    ),
+                    cornerRadius = CornerRadius(12.dp.toPx()),
                 )
-                .border(BorderStroke(1.5.dp, Brush.verticalGradient(listOf(color, color.copy(alpha = 0.35f)))), RoundedCornerShape(14.dp))
-                .padding(10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            ItemIcon(drop.item, Modifier.size(52.dp))
-            Spacer(Modifier.width(10.dp))
-            Column {
+            }
+            .clip(shape)
+            .background(Brush.verticalGradient(listOf(Color(0xF02A2620), Color(0xF0171411))))
+            .border(BorderStroke(1.5.dp, Brush.verticalGradient(listOf(color, color.copy(alpha = 0.35f)))), shape)
+            .padding(start = 8.dp, top = 7.dp, end = 10.dp, bottom = 7.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        ItemIcon(drop.item, Modifier.size(44.dp))
+        Spacer(Modifier.width(8.dp))
+        Column {
+            Text(
+                stringResource(R.string.loot_header, drop.item.itemLevel),
+                style = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFFCFC6B4), letterSpacing = 0.4.sp),
+                maxLines = 1,
+            )
+            Text(
+                drop.item.name,
+                style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = color, lineHeight = 17.sp),
+                maxLines = 2, overflow = TextOverflow.Ellipsis,
+            )
+            if (!drop.added) {
                 Text(
-                    stringResource(R.string.loot_title, drop.item.name),
-                    style = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold, color = color),
+                    stringResource(R.string.loot_autosold, fmt(drop.autoSoldGold)),
+                    style = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFFFFC66B), lineHeight = 14.sp),
                     maxLines = 2, overflow = TextOverflow.Ellipsis,
                 )
-                if (drop.added) {
-                    Text(
-                        stringResource(R.string.loot_level, drop.item.itemLevel),
-                        style = TextStyle(fontSize = 12.sp, color = Color(0xFFCFC6B4)),
-                    )
-                } else {
-                    Text(
-                        stringResource(R.string.loot_autosold, fmt(drop.autoSoldGold)),
-                        style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFFFFC66B)),
-                    )
-                }
             }
         }
     }
