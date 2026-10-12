@@ -37,7 +37,8 @@
     <string name="equipment_inventory_title">Inventar</string>
     <string name="equipment_inventory_count">%1$d / %2$d</string>
     <string name="equipment_inventory_empty">Noch keine Beute – besiege Monster, um Gegenstände zu finden.</string>
-    <string name="equipment_inventory_full">Inventar voll – neue Beute wird automatisch verkauft.</string>
+    <string name="equipment_inventory_full">Voll – neue Beute wird automatisch verkauft.</string>
+    <string name="equipment_inventory_capacity_description">Inventar: %1$d von %2$d Plätzen belegt</string>
     <string name="equipment_new_badge">Neu</string>
     <string name="equipment_level_short">St. %1$d</string>
 
@@ -47,8 +48,10 @@
     <string name="equipment_detail_value">Wert: %1$s Gold</string>
     <string name="equipment_detail_equipped">Ausgerüstet</string>
     <string name="equipment_detail_no_bonus">Keine Attributsboni</string>
-    <string name="equipment_compare_title">Vergleich mit %1$s</string>
-    <string name="equipment_compare_empty_slot">Vergleich: Slot ist leer</string>
+    <!-- Itemnamen nie in Kasus-Schablonen einsetzen ("Vergleich mit %1$s" ergibt "mit Robuste Lederstiefel"):
+         generierte Namen stehen im Nominativ. Name daher immer allein bzw. nach einem Label anzeigen. -->
+    <string name="equipment_compare_equipped_label">Derzeit angelegt</string>
+    <string name="equipment_compare_nothing_equipped">Nichts – dieser Platz ist leer</string>
     <string name="equipment_compare_same">Keine Änderung der Werte</string>
     <string name="equipment_compare_damage">Schaden</string>
     <string name="equipment_compare_dps">Schaden/Sek.: %1$s → %2$s</string>
@@ -56,4 +59,16 @@
     <string name="equipment_action_unequip">Ablegen</string>
     <string name="equipment_action_sell">Verkaufen (%1$s Gold)</string>
     <string name="equipment_unequip_full">Inventar voll – zum Ablegen erst Platz schaffen.</string>
+
+    <!-- Kapazitätswarnung (Auto-Verkauf bei vollem Inventar) -->
+    <string name="equipment_capacity_full_title">Inventar voll</string>
+    <string name="equipment_capacity_full_body">Neue Beute wird jetzt automatisch für ihren Goldwert verkauft – auch seltene Funde. Schaffe Platz, um nichts zu verpassen.</string>
+    <string name="equipment_capacity_nearly_title">Inventar fast voll</string>
+    <plurals name="equipment_capacity_free_slots">
+        <item quantity="one">Noch %1$d Platz frei</item>
+        <item quantity="other">Noch %1$d Plätze frei</item>
+    </plurals>
+    <string name="equipment_capacity_nearly_body">Ist das Inventar voll, wird neue Beute automatisch verkauft. Verkaufe rechtzeitig, was du nicht brauchst.</string>
+    <string name="equipment_capacity_sell_tip">Gegenstand antippen und „Verkaufen“ wählen. Im Shop kannst du unter „Verkaufen“ alle gewöhnlichen Gegenstände auf einmal verkaufen.</string>
+    <string name="equipment_capacity_go_to_inventory">Zum Inventar</string>
 </resources>

@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MonetizationOn
+import androidx.compose.material.icons.filled.Sell
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -39,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -54,6 +56,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -69,6 +73,7 @@ import com.idlerpg.game.domain.character.CombatStats
 import com.idlerpg.game.domain.character.StatType
 import com.idlerpg.game.domain.character.get
 import com.idlerpg.game.domain.equipment.Inventory
+import com.idlerpg.game.domain.equipment.InventoryFill
 import com.idlerpg.game.ui.character.weapon.drawWeaponInHand
 import com.idlerpg.game.ui.character.weapon.weaponLookOf
 import kotlinx.coroutines.launch
@@ -76,6 +81,7 @@ import java.text.NumberFormat
 import java.util.Locale
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 private val GoodColor = Color(0xFF81C784)
 private val BadColor = Color(0xFFE57373)
@@ -90,6 +96,8 @@ fun EquipmentScreen() {
     val state by repository.state.collectAsState(initial = null)
     // Selected item id (inventory or equipped).
     var selectedId by rememberSaveable { mutableStateOf<String?>(null) }
+    val scrollState = rememberScrollState()
+    var inventoryTop by remember { mutableIntStateOf(0) }
 
     val current = state
     if (current == null) {
@@ -100,13 +108,22 @@ fun EquipmentScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scrollState)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+        // Shown only when the inventory is (nearly) full: new loot would be auto-sold.
+        InventoryCapacityBanner(
+            state = current,
+            onGoToInventory = { scope.launch { scrollState.animateScrollTo(inventoryTop) } },
+        )
         PaperDollCard(current) { item -> selectedId = item.id }
         BonusCard(current)
-        InventoryCard(current) { item ->
+        InventoryCard(
+            current,
+            // Offset inside the padded scroll content = scroll value that puts the card at the top.
+            Modifier.onGloballyPositioned { inventoryTop = it.positionInParent().y.roundToInt() },
+        ) { item ->
             selectedId = item.id
             if (item.isNew) scope.launch { repository.update { Inventory.markSeen(it, item.id) } }
         }
@@ -328,21 +345,31 @@ private fun SummaryRow(label: String, value: String, emphasize: Boolean = false)
 // ------------------------------------------------------------------ inventory
 
 @Composable
-private fun InventoryCard(state: GameState, onItemClick: (Item) -> Unit) {
+private fun InventoryCard(state: GameState, modifier: Modifier = Modifier, onItemClick: (Item) -> Unit) {
     val items = remember(state.equipment.inventory) { Inventory.sorted(state.equipment.inventory) }
-    val full = Inventory.isFull(state)
-    Card(Modifier.fillMaxWidth(), colors = cardColors()) {
+    val fill = Inventory.fill(state)
+    val accent = fillAccent(fill, normal = MaterialTheme.colorScheme.primary)
+    Card(modifier.fillMaxWidth(), colors = cardColors()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(R.string.equipment_inventory_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                Text(
-                    stringResource(R.string.equipment_inventory_count, items.size, Inventory.CAPACITY),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = if (full) BadColor else MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(R.string.equipment_inventory_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                    Text(
+                        stringResource(R.string.equipment_inventory_count, items.size, Inventory.CAPACITY),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = if (fill == InventoryFill.OK) FontWeight.Normal else FontWeight.SemiBold,
+                        color = if (fill == InventoryFill.OK) MaterialTheme.colorScheme.onSurfaceVariant else accent,
+                    )
+                }
+                InventoryCapacityBar(items.size, Inventory.fillFraction(state), accent)
             }
-            if (full) {
-                Text(stringResource(R.string.equipment_inventory_full), style = MaterialTheme.typography.bodySmall, color = BadColor)
+            if (fill == InventoryFill.FULL) {
+                // Short reminder next to the grid (the detailed banner sits at the top of the tab).
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Filled.Sell, contentDescription = null, tint = accent, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text(stringResource(R.string.equipment_inventory_full), style = MaterialTheme.typography.bodySmall, color = accent)
+                }
             }
             if (items.isEmpty()) {
                 Text(
@@ -528,19 +555,29 @@ private fun ComparisonBlock(state: GameState, item: Item) {
     val dpsNew = remember(state, item) { Inventory.combatWith(state, item).dps }
     Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.surfaceContainer) {
         Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            if (equipped != null) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    ItemIcon(equipped, Modifier.size(36.dp), contentDescription = null)
-                    Spacer(Modifier.width(10.dp))
+            // Label + name on separate lines: generated names are nominative, so they must never be
+            // embedded in a sentence template ("Vergleich mit Robuste Lederstiefel").
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (equipped != null) {
+                    ItemIcon(equipped, Modifier.size(40.dp), contentDescription = null)
+                } else {
+                    EmptySlotIcon(item.slot, Modifier.size(40.dp))
+                }
+                Spacer(Modifier.width(10.dp))
+                Column {
                     Text(
-                        stringResource(R.string.equipment_compare_title, equipped.name),
+                        stringResource(R.string.equipment_compare_equipped_label),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        equipped?.name ?: stringResource(R.string.equipment_compare_nothing_equipped),
                         style = MaterialTheme.typography.titleSmall,
-                        color = rarityColor(equipped.rarity),
+                        color = equipped?.let { rarityColor(it.rarity) } ?: MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-            } else {
-                Text(stringResource(R.string.equipment_compare_empty_slot), style = MaterialTheme.typography.titleSmall)
             }
+            Spacer(Modifier.height(4.dp))
             val statLines = StatType.entries.filter { diff.stats[it] != 0 }
             if (statLines.isEmpty() && !diff.hasDamage) {
                 Text(stringResource(R.string.equipment_compare_same), color = MaterialTheme.colorScheme.onSurfaceVariant)

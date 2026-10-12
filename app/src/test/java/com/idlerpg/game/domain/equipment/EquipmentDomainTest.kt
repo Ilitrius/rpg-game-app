@@ -162,6 +162,48 @@ class InventoryTest {
         assertEquals(result.state, Inventory.addToInventory(full, item("extra", price = 17)))
     }
 
+    private fun withItems(n: Int) = GameState(equipment = EquipmentState(inventory = (1..n).map { item("i$it") }))
+
+    @Test
+    fun fillLevelThresholds() {
+        val nearlyFullFrom = Inventory.CAPACITY - Inventory.NEARLY_FULL_FREE_SLOTS
+        assertEquals(InventoryFill.OK, Inventory.fill(withItems(0)))
+        assertEquals(InventoryFill.OK, Inventory.fill(withItems(nearlyFullFrom - 1)))
+        assertEquals(InventoryFill.NEARLY_FULL, Inventory.fill(withItems(nearlyFullFrom)))
+        assertEquals(InventoryFill.NEARLY_FULL, Inventory.fill(withItems(Inventory.CAPACITY - 1)))
+        assertEquals(InventoryFill.FULL, Inventory.fill(withItems(Inventory.CAPACITY)))
+        assertEquals(Inventory.NEARLY_FULL_FREE_SLOTS, Inventory.freeSlots(withItems(nearlyFullFrom)))
+        assertEquals(1, Inventory.freeSlots(withItems(Inventory.CAPACITY - 1)))
+    }
+
+    @Test
+    fun fullFillMatchesIsFullAndAutoSell() {
+        for (n in listOf(0, 20, Inventory.CAPACITY - 1, Inventory.CAPACITY, Inventory.CAPACITY + 3)) {
+            val s = withItems(n)
+            assertEquals("n=$n", Inventory.isFull(s), Inventory.fill(s) == InventoryFill.FULL)
+            // The warning must be shown exactly when the next drop would be auto-sold.
+            assertEquals("n=$n", Inventory.fill(s) == InventoryFill.FULL, !Inventory.tryAdd(s, item("drop")).added)
+        }
+    }
+
+    @Test
+    fun overfullSaveClampsFreeSlotsAndFraction() {
+        val over = withItems(Inventory.CAPACITY + 5)
+        assertEquals(0, Inventory.freeSlots(over))
+        assertEquals(1f, Inventory.fillFraction(over))
+        assertEquals(InventoryFill.FULL, Inventory.fill(over))
+        assertEquals(0f, Inventory.fillFraction(withItems(0)))
+        assertEquals(0.5f, Inventory.fillFraction(withItems(Inventory.CAPACITY / 2)))
+    }
+
+    @Test
+    fun sellingOneItemFromFullInventoryStopsAutoSell() {
+        val full = withItems(Inventory.CAPACITY)
+        val afterSell = Inventory.sell(full, "i1")
+        assertEquals(InventoryFill.NEARLY_FULL, Inventory.fill(afterSell))
+        assertTrue(Inventory.tryAdd(afterSell, item("drop")).added)
+    }
+
     @Test
     fun equipSwapsWithPreviouslyEquipped() {
         val old = item("old")

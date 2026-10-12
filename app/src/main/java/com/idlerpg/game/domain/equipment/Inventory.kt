@@ -16,6 +16,21 @@ data class ItemComparison(
 }
 
 /**
+ * How full the inventory is. Drives the capacity warning in the equipment tab: once the
+ * inventory is [FULL], new loot is sold automatically (see [Inventory.tryAdd]).
+ */
+enum class InventoryFill {
+    /** Plenty of room. */
+    OK,
+
+    /** At most [Inventory.NEARLY_FULL_FREE_SLOTS] free slots left. */
+    NEARLY_FULL,
+
+    /** No free slot: new loot is auto-sold for its [Item.price]. */
+    FULL,
+}
+
+/**
  * Pure inventory/equipment operations on [GameState]. Every function returns a new state
  * (or the same instance when nothing changes) and never throws for unknown ids.
  */
@@ -31,7 +46,27 @@ object Inventory {
      */
     data class AddResult(val state: GameState, val added: Boolean, val autoSoldGold: Long)
 
+    /**
+     * Free slots at or below which the inventory counts as [InventoryFill.NEARLY_FULL].
+     * With 8–16 % drop chance per kill, 5 slots last a few minutes of fighting — enough time to react.
+     */
+    const val NEARLY_FULL_FREE_SLOTS = 5
+
     fun isFull(state: GameState): Boolean = state.equipment.inventory.size >= CAPACITY
+
+    /** Free inventory slots (never negative, even for an over-full imported save). */
+    fun freeSlots(state: GameState): Int = (CAPACITY - state.equipment.inventory.size).coerceAtLeast(0)
+
+    /** Fill level for the capacity warning; [InventoryFill.FULL] exactly when [isFull]. */
+    fun fill(state: GameState): InventoryFill = when {
+        isFull(state) -> InventoryFill.FULL
+        freeSlots(state) <= NEARLY_FULL_FREE_SLOTS -> InventoryFill.NEARLY_FULL
+        else -> InventoryFill.OK
+    }
+
+    /** Occupied share of the inventory in 0..1 (for the capacity bar). */
+    fun fillFraction(state: GameState): Float =
+        (state.equipment.inventory.size.toFloat() / CAPACITY).coerceIn(0f, 1f)
 
     /**
      * Adds [item] to the inventory, marked as new. If the inventory is full, the item is sold
