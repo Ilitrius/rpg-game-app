@@ -47,7 +47,11 @@
     <!-- Offline progress -->
     <string name="welcome_back_title">Willkommen zurück!</string>
     <string name="welcome_back_away">Du warst %1$s unterwegs.</string>
-    <string name="welcome_back_capped">Angerechnet werden höchstens %1$d Stunden.</string>
+    <string name="welcome_back_counted_label">Angerechnete Zeit</string>
+    <string name="welcome_back_counted_value">%1$s / max. %2$s</string>
+    <string name="welcome_back_capped">Höchstdauer erreicht – längere Abwesenheit bringt nichts zusätzlich.</string>
+    <string name="welcome_back_rate">Ohne dich rastet dein Held meist und kämpft nur etwa %1$d Min. pro Stunde. Aktiv kommt er viel schneller voran.</string>
+    <string name="welcome_back_too_weak">Dein Held war diesem Gebiet allein nicht gewachsen und hat nichts erbeutet. Wechsle vor dem Gehen in ein leichteres Gebiet.</string>
     <string name="welcome_back_kills">Besiegte Monster: %1$s</string>
     <string name="welcome_back_xp">Erfahrung: +%1$s EP</string>
     <string name="welcome_back_gold">Gold: +%1$s</string>
@@ -55,6 +59,7 @@
     <string name="welcome_back_ok">Weiter</string>
     <string name="duration_hours_minutes">%1$d Std. %2$d Min.</string>
     <string name="duration_minutes">%1$d Min.</string>
+    <string name="duration_hours">%1$d Std.</string>
     <!-- Zones / travel -->
     <string name="zone_levels">Stufe %1$d–%2$d</string>
     <string name="zone_sheet_title">Gebiete</string>
@@ -65,6 +70,7 @@
     <string name="zone_boss_open">Boss: %1$s</string>
     <string name="zone_boss_progress">Boss: %1$d/%2$d Kills</string>
     <string name="zone_boss_ready">Boss bereit!</string>
+    <string name="zone_boss_fighting">Bosskampf läuft</string>
     <string name="zone_travel">Reise nach %1$s …</string>
     <string name="zone_change_hint">Gebiet wechseln</string>
     <string name="zone_locked_cd">Gesperrt</string>
@@ -80,8 +86,7 @@
     <string name="boss_failed_hint">Der Boss zieht sich zurück – versuch es erneut.</string>
 
     <!-- Loot -->
-    <string name="loot_title">Beute: %1$s</string>
-    <string name="loot_level">Gegenstandsstufe %1$d</string>
+    <string name="loot_header">Beute · Stufe %1$d</string>
     <string name="loot_autosold">Inventar voll – für %1$s Gold verkauft</string>
     <string name="welcome_back_items">Beute: %1$d Gegenstände</string>
     <string name="welcome_back_items_sold">davon %1$d verkauft (+%2$s Gold, Inventar voll)</string>

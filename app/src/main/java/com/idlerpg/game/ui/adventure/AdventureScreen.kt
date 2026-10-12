@@ -15,26 +15,26 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material3.Icon
-import androidx.compose.ui.draw.clip
-import com.idlerpg.game.domain.world.LootDrop
-import com.idlerpg.game.domain.world.WorldProgress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -53,14 +53,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -78,20 +81,23 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.idlerpg.game.R
 import com.idlerpg.game.domain.character.Hit
 import com.idlerpg.game.domain.combat.CombatRules
+import com.idlerpg.game.domain.world.LootDrop
 import com.idlerpg.game.domain.world.MonsterType
 import com.idlerpg.game.domain.world.OfflineProgress
 import com.idlerpg.game.domain.world.OfflineReward
+import com.idlerpg.game.domain.world.WorldProgress
 import com.idlerpg.game.domain.world.Zone
 import com.idlerpg.game.domain.world.Zones
 import com.idlerpg.game.ui.adventure.MonsterPainters.drawMonster
 import com.idlerpg.game.ui.character.weapon.FirstPersonWeapon
-import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.min
+import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.random.Random
+import kotlinx.coroutines.launch
 
 /**
  * First-person adventure view: painted zone landscape, the current monster (or boss) in front, the
@@ -136,10 +142,8 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
                     attacks++
                 }
                 is AdventureEvent.MonsterHit -> {
-                    floats += FloatText(
-                        nextFloatId++, FloatKind.HERO_DAMAGE, e.damage.toLong(), 0,
-                        -0.45f + Random.nextFloat() * 0.1f, 0.74f,
-                    )
+                    // x = horizontal jitter (0..1) next to the hero HP bar, see FloatingLabel.
+                    floats += FloatText(nextFloatId++, FloatKind.HERO_DAMAGE, e.damage.toLong(), 0, Random.nextFloat(), 0f)
                     scope.launch {
                         hurtFlash.snapTo(1f)
                         hurtFlash.animateTo(0f, tween(450))
@@ -271,11 +275,22 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
 
         floats.forEach { f -> key(f.id) { FloatingLabel(f) { floats.remove(f) } } }
 
-        Hud(ui, monsterName, onZoneClick = { showZones = true }, onChallengeBoss = vm::challengeBoss)
+        val density = LocalDensity.current
+        val lootMaxWidth = if (sceneSize.width > 0) with(density) { (sceneSize.width * LOOT_MAX_WIDTH_FRACTION).toDp() } else 214.dp
+        Hud(
+            ui, monsterName,
+            onZoneClick = { showZones = true },
+            onChallengeBoss = vm::challengeBoss,
+            loot = {
+                // Bottom-left above the hero block: clear of the weapon (right) and the monster (above).
+                loot.firstOrNull()?.let { drop ->
+                    key(drop.item.id) {
+                        LootPopup(drop, Modifier.padding(bottom = 10.dp).widthIn(max = lootMaxWidth)) { loot.remove(drop) }
+                    }
+                }
+            },
+        )
 
-        loot.firstOrNull()?.let { drop ->
-            key(drop.item.id) { LootPopup(drop, Modifier.align(BiasAlignment(0f, 0.5f))) { loot.remove(drop) } }
-        }
         banner?.let { b -> key(b) { BossBanner(b) { if (banner == b) banner = null } } }
 
         AnimatedVisibility(ui.defeated, enter = fadeIn(tween(300)), exit = fadeOut(tween(500))) {
@@ -354,9 +369,36 @@ internal fun MonsterType.sizeFactor(): Float = when (this) {
 
 internal val hudShadow = Shadow(Color.Black.copy(alpha = 0.85f), Offset(0f, 2f), 6f)
 
+/** Inner padding of the HUD. */
+private val HudPadding = 12.dp
+
+/** Width of the hero block (name, HP, XP bar) in the bottom-left corner. */
+private val HeroBlockWidth = 170.dp
+
+/** Bottom edge of the hero HP bar above the HUD's bottom edge (XP bar 12 dp + 4 dp gap). */
+private val HeroHpBarBottom = 16.dp
+
+/**
+ * Maximum loot popup width as share of the scene width. The popup sits bottom-left directly above
+ * the hero block (≈ 78–150 dp above the scene's bottom edge). Measured for 1080×2400 (scene
+ * ≈ 411×786 dp below the status bar / above the menu bar, weapon unit 3 px): in that band every
+ * weapon at rest incl. idle sway starts at x ≥ 238 dp (dagger 238, fist 239, sword 245, mace/axe
+ * 273 dp — the long ones lean out over the right edge), and monsters incl. ground shadow and
+ * death animation stay ≥ 190 dp above the bottom. 12 dp + 0.52 × 411 dp = 226 dp keeps the card
+ * clear of both. All weapon geometry scales with the width, so the fraction holds on other
+ * portrait screens. (Swing follow-throughs of sword/axe sweep through this corner for ~0.2 s.)
+ */
+internal const val LOOT_MAX_WIDTH_FRACTION = 0.52f
+
 @Composable
-private fun Hud(ui: AdventureUiState, monsterName: String, onZoneClick: () -> Unit, onChallengeBoss: () -> Unit) {
-    Box(Modifier.fillMaxSize().padding(12.dp)) {
+private fun Hud(
+    ui: AdventureUiState,
+    monsterName: String,
+    onZoneClick: () -> Unit,
+    onChallengeBoss: () -> Unit,
+    loot: @Composable () -> Unit,
+) {
+    Box(Modifier.fillMaxSize().padding(HudPadding)) {
         // Zone label (top-left), opens the zone sheet.
         val changeHint = stringResource(R.string.zone_change_hint)
         Row(
@@ -380,15 +422,19 @@ private fun Hud(ui: AdventureUiState, monsterName: String, onZoneClick: () -> Un
                     color = Color(0xFFD8D2C0),
                 )
                 val kills = ui.killsTowardsBoss.coerceAtMost(WorldProgress.BOSS_KILLS_REQUIRED)
-                val ready = kills >= WorldProgress.BOSS_KILLS_REQUIRED
+                val (bossLine, bossColor) = when (ui.bossHudStatus) {
+                    BossHudStatus.FIGHTING -> stringResource(R.string.zone_boss_fighting) to Color(0xFFFF8A65)
+                    BossHudStatus.READY -> stringResource(R.string.zone_boss_ready) to Color(0xFFFFD54F)
+                    BossHudStatus.PROGRESS -> stringResource(
+                        R.string.zone_boss_progress, kills.toInt(), WorldProgress.BOSS_KILLS_REQUIRED.toInt(),
+                    ) to Color(0xFFB9B3A2)
+                }
                 Text(
-                    if (ready) {
-                        stringResource(R.string.zone_boss_ready)
-                    } else {
-                        stringResource(R.string.zone_boss_progress, kills.toInt(), WorldProgress.BOSS_KILLS_REQUIRED.toInt())
-                    },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = if (ready) Color(0xFFFFD54F) else Color(0xFFB9B3A2),
+                    bossLine,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = if (ui.bossHudStatus == BossHudStatus.PROGRESS) FontWeight.Normal else FontWeight.Bold,
+                    ),
+                    color = bossColor,
                 )
             }
             Icon(
@@ -462,26 +508,34 @@ private fun Hud(ui: AdventureUiState, monsterName: String, onZoneClick: () -> Un
             }
         }
 
-        // Hero HP (bottom-left; the dagger occupies the bottom-right)
-        Column(Modifier.align(Alignment.BottomStart).width(170.dp)) {
-            Text(
-                stringResource(R.string.hero_label, ui.heroName, ui.heroLevel),
-                style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White, shadow = hudShadow),
-            )
-            Spacer(Modifier.height(4.dp))
-            HpBar(
-                current = ui.heroHp.toLong(), max = ui.heroMaxHp.toLong(),
-                fill = listOf(Color(0xFF9CE07A), Color(0xFF43A047), Color(0xFF1B5E20)),
-                modifier = Modifier.fillMaxWidth().height(16.dp),
-            )
-            Spacer(Modifier.height(4.dp))
-            HpBar(
-                current = ui.heroXp, max = ui.heroXpNeeded,
-                fill = listOf(Color(0xFFB9A8FF), Color(0xFF7E57C2), Color(0xFF3F1F87)),
-                modifier = Modifier.fillMaxWidth().height(12.dp),
-                label = stringResource(R.string.xp_value, ui.heroXp, ui.heroXpNeeded),
-            )
+        // Loot popup + hero HP (bottom-left; the weapon occupies the bottom-right)
+        Column(Modifier.align(Alignment.BottomStart)) {
+            loot()
+            HeroBlock(ui)
         }
+    }
+}
+
+@Composable
+private fun HeroBlock(ui: AdventureUiState) {
+    Column(Modifier.width(HeroBlockWidth)) {
+        Text(
+            stringResource(R.string.hero_label, ui.heroName, ui.heroLevel),
+            style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White, shadow = hudShadow),
+        )
+        Spacer(Modifier.height(4.dp))
+        HpBar(
+            current = ui.heroHp.toLong(), max = ui.heroMaxHp.toLong(),
+            fill = listOf(Color(0xFF9CE07A), Color(0xFF43A047), Color(0xFF1B5E20)),
+            modifier = Modifier.fillMaxWidth().height(16.dp),
+        )
+        Spacer(Modifier.height(4.dp))
+        HpBar(
+            current = ui.heroXp, max = ui.heroXpNeeded,
+            fill = listOf(Color(0xFFB9A8FF), Color(0xFF7E57C2), Color(0xFF3F1F87)),
+            modifier = Modifier.fillMaxWidth().height(12.dp),
+            label = stringResource(R.string.xp_value, ui.heroXp, ui.heroXpNeeded),
+        )
     }
 }
 
@@ -544,7 +598,7 @@ private fun HpBar(
 
 private enum class FloatKind { DAMAGE, CRIT, HERO_DAMAGE, REWARD }
 
-/** [x]/[y] are alignment biases (-1..1) relative to the scene. */
+/** [x]/[y] are alignment biases (-1..1) relative to the scene; for [FloatKind.HERO_DAMAGE] [x] is a 0..1 jitter. */
 private data class FloatText(val id: Long, val kind: FloatKind, val a: Long, val b: Long, val x: Float, val y: Float)
 
 @Composable
@@ -564,14 +618,21 @@ private fun FloatingLabel(f: FloatText, onDone: () -> Unit) {
     val alpha = if (t > 0.65f) 1f - (t - 0.65f) / 0.35f else 1f
     val rise = when (f.kind) {
         FloatKind.REWARD -> 70f
-        FloatKind.HERO_DAMAGE -> 40f
+        FloatKind.HERO_DAMAGE -> 22f // stays below the loot popup
         else -> 110f
     } * LinearOutSlowInEasing.transform(t)
 
     Box(Modifier.fillMaxSize()) {
-        Column(
+        val place = if (f.kind == FloatKind.HERO_DAMAGE) {
+            // Right next to the hero HP bar (left of the resting weapon), x = jitter 0..1.
             Modifier
-                .align(BiasAlignment(f.x, f.y))
+                .align(Alignment.BottomStart)
+                .padding(start = HudPadding + HeroBlockWidth + 6.dp + 8.dp * f.x, bottom = HudPadding + HeroHpBarBottom - 4.dp)
+        } else {
+            Modifier.align(BiasAlignment(f.x, f.y))
+        }
+        Column(
+            place
                 .graphicsLayer {
                     translationY = -rise * density
                     scaleX = pop
@@ -643,14 +704,21 @@ private fun DefeatOverlay() {
     }
 }
 
+/** "8 Std. 12 Min.", "8 Std." or "45 Min." */
+@Composable
+private fun formatDuration(millis: Long): String {
+    val totalMinutes = (millis / 60_000).toInt()
+    val h = totalMinutes / 60
+    val m = totalMinutes % 60
+    return when {
+        h == 0 -> stringResource(R.string.duration_minutes, m)
+        m == 0 -> stringResource(R.string.duration_hours, h)
+        else -> stringResource(R.string.duration_hours_minutes, h, m)
+    }
+}
+
 @Composable
 private fun WelcomeBackDialog(reward: OfflineReward, onDismiss: () -> Unit) {
-    val totalMinutes = reward.awayMillis / 60_000
-    val away = if (totalMinutes >= 60) {
-        stringResource(R.string.duration_hours_minutes, (totalMinutes / 60).toInt(), (totalMinutes % 60).toInt())
-    } else {
-        stringResource(R.string.duration_minutes, totalMinutes.toInt())
-    }
     val fmt = { n: Long -> String.format(Locale.GERMANY, "%,d", n) }
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -658,30 +726,80 @@ private fun WelcomeBackDialog(reward: OfflineReward, onDismiss: () -> Unit) {
         title = { Text(stringResource(R.string.welcome_back_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(stringResource(R.string.welcome_back_away, away))
-                if (reward.awayMillis > reward.countedMillis) {
+                Text(stringResource(R.string.welcome_back_away, formatDuration(reward.awayMillis)))
+                CountedTime(reward)
+                if (reward.heroTooWeak) {
+                    Spacer(Modifier.height(4.dp))
+                    Text(stringResource(R.string.welcome_back_too_weak), color = Color(0xFFFF8A65))
+                } else {
                     Text(
-                        stringResource(R.string.welcome_back_capped, (OfflineProgress.MAX_OFFLINE_MILLIS / 3_600_000).toInt()),
+                        stringResource(R.string.welcome_back_rate, (OfflineProgress.EFFICIENCY * 60).roundToInt().coerceAtLeast(1)),
                         style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                }
-                Spacer(Modifier.height(4.dp))
-                Text(stringResource(R.string.welcome_back_kills, fmt(reward.kills)), fontWeight = FontWeight.SemiBold)
-                Text(stringResource(R.string.welcome_back_xp, fmt(reward.xp)), color = Color(0xFF9CE07A))
-                Text(stringResource(R.string.welcome_back_gold, fmt(reward.gold)), color = MaterialTheme.colorScheme.primary)
-                if (reward.levelsGained > 0) {
-                    Text(stringResource(R.string.welcome_back_levels, reward.levelsGained), color = Color(0xFFFFE08A))
-                }
-                if (reward.items.isNotEmpty()) {
-                    Text(stringResource(R.string.welcome_back_items, reward.items.size), color = Color(0xFF4AA3F5))
-                    if (reward.autoSoldItems > 0) {
-                        Text(
-                            stringResource(R.string.welcome_back_items_sold, reward.autoSoldItems, fmt(reward.autoSoldGold)),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
+                    Spacer(Modifier.height(4.dp))
+                    Text(stringResource(R.string.welcome_back_kills, fmt(reward.kills)), fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.welcome_back_xp, fmt(reward.xp)), color = Color(0xFF9CE07A))
+                    Text(stringResource(R.string.welcome_back_gold, fmt(reward.gold)), color = MaterialTheme.colorScheme.primary)
+                    if (reward.levelsGained > 0) {
+                        Text(stringResource(R.string.welcome_back_levels, reward.levelsGained), color = Color(0xFFFFE08A))
+                    }
+                    if (reward.items.isNotEmpty()) {
+                        Text(stringResource(R.string.welcome_back_items, reward.items.size), color = Color(0xFF4AA3F5))
+                        if (reward.autoSoldItems > 0) {
+                            Text(
+                                stringResource(R.string.welcome_back_items_sold, reward.autoSoldItems, fmt(reward.autoSoldGold)),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
                     }
                 }
             }
         },
     )
+}
+
+/** Counted offline time against the maximum ([OfflineProgress.MAX_OFFLINE_MILLIS]) with a bar; highlights the cap. */
+@Composable
+private fun CountedTime(reward: OfflineReward) {
+    val capColor = Color(0xFFFFB74D)
+    val fraction = (reward.countedMillis.toFloat() / OfflineProgress.MAX_OFFLINE_MILLIS).coerceIn(0f, 1f)
+    Surface(
+        shape = RoundedCornerShape(10.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(horizontal = 10.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    stringResource(R.string.welcome_back_counted_label),
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.weight(1f),
+                )
+                Text(
+                    stringResource(
+                        R.string.welcome_back_counted_value,
+                        formatDuration(reward.countedMillis),
+                        formatDuration(OfflineProgress.MAX_OFFLINE_MILLIS),
+                    ),
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = if (reward.capped) capColor else MaterialTheme.colorScheme.onSurface,
+                )
+            }
+            LinearProgressIndicator(
+                progress = { fraction },
+                modifier = Modifier.fillMaxWidth().height(6.dp),
+                color = if (reward.capped) capColor else MaterialTheme.colorScheme.primary,
+                trackColor = Color.Black.copy(alpha = 0.35f),
+                strokeCap = StrokeCap.Round,
+            )
+            if (reward.capped) {
+                Text(
+                    stringResource(R.string.welcome_back_capped),
+                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+                    color = capColor,
+                )
+            }
+        }
+    }
 }

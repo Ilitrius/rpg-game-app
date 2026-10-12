@@ -27,18 +27,36 @@ data class OfflineReward(
     val autoSoldItems: Int = 0,
     /** Gold credited for [autoSoldItems] (on top of [gold]). */
     val autoSoldGold: Long = 0,
-)
+    /** True if the hero would not survive an average fight in the current zone (earns nothing). */
+    val heroTooWeak: Boolean = false,
+) {
+    /** True if the time away exceeded [OfflineProgress.MAX_OFFLINE_MILLIS] and was cut off. */
+    val capped: Boolean get() = awayMillis > countedMillis
+
+    /** All gold credited: kill gold plus auto-sold items. */
+    val totalGold: Long get() = gold + autoSoldGold
+}
 
 /**
  * Estimates kills for the time away: average hero DPS vs. average monster HP of the current zone
  * (monster level = hero level clamped to the zone range), plus walk-in/death time per kill,
  * at [EFFICIENCY] of the online rate and capped at [MAX_OFFLINE_MILLIS]. A hero who would not
  * survive a single average fight earns nothing. Item drops follow [Loot.dropChance].
+ *
+ * Balance (BalanceTest, `build/balance.txt`): online the reference hero earns roughly 2–3.5× the
+ * price of the shop's complete assortment per hour (Shop markup on ItemGenerator.sellPrice). A full
+ * night offline ([MAX_OFFLINE_MILLIS]) must buy some but not all shop offers of the current level,
+ * so offline the hero only gets about one minute of fighting per hour away ([EFFICIENCY] = 1/60):
+ * a night ≈ 25–45 % of the assortment, ≈ 1.5–3 levels and 6–14 items. If online gold or shop
+ * prices are rebalanced, re-tune [EFFICIENCY] with the BalanceTest band.
  */
 object OfflineProgress {
+    /** Longest absence that counts (a full night). */
     const val MAX_OFFLINE_MILLIS = 8L * 60 * 60 * 1000
     const val MIN_OFFLINE_MILLIS = 60_000L
-    const val EFFICIENCY = 0.5
+
+    /** Share of the online kill rate achieved while away: about one minute of fighting per hour. */
+    const val EFFICIENCY = 1.0 / 60.0
 
     /** Returns null when there is nothing to grant (first start, clock moved back, < 1 minute). */
     fun calculate(state: GameState, nowMillis: Long, random: Random = Random.Default): OfflineReward? {
@@ -54,8 +72,9 @@ object OfflineProgress {
         val avg = MonsterScaling.average(zone, level)
         val fightSeconds = avg.hp / hero.dps
         val survives = fightSeconds * avg.dps < hero.maxHp
+        if (!survives) return OfflineReward(away, counted, 0, 0, 0, 0, heroTooWeak = true)
         val secondsPerKill = fightSeconds + CombatRules.TRAVEL_MILLIS / 1000.0
-        val kills = if (survives) floor(counted / 1000.0 / secondsPerKill * EFFICIENCY).toLong() else 0L
+        val kills = floor(counted / 1000.0 / secondsPerKill * EFFICIENCY).toLong()
         if (kills <= 0) return OfflineReward(away, counted, 0, 0, 0, 0)
 
         val xp = (kills * avg.xp).roundToLong()

@@ -8,6 +8,7 @@ import com.idlerpg.game.domain.character.Progression
 import com.idlerpg.game.domain.character.StarterItems
 import com.idlerpg.game.domain.combat.CombatRules
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -222,8 +223,20 @@ class OfflineProgressTest {
         assertEquals(hour, r.countedMillis)
         assertEquals(Math.round(expected * avg.xp), r.xp)
         assertEquals(Math.round(expected * avg.gold), r.gold)
-        // sanity: roughly 250–350 kills per hour for the starter hero
-        assertTrue(r.kills in 250..350)
+        // sanity: about one minute of fighting per hour away, the starter hero kills ~10 monsters a minute
+        assertTrue(r.kills in 6..15)
+        assertFalse(r.capped)
+        assertFalse(r.heroTooWeak)
+    }
+
+    @Test
+    fun offlineIsAboutOneMinuteOfFightingPerHour() {
+        val r = OfflineProgress.calculate(base, 1_000_000L + 8 * hour)!!
+        val hero = CombatStats.of(base)
+        val avg = MonsterScaling.average(Zones.WIESE, 1)
+        val onlineKillsPerMinute = 60.0 / (avg.hp / hero.dps + CombatRules.TRAVEL_MILLIS / 1000.0)
+        // 8 hours away ≈ 8 minutes online (± rounding of the last kill)
+        assertEquals(onlineKillsPerMinute * 8, r.kills.toDouble(), 1.0)
     }
 
     @Test
@@ -233,6 +246,17 @@ class OfflineProgressTest {
         assertEquals(eight.kills, twenty.kills)
         assertEquals(20 * hour, twenty.awayMillis)
         assertEquals(OfflineProgress.MAX_OFFLINE_MILLIS, twenty.countedMillis)
+        assertFalse(eight.capped)
+        assertTrue(twenty.capped)
+    }
+
+    @Test
+    fun tooWeakHeroIsFlagged() {
+        val hoehle = base.copy(world = base.world.copy(currentZoneId = "hoehle", unlockedZoneIds = Zones.all.map { it.id }))
+        val r = OfflineProgress.calculate(hoehle, 1_000_000L + 8 * hour)!!
+        assertTrue(r.heroTooWeak)
+        assertEquals(0L, r.kills)
+        assertEquals(0L, r.totalGold)
     }
 
     @Test

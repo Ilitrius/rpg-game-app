@@ -218,23 +218,34 @@ class OfflineLootTest {
     private val base = StarterItems.ensureStarterWeapon(GameState())
         .copy(world = WorldState(lastActiveEpochMillis = 1_000_000L))
 
+    /** One-hit hero with maximum drop chance: fights take no time, a night yields ~260 kills. */
+    private val looter = base.copy(
+        character = base.character.copy(stats = base.character.stats.copy(strength = 3_000, luck = 100)),
+    )
+
     @Test
-    fun offlineGrantsCappedItems() {
+    fun offlineGrantsItemsOfTheZoneLevel() {
         val r = OfflineProgress.calculate(base, 1_000_000L + 8 * hour, Random(7))!!
-        assertTrue(r.kills > 300)
-        assertEquals(Loot.MAX_OFFLINE_ITEMS, r.items.size)
+        assertTrue(r.items.isNotEmpty())
         assertEquals(0, r.autoSoldItems)
         val s = OfflineProgress.apply(base, r, 1_000_000L + 8 * hour)
-        assertEquals(Loot.MAX_OFFLINE_ITEMS, s.equipment.inventory.size)
+        assertEquals(r.items.size, s.equipment.inventory.size)
         assertTrue(s.equipment.inventory.all { it.isNew })
         val lvl = base.character.level.coerceIn(Zones.WIESE.minLevel, Zones.WIESE.maxLevel)
         assertTrue(r.items.all { it.itemLevel == lvl })
     }
 
     @Test
+    fun offlineItemsAreCapped() {
+        val r = OfflineProgress.calculate(looter, 1_000_000L + 8 * hour, Random(7))!!
+        assertTrue("kills ${r.kills}", r.kills > 200)
+        assertEquals(Loot.MAX_OFFLINE_ITEMS, r.items.size)
+    }
+
+    @Test
     fun offlineItemsBeyondCapacityAreSold() {
-        val nearlyFull = base.copy(
-            equipment = base.equipment.copy(inventory = List(Inventory.CAPACITY - 3) { Item("x$it", "X", EquipmentSlot.RING) }),
+        val nearlyFull = looter.copy(
+            equipment = looter.equipment.copy(inventory = List(Inventory.CAPACITY - 3) { Item("x$it", "X", EquipmentSlot.RING) }),
         )
         val r = OfflineProgress.calculate(nearlyFull, 1_000_000L + 8 * hour, Random(7))!!
         assertEquals(r.items.size - 3, r.autoSoldItems)

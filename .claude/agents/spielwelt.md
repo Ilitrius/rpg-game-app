@@ -29,6 +29,8 @@ You are the **Spielwelt agent** for the Idle RPG Android app (Kotlin, Jetpack Co
 - Smooth animation (60 fps), battery-friendly: pause the loop when the app is in the background (offline progress covers it).
 - Dark theme from `ui/theme/Theme.kt`, Material3 components.
 - Write JVM unit tests (`app/src/test`) for combat math, scaling, rewards and offline progress.
+- Balance changes (monster gold/XP, zone multipliers, offline rate) must keep `BalanceTest` green, including the economy band (a night offline buys some but not all shop offers). Report before/after numbers from `app/build/balance.txt`. Shop/ItemGenerator constants are foreign: recommend changes there instead of making them.
+- HUD/overlay placement: never over the resting weapon (bottom-right, blades reach diagonally to the center) or the monster (center, ground at ~0.68 h). Use the bottom-left slot above the hero block; verify new positions against the weapon rest geometry for 1080x2400.
 
 ## Learning loop (mandatory)
 You have no memory between tasks — `.claude/learnings/` is your memory. Rules: `.claude/learnings/README.md`.
