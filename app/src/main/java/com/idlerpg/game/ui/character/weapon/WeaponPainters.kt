@@ -590,7 +590,7 @@ fun DrawScope.drawWeaponFitted(
     shimmer: Float = 0f,
 ) {
     val shape = WeaponPainters.shapeOf(look.kind)
-    val b = shape?.bounds ?: HandPainter.FIST_BOUNDS
+    val b = shape?.bounds ?: FistPainter.BOUNDS
     val rad = Math.toRadians(rotationDegrees.toDouble())
     val c = abs(cos(rad)).toFloat()
     val s = abs(sin(rad)).toFloat()
@@ -605,8 +605,7 @@ fun DrawScope.drawWeaponFitted(
         translate(-b.center.x, -b.center.y)
     }) {
         if (shape == null) {
-            HandPainter.drawHandBack(this)
-            HandPainter.drawFingers(this, fist = true)
+            FistPainter.draw(this)
         } else {
             with(WeaponPainters) { drawWeaponUnits(look, shimmer) }
         }

@@ -17,6 +17,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -141,12 +142,18 @@ fun FirstPersonWeapon(
 // ============================================================================ pose keyframes
 
 /** Pose of the hand: screen position of the grip center, rotation (degrees) and px-per-unit scale. */
-private data class HandPose(val pivot: Offset, val rotation: Float, val scale: Float)
+internal data class HandPose(val pivot: Offset, val rotation: Float, val scale: Float) {
+    /** Screen position of [handPoint] (hand space, relative to the grip center). */
+    fun toScreen(handPoint: Offset): Offset = pivot + rotateVec(handPoint, rotation) * scale
+}
+
+/** Pixels per hand-space unit for a first-person view of [size]. */
+internal fun firstPersonUnit(size: Size): Float = minOf(size.width, size.height * 0.62f) / 360f
 
 private enum class Ease { LINEAR, SMOOTH, IN, OUT }
 
 /** Which hand-space point a keyframe places at its screen position. */
-private enum class Aim { PIVOT, TIP, POMMEL, TOP, CONTACT }
+internal enum class Aim { PIVOT, TIP, POMMEL, TOP, CONTACT }
 
 /**
  * One keyframe. Screen position = (x × width, y × height + dy × unit); with [aim] != PIVOT that
@@ -177,7 +184,7 @@ private fun ease(e: Ease, k: Float): Float {
 private fun lerpOffset(a: Offset, b: Offset, t: Float) = Offset(lerp(a.x, b.x, t), lerp(a.y, b.y, t))
 
 /** Rotates [v] by [degrees] (clockwise on screen, like Compose's rotate). */
-private fun rotateVec(v: Offset, degrees: Float): Offset {
+internal fun rotateVec(v: Offset, degrees: Float): Offset {
     val r = Math.toRadians(degrees.toDouble())
     val c = cos(r).toFloat()
     val s = sin(r).toFloat()
@@ -185,7 +192,7 @@ private fun rotateVec(v: Offset, degrees: Float): Offset {
 }
 
 /** Characteristic hand-space points (relative to the grip center, weapon pointing to -y). */
-private class Points(val tip: Offset, val pommel: Offset, val top: Offset, val contact: Offset) {
+internal class Points(val tip: Offset, val pommel: Offset, val top: Offset, val contact: Offset) {
     fun of(aim: Aim): Offset = when (aim) {
         Aim.PIVOT -> Offset.Zero
         Aim.TIP -> tip
@@ -197,11 +204,14 @@ private class Points(val tip: Offset, val pommel: Offset, val top: Offset, val c
 
 private val pointsCache = HashMap<WeaponKind, Points>()
 
-private fun pointsOf(kind: WeaponKind): Points = pointsCache.getOrPut(kind) {
+internal fun pointsOf(kind: WeaponKind): Points = pointsCache.getOrPut(kind) {
     val shape = WeaponPainters.shapeOf(kind)
     if (shape == null) {
-        // Fist: knuckles on top, heel of the fist below, contact on the forearm's steel plate.
-        Points(tip = Offset(-4f, -38f), pommel = Offset(-6f, 42f), top = Offset(-4f, -38f), contact = Offset(40f, 140f))
+        // Fist: punches land with the knuckle row, the hammer fist with the low thumb-side edge,
+        // parries on the forearm's steel plate.
+        val g = DaggerPainter.GRIP_CENTER
+        val knuckles = FistPainter.KNUCKLE_FRONT - g
+        Points(tip = knuckles, pommel = FistPainter.HAMMER_POINT - g, top = knuckles, contact = Offset(40f, 140f))
     } else {
         val g = shape.gripCenter
         val tip = shape.strikePoint - g
@@ -344,7 +354,7 @@ private fun parryKeys(r0: Key, r1: Key, contact: Float, pivotX: Float, pivotY: F
     r1,
 )
 
-private fun DrawScope.keyPose(key: Key, pts: Points, unit: Float): HandPose {
+private fun keyPose(key: Key, pts: Points, unit: Float, size: Size): HandPose {
     val target = Offset(key.x * size.width, key.y * size.height + key.dy * unit)
     val sc = unit * key.scale
     val pivot = if (key.aim == Aim.PIVOT) target else target - rotateVec(pts.of(key.aim), key.rot) * sc
@@ -352,7 +362,7 @@ private fun DrawScope.keyPose(key: Key, pts: Points, unit: Float): HandPose {
 }
 
 /** Pose at progress [p] (no idle sway). */
-private fun DrawScope.poseAt(kind: WeaponKind, action: WeaponAction, p: Float, unit: Float): HandPose {
+private fun poseAt(kind: WeaponKind, action: WeaponAction, p: Float, unit: Float, size: Size): HandPose {
     val keys = keysOf(kind, action)
     val pts = pointsOf(kind)
     val t = p.coerceIn(0f, 1f)
@@ -361,13 +371,17 @@ private fun DrawScope.poseAt(kind: WeaponKind, action: WeaponAction, p: Float, u
     val a = keys[i - 1]
     val b = keys[i]
     val k = if (b.t <= a.t) 1f else ease(b.ease, (t - a.t) / (b.t - a.t))
-    val pa = keyPose(a, pts, unit)
-    val pb = keyPose(b, pts, unit)
+    val pa = keyPose(a, pts, unit, size)
+    val pb = keyPose(b, pts, unit, size)
     return HandPose(lerpOffset(pa.pivot, pb.pivot, k), lerp(pa.rotation, pb.rotation, k), lerp(pa.scale, pb.scale, k))
 }
 
-private fun DrawScope.posedAt(kind: WeaponKind, action: WeaponAction, p: Float, swayPhase: Float, unit: Float): HandPose {
-    val base = poseAt(kind, action, p, unit)
+/**
+ * Pose of the hand in a first-person view of [size] at progress [p] of [action], incl. idle sway
+ * ([swayPhase] radians) near rest; [unit] = [firstPersonUnit] (size).
+ */
+internal fun posedAt(kind: WeaponKind, action: WeaponAction, p: Float, swayPhase: Float, unit: Float, size: Size): HandPose {
+    val base = poseAt(kind, action, p, unit, size)
     val t = p.coerceIn(0f, 1f)
     val edge = minOf(t, 1f - t)
     val sway = 1f - ease(Ease.SMOOTH, edge / 0.12f)
@@ -378,8 +392,6 @@ private fun DrawScope.posedAt(kind: WeaponKind, action: WeaponAction, p: Float, 
         base.scale,
     )
 }
-
-private fun HandPose.toScreen(handPoint: Offset): Offset = pivot + rotateVec(handPoint, rotation) * scale
 
 // ============================================================================ drawing
 
@@ -401,9 +413,9 @@ fun DrawScope.drawFirstPersonWeapon(
     val w = size.width
     val h = size.height
     if (w <= 0f || h <= 0f) return
-    val unit = minOf(w, h * 0.62f) / 360f // px per hand-space unit
+    val unit = firstPersonUnit(size) // px per hand-space unit
     val kind = look.kind
-    val pose = posedAt(kind, action, attackProgress, swayPhase, unit)
+    val pose = posedAt(kind, action, attackProgress, swayPhase, unit, size)
 
     // ---- Motion trail behind the weapon
     drawMotionTrail(kind, action, attackProgress, swayPhase, unit)
@@ -415,12 +427,18 @@ fun DrawScope.drawFirstPersonWeapon(
         scale(pose.scale, pose.scale, Offset.Zero)
     }) {
         // Hand space: grip center at origin, weapon points to -y, forearm towards +y.
-        withTransform({ translate(-DaggerPainter.GRIP_CENTER.x, -DaggerPainter.GRIP_CENTER.y) }) {
-            HandPainter.drawArmBehind(this)
-        }
-        drawWeaponHeld(look, shimmer)
-        withTransform({ translate(-DaggerPainter.GRIP_CENTER.x, -DaggerPainter.GRIP_CENTER.y) }) {
-            HandPainter.drawFingers(this, fist = kind == WeaponKind.FIST)
+        if (kind == WeaponKind.FIST) {
+            withTransform({ translate(-DaggerPainter.GRIP_CENTER.x, -DaggerPainter.GRIP_CENTER.y) }) {
+                FistPainter.drawWithForearm(this)
+            }
+        } else {
+            withTransform({ translate(-DaggerPainter.GRIP_CENTER.x, -DaggerPainter.GRIP_CENTER.y) }) {
+                HandPainter.drawArmBehind(this)
+            }
+            drawWeaponHeld(look, shimmer)
+            withTransform({ translate(-DaggerPainter.GRIP_CENTER.x, -DaggerPainter.GRIP_CENTER.y) }) {
+                HandPainter.drawFingers(this)
+            }
         }
     }
 
@@ -463,7 +481,7 @@ private fun DrawScope.drawMotionTrail(kind: WeaponKind, action: WeaponAction, p:
     for (i in 0..n) {
         val q = p - window * i / n
         if (q < 0f) break
-        val pose = posedAt(kind, action, q, swayPhase, unit)
+        val pose = posedAt(kind, action, q, swayPhase, unit, size)
         outer += pose.toScreen(head)
         innerList += pose.toScreen(innerPoint)
     }

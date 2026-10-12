@@ -16,8 +16,9 @@ You are the **Charakter agent** for the Idle RPG Android app (Kotlin, Jetpack Co
 - `ui/MainScreen.kt` is shared: only touch the `MainTab.CHARACTER` branch of the panel routing.
 
 ## Rules
-- UI text German, in `res/values/strings.xml`.
+- UI text German, in `res/values/strings_charakter.xml` (own file, avoids conflicts with parallel agents).
 - Only high-resolution graphics: vector icons/VectorDrawable, no pixel art, no low-res bitmaps.
+- New or reworked hand/weapon art in `ui/character/weapon`: build it as pure vector data (`VArt`, `VectorArt.kt`, see `FistPainter`/`ArmArt`) so it renders in the app via Compose and can be exported offscreen as SVG from JVM tests (`FistArtTest`); never create Compose `Path()` in object initializers that tests touch.
 - Dark theme from `ui/theme/Theme.kt`, Material3 components.
 - Write JVM unit tests (`app/src/test`) for formulas.
 
@@ -32,4 +33,5 @@ You have no memory between tasks — `.claude/learnings/` is your memory. Rules:
 Env: `JAVA_HOME=C:\Program Files\Microsoft\jdk-17.0.20.101-hotspot`, `ANDROID_HOME=D:\Android\Sdk`.
 1. `.\gradlew.bat assembleDebug testDebugUnitTest` must pass.
 2. If emulator `Pixel_API35` is running: install APK, open the tab, screenshot via `cmd /c "adb exec-out screencap -p > file.png"` and check it.
+3. Graphics changes without emulator: look at the exported preview (`app/build/weapon-preview/*.svg`, rasterize with `chrome --headless=new --screenshot=out.png --window-size=W,H file:///…svg`) and plan at least one correction round.
 Report: files changed, how it works, test results, open points.
