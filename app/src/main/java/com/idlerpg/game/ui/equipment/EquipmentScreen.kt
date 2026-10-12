@@ -69,6 +69,8 @@ import com.idlerpg.game.domain.character.CombatStats
 import com.idlerpg.game.domain.character.StatType
 import com.idlerpg.game.domain.character.get
 import com.idlerpg.game.domain.equipment.Inventory
+import com.idlerpg.game.ui.character.weapon.drawWeaponInHand
+import com.idlerpg.game.ui.character.weapon.weaponLookOf
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
@@ -168,7 +170,7 @@ private fun PaperDollCard(state: GameState, onSlotClick: (Item) -> Unit) {
                         SlotView(it, state.equipment.equipped[it], onSlotClick)
                     }
                 }
-                HeroSilhouette(Modifier.weight(1f).height(330.dp))
+                HeroSilhouette(Modifier.weight(1f).height(330.dp), state.equipment.equipped[EquipmentSlot.WEAPON])
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf(EquipmentSlot.AMULET, EquipmentSlot.WEAPON, EquipmentSlot.RING).forEach {
                         SlotView(it, state.equipment.equipped[it], onSlotClick)
@@ -212,9 +214,9 @@ private fun SlotView(slot: EquipmentSlot, item: Item?, onClick: (Item) -> Unit) 
     }
 }
 
-/** Soft vector silhouette of the hero between the slot columns. */
+/** Soft vector silhouette of the hero between the slot columns, holding the equipped [weapon]. */
 @Composable
-private fun HeroSilhouette(modifier: Modifier) {
+private fun HeroSilhouette(modifier: Modifier, weapon: Item? = null) {
     val glow = MaterialTheme.colorScheme.primary
     Canvas(modifier) {
         val s = min(size.width / 100f, size.height / 200f)
@@ -237,6 +239,8 @@ private fun HeroSilhouette(modifier: Modifier) {
             drawPath(body, glow.copy(alpha = 0.35f), style = Stroke(0.9f))
             // Subtle rim light on the left side
             drawArc(Color.White.copy(alpha = 0.18f), 150f, 90f, false, Offset(40f, 10f), Size(20f, 24f), style = Stroke(1.2f))
+            // Equipped weapon in the right-hand side hand (graphic by the Charakter agent).
+            if (weapon != null) drawWeaponInHand(weaponLookOf(weapon), Offset(82.5f, 103.5f), 8f, 0.2f, Color(0xFF2E342D))
         }
     }
 }

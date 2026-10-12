@@ -13,6 +13,20 @@
     <string name="character_weapon_fists">Fäuste</string>
     <string name="character_weapon_image">Abbildung der ausgerüsteten Waffe</string>
 
+    <string name="character_actions_title">Kampftechniken</string>
+    <string name="character_action_swing">Schwingen</string>
+    <string name="character_action_stab">Stechen</string>
+    <string name="character_action_strike">Schlagen</string>
+    <string name="character_action_parry">Parieren</string>
+    <string name="character_action_swing_hint">gegen normale Gegner</string>
+    <string name="character_action_stab_hint">gegen offene, taumelnde Gegner</string>
+    <string name="character_action_strike_hint">bricht die Deckung</string>
+    <string name="character_action_parry_hint">gegen ausholende Angriffe</string>
+    <string name="character_action_damage">×%1$s</string>
+    <string name="character_action_crit">+%1$d %% Krit</string>
+    <string name="character_action_parry_value">%1$s %%</string>
+    <string name="character_action_rating">Wertung %1$d von 5</string>
+
     <string name="character_stats_title">Attribute</string>
     <string name="character_stat_strength">Stärke</string>
     <string name="character_stat_dexterity">Geschick</string>
@@ -32,6 +46,7 @@
     <string name="character_derived_hp">Leben</string>
     <string name="character_derived_crit">Krit-Chance</string>
     <string name="character_derived_crit_mult">Krit-Schaden</string>
+    <string name="character_derived_parry">Parierchance</string>
     <string name="character_derived_dps">Schaden/Sek. (Ø)</string>
 
     <string name="character_rarity_common">Gewöhnlich</string>

@@ -18,6 +18,7 @@ import kotlin.random.Random
  * @property maxHp maximum hit points
  * @property critChance chance per hit for a critical hit, 0.0..[CombatStats.MAX_CRIT_CHANCE]
  * @property critMultiplier damage factor of a critical hit (e.g. 1.5 = +50 %)
+ * @property weaponType mechanical type of the equipped weapon (affinities, parry chance)
  */
 data class CombatStats(
     val totalStats: Stats,
@@ -27,6 +28,7 @@ data class CombatStats(
     val maxHp: Int,
     val critChance: Double,
     val critMultiplier: Double,
+    val weaponType: WeaponType = WeaponType.FIST,
 ) {
     /** Average damage of a normal hit. */
     val averageHit: Double get() = (damageMin + damageMax) / 2.0
@@ -47,6 +49,35 @@ data class CombatStats(
         val amount = if (crit) floor(base * critMultiplier).toLong().coerceAtLeast(base + 1L) else base.toLong()
         return Hit(amount, crit)
     }
+
+    /** Chance that a [WeaponAction.PARRY] succeeds (see [WeaponActions.parryChance]). */
+    val parryChance: Double get() = WeaponActions.parryChance(totalStats, weaponType)
+
+    /** Affinity of the equipped weapon for [action]. */
+    fun modifierFor(action: WeaponAction): ActionModifier = WeaponActions.modifier(weaponType, action)
+
+    /**
+     * Rolls one hit performed with [action] using the equipped [weaponType]:
+     * - base = uniform [damageMin]..[damageMax], then `floor(base × damageMultiplier)`, min 1;
+     * - crit chance = [critChance] + critChanceBonus (capped at [WeaponActions.MAX_ACTION_CRIT_CHANCE]);
+     * - crit damage = `floor(damage × (critMultiplier + critMultiplierBonus))`, at least damage + 1.
+     *
+     * [WeaponAction.PARRY] deals no damage: returns `Hit(0, false)` without consuming randomness —
+     * use [rollParry] for the parry itself.
+     */
+    fun rollHit(action: WeaponAction, random: Random = Random.Default): Hit {
+        if (action == WeaponAction.PARRY) return Hit(0, false)
+        val mod = modifierFor(action)
+        val base = random.nextInt(damageMin, damageMax + 1)
+        val dmg = floor(base * mod.damageMultiplier).toLong().coerceAtLeast(1L)
+        val chance = (critChance + mod.critChanceBonus).coerceIn(0.0, WeaponActions.MAX_ACTION_CRIT_CHANCE)
+        val crit = random.nextDouble() < chance
+        val amount = if (crit) floor(dmg * (critMultiplier + mod.critMultiplierBonus)).toLong().coerceAtLeast(dmg + 1L) else dmg
+        return Hit(amount, crit)
+    }
+
+    /** Rolls whether a parry succeeds ([parryChance]). */
+    fun rollParry(random: Random = Random.Default): Boolean = random.nextDouble() < parryChance
 
     companion object {
         /** Damage of an unarmed hero (no weapon equipped). */
@@ -113,7 +144,7 @@ data class CombatStats(
             val critChance = (BASE_CRIT_CHANCE + luck * CRIT_CHANCE_PER_LUCK).coerceAtMost(MAX_CRIT_CHANCE)
             val critMult = (BASE_CRIT_MULTIPLIER + luck * CRIT_MULTIPLIER_PER_LUCK).coerceAtMost(MAX_CRIT_MULTIPLIER)
 
-            return CombatStats(total, min, max, aps, hp, critChance, critMult)
+            return CombatStats(total, min, max, aps, hp, critChance, critMult, weaponTypeOf(weapon ?: equipped.firstOrNull { it.slot == EquipmentSlot.WEAPON }))
         }
     }
 }

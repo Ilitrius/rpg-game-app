@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -46,14 +45,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 import com.idlerpg.game.IdleRpgApp
 import com.idlerpg.game.R
 import com.idlerpg.game.data.EquipmentSlot
@@ -64,8 +66,9 @@ import com.idlerpg.game.domain.character.CombatStats
 import com.idlerpg.game.domain.character.Progression
 import com.idlerpg.game.domain.character.StarterItems
 import com.idlerpg.game.domain.character.StatType
+import com.idlerpg.game.domain.character.WeaponAction
 import com.idlerpg.game.domain.character.get
-import com.idlerpg.game.ui.character.weapon.DaggerImage
+import com.idlerpg.game.ui.character.weapon.WeaponImage
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
@@ -181,22 +184,35 @@ private fun WeaponCard(weapon: Item?, combat: CombatStats) {
                     .height(150.dp)
                     .background(
                         Brush.radialGradient(
-                            listOf(Color(0xFF4A4F45), Color(0xFF262B25), Color(0xFF171A16)),
+                            listOf(
+                                weapon?.rarity?.takeIf { it >= Rarity.RARE }
+                                    ?.let { lerp(Color(0xFF4A4F45), rarityColor(it), 0.35f) }
+                                    ?: Color(0xFF4A4F45),
+                                Color(0xFF262B25),
+                                Color(0xFF171A16),
+                            ),
                         ),
                     ),
                 contentAlignment = Alignment.Center,
             ) {
                 if (weapon != null) {
-                    DaggerImage(
-                        modifier = Modifier.requiredSize(width = 96.dp, height = 307.dp).rotate(90f),
-                        rust = if (weapon.id == StarterItems.RUSTY_DAGGER_ID) 0.45f else 0f,
+                    WeaponImage(
+                        item = weapon,
+                        rotationDegrees = 90f,
+                        modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 30.dp),
                         contentDescription = stringResource(R.string.character_weapon_image),
                     )
                 } else {
+                    WeaponImage(
+                        item = null,
+                        rotationDegrees = -8f,
+                        modifier = Modifier.fillMaxSize().padding(top = 26.dp, bottom = 30.dp),
+                    )
                     Text(
                         stringResource(R.string.character_weapon_none),
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp),
                     )
                 }
                 Text(
@@ -231,6 +247,8 @@ private fun WeaponCard(weapon: Item?, combat: CombatStats) {
                 weapon?.let { bonusLine(it) }?.takeIf { it.isNotEmpty() }?.let {
                     Text(it, style = MaterialTheme.typography.bodyMedium, color = Color(0xFF81C784))
                 }
+                Spacer(Modifier.height(8.dp))
+                ActionAffinities(combat)
             }
         }
     }
@@ -347,8 +365,76 @@ private fun DerivedCard(combat: CombatStats) {
             DerivedRow(stringResource(R.string.character_derived_hp), numberFormat.format(combat.maxHp))
             DerivedRow(stringResource(R.string.character_derived_crit), format("%.1f %%", combat.critChance * 100))
             DerivedRow(stringResource(R.string.character_derived_crit_mult), format("×%.2f", combat.critMultiplier))
+            DerivedRow(stringResource(R.string.character_derived_parry), format("%.0f %%", combat.parryChance * 100))
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
             DerivedRow(stringResource(R.string.character_derived_dps), format("%.1f", combat.dps), emphasize = true)
+        }
+    }
+}
+
+/** Rows "Schwingen / Stechen / Schlagen / Parieren" with a 5-step rating for the equipped weapon. */
+@Composable
+private fun ActionAffinities(combat: CombatStats) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            stringResource(R.string.character_actions_title),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        WeaponAction.entries.forEach { action ->
+            val (label, hint) = when (action) {
+                WeaponAction.SWING -> R.string.character_action_swing to R.string.character_action_swing_hint
+                WeaponAction.STAB -> R.string.character_action_stab to R.string.character_action_stab_hint
+                WeaponAction.STRIKE -> R.string.character_action_strike to R.string.character_action_strike_hint
+                WeaponAction.PARRY -> R.string.character_action_parry to R.string.character_action_parry_hint
+            }
+            val mod = combat.modifierFor(action)
+            val rating: Int
+            val value: String
+            if (action == WeaponAction.PARRY) {
+                rating = actionRating(combat.parryChance, 0.15, 0.80)
+                value = stringResource(R.string.character_action_parry_value, format("%.0f", combat.parryChance * 100))
+            } else {
+                rating = actionRating(mod.expectedFactor(combat.critChance, combat.critMultiplier), 0.62, 1.42)
+                val dmg = stringResource(R.string.character_action_damage, format("%.2f", mod.damageMultiplier))
+                value = if (mod.critChanceBonus > 0.0) {
+                    dmg + " · " + stringResource(R.string.character_action_crit, (mod.critChanceBonus * 100).roundToInt())
+                } else dmg
+            }
+            ActionRow(stringResource(label), stringResource(hint), rating, value)
+        }
+    }
+}
+
+/** Maps [v] linearly from [lo]..[hi] to a rating of 1..5. */
+private fun actionRating(v: Double, lo: Double, hi: Double): Int =
+    (1 + ((v - lo) / (hi - lo) * 4.0).roundToInt()).coerceIn(1, 5)
+
+@Composable
+private fun ActionRow(label: String, hint: String, rating: Int, value: String) {
+    val ratingText = stringResource(R.string.character_action_rating, rating)
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.weight(1f)) {
+            Text(label, style = MaterialTheme.typography.bodyLarge)
+            Text(hint, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Column(horizontalAlignment = Alignment.End) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
+                modifier = Modifier.semantics { contentDescription = ratingText },
+            ) {
+                val on = lerp(Color(0xFFB0874A), Color(0xFFFFC857), rating / 5f)
+                repeat(5) { i ->
+                    Box(
+                        Modifier
+                            .size(width = 16.dp, height = 7.dp)
+                            .clip(RoundedCornerShape(3.dp))
+                            .background(if (i < rating) on else MaterialTheme.colorScheme.surfaceContainerHighest),
+                    )
+                }
+            }
+            Spacer(Modifier.height(2.dp))
+            Text(value, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }

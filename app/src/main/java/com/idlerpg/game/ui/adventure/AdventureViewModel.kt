@@ -5,7 +5,9 @@ import android.os.SystemClock
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.idlerpg.game.IdleRpgApp
+import com.idlerpg.game.data.EquipmentSlot
 import com.idlerpg.game.data.GameState
+import com.idlerpg.game.data.Item
 import com.idlerpg.game.data.WorldState
 import com.idlerpg.game.domain.character.CombatStats
 import com.idlerpg.game.domain.character.Hit
@@ -21,6 +23,7 @@ import com.idlerpg.game.domain.world.OfflineReward
 import com.idlerpg.game.domain.world.WorldProgress
 import com.idlerpg.game.domain.world.Zone
 import com.idlerpg.game.domain.world.Zones
+import com.idlerpg.game.ui.character.weapon.WEAPON_IMPACT_FRACTION
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
@@ -66,6 +69,8 @@ data class AdventureUiState(
     val bossTimeLeftMillis: Long = WorldProgress.BOSS_TIME_LIMIT_MILLIS,
     /** Non-null while the travel transition to this zone is running. */
     val travelingTo: Zone? = null,
+    /** Currently equipped weapon (null = fists), drawn in first person. */
+    val equippedWeapon: Item? = null,
 ) {
     val killsTowardsBoss: Long get() = WorldProgress.killsTowardsBoss(world, zone)
     val canChallengeBoss: Boolean
@@ -87,8 +92,8 @@ sealed interface AdventureEvent {
 
 private const val DEFAULT_STAB_MILLIS = 340
 
-/** Must match the impact point of FirstPersonDagger (IMPACT_AT = 0.38). */
-private const val STAB_IMPACT_FRACTION = 0.38
+/** Impact point of the first-person attack animation (same for every weapon kind). */
+private val STAB_IMPACT_FRACTION = WEAPON_IMPACT_FRACTION.toDouble()
 
 /** Duration of the fade-out/fade-in when travelling to another zone. */
 const val TRAVEL_TRANSITION_MILLIS = 1400L
@@ -160,6 +165,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
                 heroHp = ceil(heroHp).toInt(),
                 attackDurationMillis = stab,
                 world = s.world,
+                equippedWeapon = s.equipment.equipped[EquipmentSlot.WEAPON],
             )
         }
         statsReady.complete(Unit)

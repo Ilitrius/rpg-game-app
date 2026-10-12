@@ -16,12 +16,17 @@ Zusätzlich `spielwelt`: Abenteuer-Ansicht (Ich-Perspektive), Gebiete, Monster, 
 - Strings pro Feld in eigener Datei (`res/values/strings_<feld>.xml`), damit parallele Agenten nicht kollidieren.
 - Theme (`ui/theme`), Datenmodell und `IdleRpgApp` gehören dem Haupt-Thread, nicht einem Feld-Agenten.
 
+## Lernende Agenten
+- Lernspeicher: `.claude/learnings/` — `shared.md` (für alle, voneinander lernen) + `<agent>.md` (eigene). Regeln in `README.md` dort.
+- Jeder Agent liest vor dem Auftrag `shared.md` + eigene Datei, trägt danach neue Erkenntnisse ein und darf die eigene Definition in `.claude/agents/` weiterentwickeln.
+- Haupt-Thread: Agenten-Aufträge immer mit Hinweis auf die Definition starten; nach jedem Bericht Lern-Änderungen prüfen; regelmäßig kuratieren (Duplikate zusammenführen, Bewährtes in Definitionen/CLAUDE.md übernehmen).
+
 ## Datenvertrag (Stand)
 - `GameState`: `character`, `equipment`, `gold`, `starterWeaponGranted`, `world: WorldState` (Zone, freigeschaltete Zonen, Kills, `lastActiveEpochMillis`).
 - `Item.damageMin/damageMax`: Grundschaden für Waffen.
 - `IdleRpgApp.onCreate` gibt einmalig den Startdolch (`StarterItems.ensureStarterWeapon`).
 - Kampf-API (`charakter`): `CombatStats.of(state)`, `rollHit()`, `attackIntervalMillis`, `Progression.applyXp`, `spendPoint`.
-- Dolch-Grafik (`charakter`): `ui/character/weapon` — `DaggerImage`, `FirstPersonDagger(attackTrigger, onStabImpact)`.
+- Waffen-Grafik (`charakter`): `ui/character/weapon` — `weaponKindOf(item)`/`weaponLookOf(item)` (null→Faust, Startdolch/""→rostiger Dolch, dolch/kurzschwert/streitkolben/axt), `WeaponImage(item, rotationDegrees)`, `drawWeaponFitted`, `drawWeaponInHand` (Paper-Doll), `FirstPersonWeapon(weapon, attackTrigger, attackDurationMillis, onStabImpact)` (Stich/Hieb/Faustschlag, Treffer immer bei `WEAPON_IMPACT_FRACTION` = 0.38). `FirstPersonDagger`/`DaggerImage` bleiben als Kompatibilität. Alle Waffen: gleiche Griffgeometrie (16 Einheiten breit, `gripCenter`), damit eine Hand alle hält.
 - `Item.baseType` (Grafik/Name-Stamm, "" = Altbestand → Waffe=Dolch), `Item.itemLevel`, `Item.isNew` ("Neu"-Badge).
 - Beute-API (`ausruestung`, `domain/equipment`): `ItemGenerator.roll(itemLevel, random, minRarity, rarityBoost, slot?)`, `Inventory.addToInventory(state, item)` (voll bei 40 → Auto-Verkauf für `price`; `tryAdd` liefert Info), `equip/unequip/sell/compare`. Grafik: `ui/equipment/ItemIcon(item)`.
 - Kampfschleife/Welt (`spielwelt`): `domain/world`, `domain/combat`, `ui/adventure/AdventureViewModel`.

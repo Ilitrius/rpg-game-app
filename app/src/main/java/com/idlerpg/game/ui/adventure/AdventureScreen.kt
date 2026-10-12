@@ -84,7 +84,7 @@ import com.idlerpg.game.domain.world.OfflineReward
 import com.idlerpg.game.domain.world.Zone
 import com.idlerpg.game.domain.world.Zones
 import com.idlerpg.game.ui.adventure.MonsterPainters.drawMonster
-import com.idlerpg.game.ui.character.weapon.FirstPersonDagger
+import com.idlerpg.game.ui.character.weapon.FirstPersonWeapon
 import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.math.PI
@@ -232,7 +232,8 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
                 .drawBehind { scene?.drawForeground(this, time) },
         )
 
-        FirstPersonDagger(
+        FirstPersonWeapon(
+            weapon = ui.equippedWeapon,
             attackTrigger = attacks,
             modifier = Modifier.fillMaxSize(),
             attackDurationMillis = ui.attackDurationMillis,
