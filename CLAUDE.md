@@ -22,7 +22,7 @@ Zusätzlich `spielwelt`: Abenteuer-Ansicht (Ich-Perspektive), Gebiete, Monster, 
 - Haupt-Thread: Agenten-Aufträge immer mit Hinweis auf die Definition starten; nach jedem Bericht Lern-Änderungen prüfen; regelmäßig kuratieren (Duplikate zusammenführen, Bewährtes in Definitionen/CLAUDE.md übernehmen).
 
 ## Datenvertrag (Stand)
-- `GameState`: `character`, `equipment`, `gold`, `starterWeaponGranted`, `world: WorldState` (Zone, freigeschaltete Zonen, Kills, `lastActiveEpochMillis`).
+- `GameState`: `character`, `equipment`, `gold`, `starterWeaponGranted`, `world: WorldState` (Zone, freigeschaltete Zonen, Kills, `lastActiveEpochMillis`), `shop: ShopState`.
 - `Item.damageMin/damageMax`: Grundschaden für Waffen.
 - `IdleRpgApp.onCreate` gibt einmalig den Startdolch (`StarterItems.ensureStarterWeapon`).
 - Kampf-API (`charakter`): `CombatStats.of(state)`, `rollHit()`, `attackIntervalMillis`, `Progression.applyXp`, `spendPoint`.
@@ -31,6 +31,7 @@ Zusätzlich `spielwelt`: Abenteuer-Ansicht (Ich-Perspektive), Gebiete, Monster, 
 - Beute-API (`ausruestung`, `domain/equipment`): `ItemGenerator.roll(itemLevel, random, minRarity, rarityBoost, slot?)`, `Inventory.addToInventory(state, item)` (voll bei 40 → Auto-Verkauf für `price`; `tryAdd` liefert Info), `equip/unequip/sell/compare`. Grafik: `ui/equipment/ItemIcon(item)`.
 - Kampfschleife/Welt (`spielwelt`): `domain/world`, `domain/combat`, `ui/adventure/AdventureViewModel`.
 - `WorldState` (spielwelt): `heroHp` (-1 = voll/unbekannt), `defeatedBossIds`, `bossDefeatedAtKills` (Zone→Kills beim letzten Bosssieg); Zonen: wiese/wald/sumpf/gebirge/hoehle, nächste Zone via Bosssieg (`WorldProgress`), Drops via `Loot` (nutzt `ItemGenerator`/`Inventory.tryAdd`).
+- Shop-API (`shop`, `domain/shop/Shop`): `ShopState` (`offers`, `restockedAtEpochMillis`, `stockLevel`, `paidRestocks`); Kaufpreis berechnet (`Shop.buyPrice` = `price` × `markup(itemLevel)`, nie gespeichert); `ensureStock` (gratis alle 30 min / bei 3 Stufen Vorsprung, nur bei offenem Tab), `paidRestock`, `buy`, `isUpgrade`, `bulkSellCandidates`.
 
 ## Stack
 - Kotlin 2.0.21, Jetpack Compose (BOM 2024.12.01), Material3

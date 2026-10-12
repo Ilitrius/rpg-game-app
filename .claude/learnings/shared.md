@@ -1,6 +1,7 @@
 # Gemeinsame Erkenntnisse (alle Agenten)
 
 ## Umgebung & Werkzeuge
+- [2026-10-12] Große Kotlin-Dateien nicht per Bash-Heredoc schreiben/anhängen (Git-Bash bricht bei langen Heredocs mit `unexpected EOF ... matching '` ab, nichts wird geschrieben) — Write/Edit-Tool nutzen. — **Warum:** Shop-Agent verlor dadurch einen Durchlauf.
 - [2026-10-11] Screenshots nur über `cmd /c "adb exec-out screencap -p > datei.png"` — **Warum:** PowerShell-Pipes zerstören Binärdaten.
 - [2026-10-11] Nav-Leiste bei 1080x2400: y=2250, Charakter x=125, Ausrüstung x=400, Shop x=680, Optionen x=950. Gebietsname oben links antippbar. — **Warum:** spart Ausprobieren.
 - [2026-10-11] Clipboard über adb ist unzuverlässig; für Testdaten lieber temporären Code-Pfad nutzen. — **Warum:** Optionen-Agent konnte ungültige Eingaben nicht per adb einspielen.
@@ -18,6 +19,7 @@
 - [2026-10-11] Treffer-Zeitpunkt aller Waffenanimationen = `WEAPON_IMPACT_FRACTION` (0.38); Kampfschleife hängt daran. — **Warum:** Schaden, Blitz und Zahl müssen synchron zur Animation sein.
 - [2026-10-11] Belohnungen (EP, Gold, Item) in **einem** `repository.update` anwenden und im `appScope` speichern. — **Warum:** atomar, geht nicht verloren, wenn die Schleife abbricht.
 - [2026-10-11] Änderungen in fremden Dateien: nur minimal, nur mit Auftrag, im Bericht markieren. — **Warum:** Besitz-Regeln halten das Projekt konsistent.
+- [2026-10-12] Itemnamen nie in Satzschablonen mit Kasus einsetzen ("Vergleich mit %1$s" → "Vergleich mit Robuste Lederstiefel" ist falsch, Dativ fehlt). Neutral formulieren: "Angelegt: %1$s". — **Warum:** generierte Namen tragen Nominativ-Adjektivendungen; Ausrüstung-Tab hat das Problem noch.
 
 ## Balance
 - [2026-10-11] Ausrüstung wiegt ca. doppelt so viel wie Stufenaufstiege. Zonen-Multiplikatoren (Spielwelt) sind auf `ItemGenerator`-Konstanten (Ausrüstung) abgestimmt — eine Seite ändern heißt die andere neu abstimmen. — **Warum:** Balance-Analyse Spielwelt-Agent.

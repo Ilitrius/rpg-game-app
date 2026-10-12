@@ -16,6 +16,8 @@ data class GameState(
     val starterWeaponGranted: Boolean = false,
     /** World/adventure progress (zone, kills, last-active time). Owned by the Spielwelt area. */
     val world: WorldState = WorldState(),
+    /** Merchant assortment and restock timer. Owned by the Shop area (domain/shop). */
+    val shop: ShopState = ShopState(),
 ) {
     companion object {
         const val SCHEMA_VERSION = 1
@@ -103,4 +105,20 @@ data class WorldState(
     val heroHp: Int = -1,
     val defeatedBossIds: List<String> = emptyList(),
     val bossDefeatedAtKills: Map<String, Long> = emptyMap(),
+)
+
+/**
+ * Persistent shop state (Shop area, see domain/shop/Shop).
+ *
+ * @property offers items currently for sale (bought items are removed); buy price is derived from the item
+ * @property restockedAtEpochMillis wall-clock time of the last free (timed) restock; 0 = never stocked
+ * @property stockLevel shop level the current offers were generated for (0 = never stocked)
+ * @property paidRestocks paid "Neu auffüllen" since the last timed restock (raises the next price)
+ */
+@Serializable
+data class ShopState(
+    val offers: List<Item> = emptyList(),
+    val restockedAtEpochMillis: Long = 0,
+    val stockLevel: Int = 0,
+    val paidRestocks: Int = 0,
 )

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings des Shop-Tabs (eigene Datei, damit parallele Feature-Agenten nicht kollidieren). -->
+<resources>
+    <string name="shop_title">Händler</string>
+    <string name="shop_subtitle">Waren für Stufe %1$d</string>
+    <string name="shop_gold">%1$s Gold</string>
+    <string name="shop_tab_buy">Kaufen</string>
+    <string name="shop_tab_sell">Verkaufen</string>
+
+    <!-- Sortiment / Auffüllen -->
+    <string name="shop_restock_in">Neue Ware in %1$s</string>
+    <string name="shop_restock_arriving">Neue Ware trifft ein …</string>
+    <string name="shop_restock_paid">Neu auffüllen (%1$s Gold)</string>
+    <string name="shop_restock_hint">Jedes weitere Auffüllen kostet bis zur nächsten Lieferung mehr.</string>
+    <string name="shop_restock_done">Der Händler hat neue Ware ausgelegt.</string>
+    <string name="shop_restock_no_gold">Nicht genug Gold zum Auffüllen.</string>
+    <string name="shop_sold_out">Ausverkauft! Neue Ware kommt bald – oder lass jetzt auffüllen.</string>
+    <string name="shop_upgrade">Verbesserung</string>
+    <string name="shop_new">Neu</string>
+
+    <!-- Kaufen -->
+    <string name="shop_buy">Kaufen (%1$s Gold)</string>
+    <string name="shop_bought">%1$s gekauft – liegt jetzt im Inventar.</string>
+    <string name="shop_not_enough_gold">Nicht genug Gold – dir fehlen %1$s Gold.</string>
+    <string name="shop_inventory_full">Inventar voll – verkaufe erst etwas, um Platz zu schaffen.</string>
+    <string name="shop_go_to_sell">Zum Verkaufen</string>
+    <string name="shop_offer_gone">Dieses Angebot ist nicht mehr verfügbar.</string>
+
+    <!-- Verkaufen -->
+    <string name="shop_sell_title">Inventar</string>
+    <string name="shop_sell_count">%1$d / %2$d</string>
+    <string name="shop_sell_empty">Dein Inventar ist leer – besiege Monster, um Beute zu finden.</string>
+    <string name="shop_sell">Verkaufen (%1$s Gold)</string>
+    <string name="shop_sell_all_common">Gewöhnliche Gegenstände verkaufen</string>
+    <plurals name="shop_sell_all_common_detail">
+        <item quantity="one">%1$d Gegenstand für %2$s Gold</item>
+        <item quantity="other">%1$d Gegenstände für %2$s Gold</item>
+    </plurals>
+    <string name="shop_sell_all_common_confirm_title">Gewöhnliche Gegenstände verkaufen?</string>
+    <plurals name="shop_sell_all_common_confirm">
+        <item quantity="one">%1$d gewöhnlicher Gegenstand aus dem Inventar wird für %2$s Gold verkauft. Angelegte Ausrüstung und Verbesserungen bleiben erhalten.</item>
+        <item quantity="other">%1$d gewöhnliche Gegenstände aus dem Inventar werden für %2$s Gold verkauft. Angelegte Ausrüstung und Verbesserungen bleiben erhalten.</item>
+    </plurals>
+    <string name="shop_cancel">Abbrechen</string>
+    <string name="shop_sold_one">%1$s für %2$s Gold verkauft.</string>
+    <plurals name="shop_sold_many">
+        <item quantity="one">%1$d Gegenstand für %2$s Gold verkauft.</item>
+        <item quantity="other">%1$d Gegenstände für %2$s Gold verkauft.</item>
+    </plurals>
+
+    <!-- Details / Vergleich -->
+    <string name="shop_level">Stufe %1$d</string>
+    <string name="shop_damage">Schaden %1$d–%2$d</string>
+    <string name="shop_no_bonus">Keine Attributsboni</string>
+    <string name="shop_sell_value">Verkaufswert: %1$s Gold</string>
+    <string name="shop_compare_title">Angelegt: %1$s</string>
+    <string name="shop_compare_empty">Vergleich: In diesem Slot ist nichts angelegt.</string>
+    <string name="shop_compare_same">Keine Änderung der Werte</string>
+    <string name="shop_compare_damage">Schaden %1$s / %2$s</string>
+    <string name="shop_compare_dps">Schaden/Sek.: %1$s → %2$s</string>
+    <string name="shop_dps_delta">%1$s Schaden/Sek.</string>
+</resources>
