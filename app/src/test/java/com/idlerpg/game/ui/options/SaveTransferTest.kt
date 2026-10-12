@@ -94,11 +94,16 @@ class SaveTransferTest {
     @Test
     fun negativeValuesAreRejected() {
         val base = SaveTransfer.encode(sample)
-        assertEquals(SaveError.NegativeValue("gold"), invalid(withValue(base, "gold", "-1")))
-        assertEquals(SaveError.NegativeValue("xp"), invalid(withValue(base, "xp", "-5")))
-        assertEquals(SaveError.NegativeValue("strength"), invalid(withValue(base, "strength", "-3")))
-        assertEquals(SaveError.NegativeValue("unspentPoints"), invalid(withValue(base, "unspentPoints", "-1")))
-        assertEquals(SaveError.NegativeValue("price"), invalid(withValue(base, "price", "-10")))
+        val character = SaveLocation.Character
+        assertEquals(SaveError.NegativeValue(SaveField.GOLD, SaveLocation.Root), invalid(withValue(base, "gold", "-1")))
+        assertEquals(SaveError.NegativeValue(SaveField.XP, character), invalid(withValue(base, "xp", "-5")))
+        assertEquals(SaveError.NegativeValue(SaveField.STRENGTH, character), invalid(withValue(base, "strength", "-3")))
+        assertEquals(SaveError.NegativeValue(SaveField.UNSPENT_POINTS, character), invalid(withValue(base, "unspentPoints", "-1")))
+        // First "price" in the file belongs to the equipped weapon.
+        assertEquals(
+            SaveError.NegativeValue(SaveField.PRICE, SaveLocation.EquippedItem(EquipmentSlot.WEAPON, "Langschwert")),
+            invalid(withValue(base, "price", "-10")),
+        )
     }
 
     @Test

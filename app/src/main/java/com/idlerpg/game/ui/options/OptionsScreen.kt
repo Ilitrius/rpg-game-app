@@ -20,7 +20,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.ContentPaste
+import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.FileOpen
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.SaveAlt
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material.icons.outlined.Tune
@@ -55,6 +57,9 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.idlerpg.game.IdleRpgApp
 import com.idlerpg.game.R
+import com.idlerpg.game.data.EquipmentSlot
+import com.idlerpg.game.domain.world.Zones
+import com.idlerpg.game.ui.adventure.nameRes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -72,6 +77,8 @@ fun OptionsScreen() {
 
     // Validated JSON waiting for user confirmation (saveable across rotation).
     var pendingImport by rememberSaveable { mutableStateOf<String?>(null) }
+    // Why the last import was rejected; shown in a dialog (the messages are too long for a snackbar).
+    var importError by rememberSaveable { mutableStateOf<String?>(null) }
 
     fun notify(message: String) {
         scope.launch {
@@ -83,7 +90,7 @@ fun OptionsScreen() {
     fun handleImportText(text: String?) {
         when (val result = SaveTransfer.parse(text)) {
             is ImportResult.Valid -> pendingImport = text
-            is ImportResult.Invalid -> notify(errorMessage(context, result.error))
+            is ImportResult.Invalid -> importError = errorMessage(context, result.error)
         }
     }
 
@@ -159,12 +166,13 @@ fun OptionsScreen() {
     }
 
     pendingImport?.let { json ->
-        val valid = SaveTransfer.parse(json) as? ImportResult.Valid
+        val valid = remember(json) { SaveTransfer.parse(json) as? ImportResult.Valid }
         if (valid == null) {
             pendingImport = null
         } else {
             ConfirmImportDialog(
                 summary = valid.summary,
+                notes = valid.notes.map { noteMessage(context, it) },
                 onConfirm = {
                     pendingImport = null
                     scope.launch {
@@ -175,6 +183,10 @@ fun OptionsScreen() {
                 onDismiss = { pendingImport = null },
             )
         }
+    }
+
+    importError?.let { message ->
+        ImportErrorDialog(message = message, onDismiss = { importError = null })
     }
 }
 
@@ -257,7 +269,7 @@ private fun ActionButton(icon: ImageVector, label: String, primary: Boolean, onC
 }
 
 @Composable
-private fun ConfirmImportDialog(summary: SaveSummary, onConfirm: () -> Unit, onDismiss: () -> Unit) {
+private fun ConfirmImportDialog(summary: SaveSummary, notes: List<String>, onConfirm: () -> Unit, onDismiss: () -> Unit) {
     val gold = NumberFormat.getIntegerInstance(Locale.GERMANY).format(summary.gold)
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -269,6 +281,18 @@ private fun ConfirmImportDialog(summary: SaveSummary, onConfirm: () -> Unit, onD
                     stringResource(R.string.options_confirm_summary, summary.name, summary.level, gold, summary.itemCount),
                     style = MaterialTheme.typography.bodyLarge,
                 )
+                notes.forEach { note ->
+                    Row(verticalAlignment = Alignment.Top) {
+                        Icon(
+                            Icons.Outlined.Info,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier.size(18.dp),
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(note, style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
                 Text(
                     stringResource(R.string.options_confirm_warning),
                     style = MaterialTheme.typography.bodyMedium,
@@ -285,6 +309,20 @@ private fun ConfirmImportDialog(summary: SaveSummary, onConfirm: () -> Unit, onD
     )
 }
 
+@Composable
+private fun ImportErrorDialog(message: String, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = { Icon(Icons.Outlined.ErrorOutline, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
+        title = { Text(stringResource(R.string.options_error_title)) },
+        text = { Text(message, style = MaterialTheme.typography.bodyLarge) },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.options_error_ok)) }
+        },
+    )
+}
+
+/** German, concrete message for a rejected save: where the problem sits and what is wrong. */
 private fun errorMessage(context: Context, error: SaveError): String = when (error) {
     SaveError.Empty -> context.getString(R.string.options_error_empty)
     SaveError.TooLarge -> context.getString(R.string.options_error_too_large)
@@ -292,8 +330,122 @@ private fun errorMessage(context: Context, error: SaveError): String = when (err
     is SaveError.NewerVersion -> context.getString(R.string.options_error_newer_version, error.found, error.supported)
     SaveError.InvalidVersion -> context.getString(R.string.options_error_invalid_version)
     SaveError.LevelTooLow -> context.getString(R.string.options_error_level)
-    is SaveError.NegativeValue -> context.getString(R.string.options_error_negative, error.field)
-    is SaveError.SlotMismatch -> context.getString(R.string.options_error_slot, error.slotKey, error.itemSlot)
+    is SaveError.SlotMismatch -> context.getString(
+        R.string.options_error_slot,
+        slotName(context, error.slotKey),
+        slotName(context, error.itemSlot),
+    )
+    is SaveError.NegativeValue -> invalidAt(
+        context,
+        error.location,
+        context.getString(R.string.options_error_negative, error.field.key, fieldLabel(context, error.field)),
+    )
+    is SaveError.BelowMinimum -> invalidAt(
+        context,
+        error.location,
+        context.getString(R.string.options_error_below_min, error.field.key, fieldLabel(context, error.field), error.min, error.found),
+    )
+    is SaveError.OutOfRange -> invalidAt(
+        context,
+        error.location,
+        context.getString(
+            R.string.options_error_out_of_range,
+            error.field.key, fieldLabel(context, error.field), error.min, error.max, error.found,
+        ),
+    )
+    is SaveError.DamageRangeReversed -> invalidAt(
+        context,
+        error.location,
+        context.getString(R.string.options_error_damage_range, error.damageMin, error.damageMax),
+    )
+}
+
+private fun invalidAt(context: Context, location: SaveLocation, problem: String): String {
+    val where = locationText(context, location)
+        ?: return context.getString(R.string.options_error_invalid, problem)
+    return context.getString(R.string.options_error_invalid_at, where, problem)
+}
+
+/** Location of a value in German, or null for top-level values (e.g. gold). */
+private fun locationText(context: Context, location: SaveLocation): String? = when (location) {
+    SaveLocation.Root -> null
+    SaveLocation.Character -> context.getString(R.string.options_location_character)
+    is SaveLocation.EquippedItem -> context.getString(
+        R.string.options_location_equipped,
+        context.getString(slotLabel(location.slot)),
+        itemNameText(context, location.itemName),
+    )
+    is SaveLocation.InventoryItem ->
+        context.getString(R.string.options_location_inventory, location.position, itemNameText(context, location.itemName))
+    is SaveLocation.ShopOffer ->
+        context.getString(R.string.options_location_shop_offer, location.position, itemNameText(context, location.itemName))
+    SaveLocation.World -> context.getString(R.string.options_location_world)
+    is SaveLocation.WorldZone -> context.getString(R.string.options_location_world_zone, location.zoneId)
+    SaveLocation.Shop -> context.getString(R.string.options_location_shop)
+}
+
+private fun itemNameText(context: Context, name: String): String =
+    if (name.isBlank()) context.getString(R.string.options_unnamed) else context.getString(R.string.options_quoted, name)
+
+private fun fieldLabel(context: Context, field: SaveField): String = context.getString(
+    when (field) {
+        SaveField.XP -> R.string.options_field_xp
+        SaveField.UNSPENT_POINTS -> R.string.options_field_unspent_points
+        SaveField.STRENGTH -> R.string.options_field_strength
+        SaveField.DEXTERITY -> R.string.options_field_dexterity
+        SaveField.VITALITY -> R.string.options_field_vitality
+        SaveField.LUCK -> R.string.options_field_luck
+        SaveField.GOLD -> R.string.options_field_gold
+        SaveField.PRICE -> R.string.options_field_price
+        SaveField.DAMAGE_MIN -> R.string.options_field_damage_min
+        SaveField.DAMAGE_MAX -> R.string.options_field_damage_max
+        SaveField.ITEM_LEVEL -> R.string.options_field_item_level
+        SaveField.HERO_HP -> R.string.options_field_hero_hp
+        SaveField.TOTAL_KILLS -> R.string.options_field_total_kills
+        SaveField.ZONE_KILLS -> R.string.options_field_zone_kills
+        SaveField.LAST_ACTIVE -> R.string.options_field_last_active
+        SaveField.BOSS_DEFEATED_AT_KILLS -> R.string.options_field_boss_defeated_at_kills
+        SaveField.RESTOCKED_AT -> R.string.options_field_restocked_at
+        SaveField.STOCK_LEVEL -> R.string.options_field_stock_level
+        SaveField.PAID_RESTOCKS -> R.string.options_field_paid_restocks
+    },
+)
+
+/** German slot name for an [EquipmentSlot] enum name (falls back to the raw name). */
+private fun slotName(context: Context, slotKey: String): String =
+    EquipmentSlot.entries.firstOrNull { it.name == slotKey }?.let { context.getString(slotLabel(it)) } ?: slotKey
+
+/** Slot names belong to the Ausrüstung tab (`strings_ausruestung.xml`); used read-only. */
+private fun slotLabel(slot: EquipmentSlot): Int = when (slot) {
+    EquipmentSlot.WEAPON -> R.string.equipment_slot_weapon
+    EquipmentSlot.HELMET -> R.string.equipment_slot_helmet
+    EquipmentSlot.ARMOR -> R.string.equipment_slot_armor
+    EquipmentSlot.GLOVES -> R.string.equipment_slot_gloves
+    EquipmentSlot.BOOTS -> R.string.equipment_slot_boots
+    EquipmentSlot.RING -> R.string.equipment_slot_ring
+    EquipmentSlot.AMULET -> R.string.equipment_slot_amulet
+}
+
+/** Unknown zone ids listed in a note before "und N weitere". */
+private const val MAX_LISTED_ZONES = 5
+
+/** German text of an import hint; zone names belong to the Spielwelt tab (`Zone.nameRes`). */
+private fun noteMessage(context: Context, note: ImportNote): String = when (note) {
+    is ImportNote.UnknownCurrentZone -> context.getString(
+        R.string.options_note_unknown_zone,
+        SaveTransfer.shortName(note.zoneId),
+        context.getString(Zones.byId(note.fallbackZoneId).nameRes()),
+    )
+    is ImportNote.UnknownZonesIgnored -> {
+        val shown = note.zoneIds.take(MAX_LISTED_ZONES)
+            .joinToString(", ") { context.getString(R.string.options_quoted, SaveTransfer.shortName(it)) }
+        val more = note.zoneIds.size - MAX_LISTED_ZONES
+        if (more > 0) {
+            context.getString(R.string.options_note_unknown_zones_more, shown, more)
+        } else {
+            context.getString(R.string.options_note_unknown_zones, shown)
+        }
+    }
 }
 
 private suspend fun writeText(context: Context, uri: Uri, text: String) = withContext(Dispatchers.IO) {

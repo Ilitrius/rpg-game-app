@@ -5,7 +5,7 @@
 
     <!-- Spielstand -->
     <string name="options_save_title">Spielstand</string>
-    <string name="options_save_description">Sichere deinen kompletten Fortschritt – Charakterwerte, Level, Ausrüstung, Inventar und Gold – als JSON-Datei oder übertrage ihn auf ein anderes Gerät.</string>
+    <string name="options_save_description">Sichere deinen kompletten Fortschritt – Charakterwerte, Level, Ausrüstung, Inventar, Gold, Spielwelt und Shop – als JSON-Datei oder übertrage ihn auf ein anderes Gerät.</string>
     <string name="options_export_header">Exportieren</string>
     <string name="options_import_header">Importieren</string>
     <string name="options_export_file">Als Datei speichern</string>
@@ -35,12 +35,60 @@
     <string name="options_confirm_cancel">Abbrechen</string>
 
     <!-- Fehlermeldungen beim Import -->
+    <string name="options_error_title">Import nicht möglich</string>
+    <string name="options_error_ok">OK</string>
     <string name="options_error_empty">Ungültiger Spielstand: Die Eingabe ist leer.</string>
     <string name="options_error_too_large">Ungültiger Spielstand: Die Datei ist zu groß.</string>
     <string name="options_error_malformed">Ungültiger Spielstand: Das ist kein lesbarer Idle-RPG-Spielstand (fehlerhaftes JSON).</string>
     <string name="options_error_newer_version">Dieser Spielstand stammt aus einer neueren App-Version (Format %1$d, unterstützt bis %2$d). Bitte aktualisiere die App.</string>
     <string name="options_error_invalid_version">Ungültiger Spielstand: Unbekannte Formatversion.</string>
     <string name="options_error_level">Ungültiger Spielstand: Das Level muss mindestens 1 sein.</string>
-    <string name="options_error_negative">Ungültiger Spielstand: Der Wert „%1$s“ darf nicht negativ sein.</string>
-    <string name="options_error_slot">Ungültiger Spielstand: Ein Gegenstand vom Typ %2$s ist im Platz %1$s ausgerüstet.</string>
+    <string name="options_error_slot">Ungültiger Spielstand: Im Platz „%1$s“ ist ein Gegenstand vom Typ „%2$s“ angelegt.</string>
+    <!-- Rahmen: %1$s = Problem; mit Ort: %1$s = Ort, %2$s = Problem -->
+    <string name="options_error_invalid">Ungültiger Spielstand: %1$s</string>
+    <string name="options_error_invalid_at">Ungültiger Spielstand
+%1$s
+%2$s</string>
+    <!-- Probleme: %1$s = JSON-Schlüssel, %2$s = deutsche Bezeichnung -->
+    <string name="options_error_negative">Der Wert „%1$s“ (%2$s) darf nicht negativ sein.</string>
+    <string name="options_error_below_min">Der Wert „%1$s“ (%2$s) muss mindestens %3$d sein, gefunden: %4$d.</string>
+    <string name="options_error_out_of_range">Der Wert „%1$s“ (%2$s) muss zwischen %3$d und %4$d liegen, gefunden: %5$d.</string>
+    <string name="options_error_damage_range">Der Mindestschaden (%1$d) ist größer als der Höchstschaden (%2$d).</string>
+
+    <!-- Orte im Spielstand (für Fehlermeldungen) -->
+    <string name="options_location_character">Charakter</string>
+    <string name="options_location_equipped">Angelegt (%1$s): %2$s</string>
+    <string name="options_location_inventory">Inventar, Eintrag %1$d: %2$s</string>
+    <string name="options_location_shop_offer">Shop-Angebot %1$d: %2$s</string>
+    <string name="options_location_world">Spielwelt</string>
+    <string name="options_location_world_zone">Spielwelt, Gebiet „%1$s“</string>
+    <string name="options_location_shop">Shop</string>
+    <string name="options_quoted">„%1$s“</string>
+    <string name="options_unnamed">(ohne Namen)</string>
+
+    <!-- Deutsche Bezeichnungen der geprüften Werte -->
+    <string name="options_field_xp">Erfahrung</string>
+    <string name="options_field_unspent_points">freie Attributpunkte</string>
+    <string name="options_field_strength">Stärke</string>
+    <string name="options_field_dexterity">Geschick</string>
+    <string name="options_field_vitality">Vitalität</string>
+    <string name="options_field_luck">Glück</string>
+    <string name="options_field_gold">Gold</string>
+    <string name="options_field_price">Verkaufswert</string>
+    <string name="options_field_damage_min">Mindestschaden</string>
+    <string name="options_field_damage_max">Höchstschaden</string>
+    <string name="options_field_item_level">Gegenstandsstufe</string>
+    <string name="options_field_hero_hp">Lebenspunkte des Helden</string>
+    <string name="options_field_total_kills">besiegte Monster insgesamt</string>
+    <string name="options_field_zone_kills">besiegte Monster im Gebiet</string>
+    <string name="options_field_last_active">Zeitpunkt der letzten Aktivität</string>
+    <string name="options_field_boss_defeated_at_kills">Kill-Stand beim letzten Bosssieg</string>
+    <string name="options_field_restocked_at">Zeitpunkt der letzten Auffüllung</string>
+    <string name="options_field_stock_level">Warenstufe</string>
+    <string name="options_field_paid_restocks">bezahlte Auffüllungen</string>
+
+    <!-- Hinweise im Bestätigungsdialog (Spielstand wird trotzdem übernommen) -->
+    <string name="options_note_unknown_zone">Unbekanntes Gebiet „%1$s“ – dein Held startet im Gebiet „%2$s“.</string>
+    <string name="options_note_unknown_zones">Fortschritt in unbekannten Gebieten wird ignoriert: %1$s</string>
+    <string name="options_note_unknown_zones_more">Fortschritt in unbekannten Gebieten wird ignoriert: %1$s und %2$d weitere</string>
 </resources>

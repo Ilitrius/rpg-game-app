@@ -1,0 +1,176 @@
+{
+    "schemaVersion": 1,
+    "character": {
+        "name": "Testheld",
+        "level": 6,
+        "xp": 120,
+        "unspentPoints": 0,
+        "stats": {
+            "strength": 8,
+            "dexterity": 7,
+            "vitality": 6,
+            "luck": 5
+        }
+    },
+    "equipment": {
+        "equipped": {
+            "WEAPON": {
+                "id": "w1",
+                "name": "Gehärteter Dolch",
+                "slot": "WEAPON",
+                "rarity": "UNCOMMON",
+                "bonus": {
+                    "strength": 0,
+                    "dexterity": 3,
+                    "vitality": 0,
+                    "luck": 0
+                },
+                "price": 30,
+                "damageMin": 4,
+                "damageMax": 7,
+                "baseType": "dolch",
+                "itemLevel": 5,
+                "isNew": false
+            },
+            "HELMET": {
+                "id": "h1",
+                "name": "Eisenhelm",
+                "slot": "HELMET",
+                "rarity": "COMMON",
+                "bonus": {
+                    "strength": 0,
+                    "dexterity": 0,
+                    "vitality": 2,
+                    "luck": 0
+                },
+                "price": 12,
+                "damageMin": 0,
+                "damageMax": 0,
+                "baseType": "eisenhelm",
+                "itemLevel": 3,
+                "isNew": false
+            }
+        },
+        "inventory": [
+            {
+                "id": "r1",
+                "name": "Silberring",
+                "slot": "RING",
+                "rarity": "COMMON",
+                "bonus": {
+                    "strength": 0,
+                    "dexterity": 0,
+                    "vitality": 0,
+                    "luck": 2
+                },
+                "price": 9,
+                "damageMin": 0,
+                "damageMax": 0,
+                "baseType": "silberring",
+                "itemLevel": 2,
+                "isNew": false
+            },
+            {
+                "id": "a1",
+                "name": "Axt",
+                "slot": "WEAPON",
+                "rarity": "COMMON",
+                "bonus": {
+                    "strength": 0,
+                    "dexterity": 0,
+                    "vitality": 0,
+                    "luck": 0
+                },
+                "price": 20,
+                "damageMin": 14,
+                "damageMax": 5,
+                "baseType": "axt",
+                "itemLevel": 4,
+                "isNew": false
+            }
+        ]
+    },
+    "gold": 450,
+    "starterWeaponGranted": true,
+    "world": {
+        "currentZoneId": "wald",
+        "unlockedZoneIds": [
+            "wiese",
+            "wald"
+        ],
+        "totalKills": 80,
+        "zoneKills": {
+            "wiese": 60,
+            "wald": 20
+        },
+        "lastActiveEpochMillis": 1760000000000,
+        "heroHp": 57,
+        "defeatedBossIds": [
+            "wiese"
+        ],
+        "bossDefeatedAtKills": {
+            "wiese": 55
+        }
+    },
+    "shop": {
+        "offers": [
+            {
+                "id": "o1",
+                "name": "Eisenhelm",
+                "slot": "HELMET",
+                "rarity": "COMMON",
+                "bonus": {
+                    "strength": 0,
+                    "dexterity": 0,
+                    "vitality": 2,
+                    "luck": 0
+                },
+                "price": 12,
+                "damageMin": 0,
+                "damageMax": 0,
+                "baseType": "eisenhelm",
+                "itemLevel": 3,
+                "isNew": false
+            },
+            {
+                "id": "o2",
+                "name": "Scharfe Axt",
+                "slot": "WEAPON",
+                "rarity": "COMMON",
+                "bonus": {
+                    "strength": 0,
+                    "dexterity": 0,
+                    "vitality": 0,
+                    "luck": 0
+                },
+                "price": 20,
+                "damageMin": 5,
+                "damageMax": 14,
+                "baseType": "axt",
+                "itemLevel": 6,
+                "isNew": false
+            },
+            {
+                "id": "o3",
+                "name": "Silberring",
+                "slot": "RING",
+                "rarity": "COMMON",
+                "bonus": {
+                    "strength": 0,
+                    "dexterity": 0,
+                    "vitality": 0,
+                    "luck": 2
+                },
+                "price": 9,
+                "damageMin": 0,
+                "damageMax": 0,
+                "baseType": "silberring",
+                "itemLevel": 2,
+                "isNew": false
+            }
+        ],
+        "restockedAtEpochMillis": 1759999000000,
+        "stockLevel": 6,
+        "paidRestocks": 0
+    }
+}

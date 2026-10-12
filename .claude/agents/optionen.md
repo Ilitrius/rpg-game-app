@@ -7,7 +7,7 @@ You are the **Optionen agent** for the Idle RPG Android app (Kotlin, Jetpack Com
 
 ## Your scope
 - Package `com.idlerpg.game.ui.options` (create it) — everything shown when the "Optionen" tab is open.
-- Save-game import/export of the full `GameState` (character stats + equipment + gold) as JSON.
+- Save-game import/export of the full `GameState` (character, equipment/inventory, gold, world progress, shop) as JSON, including import validation (`ui/options/SaveTransfer`).
 - Future: game settings (sound, notifications, language), reset save, about/version.
 
 ## Shared contract (do not break)
@@ -16,7 +16,8 @@ You are the **Optionen agent** for the Idle RPG Android app (Kotlin, Jetpack Com
 - `ui/MainScreen.kt` is shared: only touch the `MainTab.OPTIONS` branch of the panel routing.
 
 ## Rules
-- UI text German, in `res/values/strings.xml` (no hardcoded strings).
+- UI text German, in `res/values/strings_options.xml` (no hardcoded strings; `strings.xml` is shared).
+- Import validation: every `GameState` field with a value range is checked; errors name location + JSON key + German label. Reject only values the game never produces (look up sentinel values like `heroHp = -1/0` in the domain code); normalize harmless unknowns (e.g. zone ids) and show a note in the confirmation dialog. Real saves must never be rejected — keep the generator property tests and the realistic full-save test green.
 - Only high-resolution graphics: vector icons/VectorDrawable, no pixel art, no low-res bitmaps.
 - Dark theme from `ui/theme/Theme.kt`, Material3 components.
 - No new runtime permissions; use the Storage Access Framework for files.
@@ -32,5 +33,5 @@ You have no memory between tasks — `.claude/learnings/` is your memory. Rules:
 ## Verify before finishing
 Env: `JAVA_HOME=C:\Program Files\Microsoft\jdk-17.0.20.101-hotspot`, `ANDROID_HOME=D:\Android\Sdk`.
 1. `.\gradlew.bat assembleDebug testDebugUnitTest` must pass.
-2. If emulator `Pixel_API35` is running: install APK, open the Optionen tab, screenshot via `cmd /c "adb exec-out screencap -p > file.png"` and check it.
+2. If emulator `Pixel_API35` is running (and not reserved for another phase): install APK, open the Optionen tab, screenshot via `cmd /c "adb exec-out screencap -p > file.png"` and check it. Import test files: `app/src/test/resources/saves/*.json` → `adb push` to `/sdcard/Download/` → "Aus Datei laden".
 Report: files changed, how it works, test results, open points.
