@@ -10,3 +10,8 @@
 .cxx
 .kotlin/
 /.claude/worktrees/
+
+# Release signing secrets
+/keystore.properties
+*.jks
+*.keystore

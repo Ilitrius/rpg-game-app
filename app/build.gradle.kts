@@ -1,8 +1,15 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+}
+
+val keystoreProps = Properties().apply {
+    val f = rootProject.file("keystore.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
 }
 
 android {
@@ -17,8 +24,20 @@ android {
         versionName = "0.1.0-rc1"
     }
 
+    signingConfigs {
+        if (keystoreProps.containsKey("storeFile")) {
+            create("release") {
+                storeFile = file(keystoreProps.getProperty("storeFile"))
+                storePassword = keystoreProps.getProperty("storePassword")
+                keyAlias = keystoreProps.getProperty("keyAlias")
+                keyPassword = keystoreProps.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
+            signingConfigs.findByName("release")?.let { signingConfig = it }
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
