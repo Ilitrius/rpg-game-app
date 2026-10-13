@@ -44,11 +44,10 @@
     <string name="options_error_invalid_version">Ungültiger Spielstand: Unbekannte Formatversion.</string>
     <string name="options_error_level">Ungültiger Spielstand: Das Level muss mindestens 1 sein.</string>
     <string name="options_error_slot">Ungültiger Spielstand: Im Platz „%1$s“ ist ein Gegenstand vom Typ „%2$s“ angelegt.</string>
-    <!-- Rahmen: %1$s = Problem; mit Ort: %1$s = Ort, %2$s = Problem -->
+    <!-- Rahmen: %1$s = Problem; mit Ort: %1$s = Ort, %2$s = Problem.
+         Zeilenumbrüche nur als \n – echte Umbrüche im XML macht aapt zu Leerzeichen. -->
     <string name="options_error_invalid">Ungültiger Spielstand: %1$s</string>
-    <string name="options_error_invalid_at">Ungültiger Spielstand
-%1$s
-%2$s</string>
+    <string name="options_error_invalid_at">Ungültiger Spielstand\n%1$s\n%2$s</string>
     <!-- Probleme: %1$s = JSON-Schlüssel, %2$s = deutsche Bezeichnung -->
     <string name="options_error_negative">Der Wert „%1$s“ (%2$s) darf nicht negativ sein.</string>
     <string name="options_error_below_min">Der Wert „%1$s“ (%2$s) muss mindestens %3$d sein, gefunden: %4$d.</string>

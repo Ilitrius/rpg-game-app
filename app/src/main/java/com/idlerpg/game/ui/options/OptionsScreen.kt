@@ -283,11 +283,13 @@ private fun ConfirmImportDialog(summary: SaveSummary, notes: List<String>, onCon
                 )
                 notes.forEach { note ->
                     Row(verticalAlignment = Alignment.Top) {
+                        // Neutral accent (gold), not tertiary: in the dark scheme tertiary is the same
+                        // rose tone as the error warning below, which made harmless notes look like errors.
                         Icon(
                             Icons.Outlined.Info,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.tertiary,
-                            modifier = Modifier.size(18.dp),
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(top = 1.dp).size(18.dp),
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(note, style = MaterialTheme.typography.bodyMedium)
