@@ -39,7 +39,7 @@ Zusätzlich `spielwelt`: Abenteuer-Ansicht (Ich-Perspektive), Gebiete, Monster, 
 - AGP 8.7.3, Gradle 8.11.1 (Wrapper), JDK 17
 - compileSdk/targetSdk 35, minSdk 26, Portrait
 - Persistenz: DataStore + kotlinx.serialization (vorgesehen)
-- Package: `com.idlerpg.game`
+- Package (Quellcode/namespace): `com.idlerpg.game`; applicationId: `com.rp.IDLEGAMERP`
 
 ## Umgebung (Windows)
 - JDK: `C:\Program Files\Microsoft\jdk-17.0.20.101-hotspot` (User-Env `JAVA_HOME`)
@@ -54,5 +54,5 @@ Zusätzlich `spielwelt`: Abenteuer-Ansicht (Ich-Perspektive), Gebiete, Monster, 
 ## Befehle
 - Build: `.\gradlew.bat assembleDebug`
 - Emulator: `D:\Android\Sdk\emulator\emulator.exe -avd Pixel_API35`
-- Install + Start: `adb install -r app\build\outputs\apk\debug\app-debug.apk; adb shell am start -n com.idlerpg.game/.MainActivity`
+- Install + Start: `adb install -r app\build\outputs\apk\debug\app-debug.apk; adb shell am start -n com.rp.IDLEGAMERP/com.idlerpg.game.MainActivity`
 - Screenshot: `adb exec-out screencap -p > shot.png` (in cmd, nicht PowerShell — PS zerstört Binär-Pipe)
