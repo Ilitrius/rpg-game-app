@@ -2,6 +2,7 @@ package com.idlerpg.game.ui.options
 
 import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,6 +19,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.VolumeOff
+import androidx.compose.material.icons.automirrored.outlined.VolumeUp
+import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.ContentPaste
 import androidx.compose.material.icons.outlined.ErrorOutline
@@ -38,9 +42,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -159,6 +165,24 @@ fun OptionsScreen() {
                 },
             )
 
+            val settings = remember { GameSettings.get(context) }
+            val soundOn by settings.soundEnabledFlow.collectAsState()
+            SoundCard(soundOn = soundOn, onChange = { settings.soundEnabled = it })
+
+            DonateCard(
+                onDonate = {
+                    try {
+                        context.startActivity(
+                            Intent(Intent.ACTION_VIEW, Uri.parse(DonateLink.URL)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                        )
+                    } catch (e: ActivityNotFoundException) {
+                        notify(context.getString(R.string.options_donate_no_browser))
+                    } catch (e: SecurityException) {
+                        notify(context.getString(R.string.options_donate_no_browser))
+                    }
+                },
+            )
+
             FutureSettingsCard()
         }
 
@@ -218,6 +242,52 @@ private fun SaveGameCard(
             SubHeader(stringResource(R.string.options_import_header))
             ActionButton(Icons.Outlined.FileOpen, stringResource(R.string.options_import_file), primary = true, onClick = onImportFile)
             ActionButton(Icons.Outlined.ContentPaste, stringResource(R.string.options_import_clipboard), primary = false, onClick = onImportClipboard)
+        }
+    }
+}
+
+@Composable
+private fun SoundCard(soundOn: Boolean, onChange: (Boolean) -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SectionHeader(
+                if (soundOn) Icons.AutoMirrored.Outlined.VolumeUp else Icons.AutoMirrored.Outlined.VolumeOff,
+                stringResource(R.string.options_sound_title),
+            )
+            Text(
+                stringResource(R.string.options_sound_description),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    stringResource(R.string.options_sound_label),
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.weight(1f),
+                )
+                Switch(checked = soundOn, onCheckedChange = onChange)
+            }
+        }
+    }
+}
+
+@Composable
+private fun DonateCard(onDonate: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            SectionHeader(Icons.Outlined.Favorite, stringResource(R.string.options_donate_title))
+            Text(
+                stringResource(R.string.options_donate_description),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            ActionButton(Icons.Outlined.Favorite, stringResource(R.string.options_donate_button), primary = true, onClick = onDonate)
         }
     }
 }
