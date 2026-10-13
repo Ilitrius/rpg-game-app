@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="512" height="512">
+  <defs>
+    <radialGradient id="bg" cx="54" cy="48" r="70" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3C4E3E"/>
+      <stop offset="0.55" stop-color="#232C24"/>
+      <stop offset="1" stop-color="#12150F"/>
+    </radialGradient>
+    <linearGradient id="bladeL" x1="48.5" y1="0" x2="54" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7D8992"/><stop offset="1" stop-color="#B9C4CB"/>
+    </linearGradient>
+    <linearGradient id="bladeR" x1="54" y1="0" x2="59.5" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E4ECF1"/><stop offset="1" stop-color="#F4F8FA"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="56" x2="0" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFEDB3"/><stop offset="0.4" stop-color="#E2B650"/>
+      <stop offset="0.75" stop-color="#9A6B1E"/><stop offset="1" stop-color="#51330A"/>
+    </linearGradient>
+    <linearGradient id="grip" x1="51.5" y1="0" x2="56.5" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4A2D1B"/><stop offset="0.45" stop-color="#8C5D3A"/><stop offset="1" stop-color="#4A2D1B"/>
+    </linearGradient>
+    <radialGradient id="pommel" cx="52.8" cy="79.2" r="5" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFEDB3"/><stop offset="0.5" stop-color="#C9A227"/><stop offset="1" stop-color="#51330A"/>
+    </radialGradient>
+  </defs>
+  <rect width="108" height="108" fill="url(#bg)"/>
+  <g transform="translate(54 54) scale(1.3) translate(-54 -54)">
+  <circle cx="54" cy="54" r="32" fill="none" stroke="#C9A227" stroke-opacity="0.45" stroke-width="1.2"/>
+  <circle cx="54" cy="54" r="29.5" fill="none" stroke="#C9A227" stroke-opacity="0.2" stroke-width="0.6"/>
+  <g transform="rotate(40 54 54)">
+    <path d="M54,23 L48.5,38 L48.5,58 L54,58 Z" fill="url(#bladeL)"/>
+    <path d="M54,23 L59.5,38 L59.5,58 L54,58 Z" fill="url(#bladeR)"/>
+    <path d="M53.3,34 L54.7,34 L54.7,56 L53.3,56 Z" fill="#59656E" fill-opacity="0.55"/>
+    <path d="M54,23 L48.5,38 L48.5,58 L59.5,58 L59.5,38 Z" fill="none" stroke="#1E2328" stroke-width="0.8" stroke-linejoin="round"/>
+    <path d="M39,60.5 Q39,58 41.5,58 L66.5,58 Q69,58 69,60.5 Q69,63 66.5,63 L41.5,63 Q39,63 39,60.5 Z" fill="url(#gold)" stroke="#3A2506" stroke-width="0.8"/>
+    <rect x="51.5" y="63" width="5" height="14" fill="url(#grip)" stroke="#1E1209" stroke-width="0.6"/>
+    <path d="M51.5,66 L56.5,67.4 M51.5,69.4 L56.5,70.8 M51.5,72.8 L56.5,74.2" stroke="#1E1209" stroke-opacity="0.7" stroke-width="0.7"/>
+    <circle cx="54" cy="80.5" r="4" fill="url(#pommel)" stroke="#3A2506" stroke-width="0.8"/>
+  </g>
+</g>
+</svg>
