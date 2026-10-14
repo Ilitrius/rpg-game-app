@@ -71,4 +71,64 @@
     <string name="equipment_capacity_nearly_body">Ist das Inventar voll, wird neue Beute automatisch verkauft. Verkaufe rechtzeitig, was du nicht brauchst.</string>
     <string name="equipment_capacity_sell_tip">Gegenstand antippen und „Verkaufen“ wählen. Im Shop kannst du unter „Verkaufen“ alle gewöhnlichen Gegenstände auf einmal verkaufen.</string>
     <string name="equipment_capacity_go_to_inventory">Zum Inventar</string>
+
+    <!-- Itemnamen (Anzeige aus Item.baseType + Item.nameSpec, siehe domain/equipment/ItemNames).
+         Reihenfolge der Arrays = Index in nameSpec: nie umsortieren, nur anhängen. -->
+    <string name="item_name_rusty_dagger">Rostiger Dolch</string>
+    <string name="item_base_dolch">Dolch</string>
+    <string name="item_base_kurzschwert">Kurzschwert</string>
+    <string name="item_base_streitkolben">Streitkolben</string>
+    <string name="item_base_axt">Axt</string>
+    <string name="item_base_lederkappe">Lederkappe</string>
+    <string name="item_base_eisenhelm">Eisenhelm</string>
+    <string name="item_base_lederwams">Lederwams</string>
+    <string name="item_base_kettenhemd">Kettenhemd</string>
+    <string name="item_base_lederhandschuhe">Lederhandschuhe</string>
+    <string name="item_base_panzerhandschuhe">Panzerhandschuhe</string>
+    <string name="item_base_lederstiefel">Lederstiefel</string>
+    <string name="item_base_plattenstiefel">Plattenstiefel</string>
+    <string name="item_base_silberring">Silberring</string>
+    <string name="item_base_goldring">Goldring</string>
+    <string name="item_base_amulett">Amulett</string>
+    <string name="item_base_talisman">Talisman</string>
+    <!-- Adjektiv-Endungen je Genus (Nominativ ohne Artikel); im Englischen leer. -->
+    <string name="item_ending_masculine">er</string>
+    <string name="item_ending_feminine">e</string>
+    <string name="item_ending_neuter">es</string>
+    <string name="item_ending_plural">e</string>
+    <string-array name="item_adj_uncommon">
+        <item>Solid</item>
+        <item>Gehärtet</item>
+        <item>Robust</item>
+        <item>Geschärft</item>
+    </string-array>
+    <string-array name="item_adj_rare">
+        <item>Meisterlich</item>
+        <item>Edl</item>
+        <item>Gesegnet</item>
+        <item>Prächtig</item>
+    </string-array>
+    <string-array name="item_adj_epic">
+        <item>Runenverziert</item>
+        <item>Verzaubert</item>
+        <item>Glühend</item>
+        <item>Sternengeschmiedet</item>
+    </string-array>
+    <string-array name="item_adj_legendary">
+        <item>Mythisch</item>
+        <item>Sagenhaft</item>
+        <item>Uralt</item>
+        <item>Göttlich</item>
+    </string-array>
+    <string name="item_suffix_strength">der Stärke</string>
+    <string name="item_suffix_dexterity">der Gewandtheit</string>
+    <string name="item_suffix_vitality">der Lebenskraft</string>
+    <string name="item_suffix_luck">des Glücks</string>
+    <string-array name="item_suffix_legendary">
+        <item>der Ahnen</item>
+        <item>der Ewigkeit</item>
+        <item>des Drachen</item>
+        <item>der Sterne</item>
+        <item>des Sturmkönigs</item>
+    </string-array>
 </resources>

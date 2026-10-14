@@ -109,7 +109,7 @@ fun CharacterScreen() {
     }
 }
 
-private val numberFormat: NumberFormat get() = NumberFormat.getIntegerInstance(Locale.GERMANY)
+private val numberFormat: NumberFormat get() = NumberFormat.getIntegerInstance(Locale.getDefault())
 
 @Composable
 private fun HeaderCard(state: GameState) {
@@ -439,7 +439,7 @@ private fun ActionRow(label: String, hint: String, rating: Int, value: String) {
     }
 }
 
-private fun format(pattern: String, value: Double) = String.format(Locale.GERMANY, pattern, value)
+private fun format(pattern: String, value: Double) = String.format(Locale.getDefault(), pattern, value)
 
 @Composable
 private fun DerivedRow(label: String, value: String, emphasize: Boolean = false) {

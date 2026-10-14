@@ -52,21 +52,6 @@ object ItemGenerator {
         Rarity.COMMON to 1, Rarity.UNCOMMON to 2, Rarity.RARE to 2, Rarity.EPIC to 3, Rarity.LEGENDARY to 4,
     )
 
-    /** Adjective stems per rarity; the gender ending (er/e/es) is appended. */
-    private val adjectives = mapOf(
-        Rarity.UNCOMMON to listOf("Solid", "Gehärtet", "Robust", "Geschärft"),
-        Rarity.RARE to listOf("Meisterlich", "Edl", "Gesegnet", "Prächtig"),
-        Rarity.EPIC to listOf("Runenverziert", "Verzaubert", "Glühend", "Sternengeschmiedet"),
-        Rarity.LEGENDARY to listOf("Mythisch", "Sagenhaft", "Uralt", "Göttlich"),
-    )
-    private val statSuffix = mapOf(
-        StatType.STRENGTH to "der Stärke",
-        StatType.DEXTERITY to "der Gewandtheit",
-        StatType.VITALITY to "der Lebenskraft",
-        StatType.LUCK to "des Glücks",
-    )
-    private val legendarySuffixes = listOf("der Ahnen", "der Ewigkeit", "des Drachen", "der Sterne", "des Sturmkönigs")
-
     /**
      * Rolls a complete random item.
      *
@@ -141,9 +126,11 @@ object ItemGenerator {
         val lvl = itemLevel.coerceIn(1, MAX_ITEM_LEVEL)
         val bonus = rollStats(base, lvl, rarity, random)
         val damage = damageRange(base, lvl, rarity)
+        val spec = buildNameSpec(rarity, bonus, random)
         return Item(
             id = UUID.randomUUID().toString(),
-            name = buildName(base, rarity, bonus, random),
+            name = ItemNames.germanName(base.id, rarity, spec),
+            nameSpec = spec,
             slot = base.slot,
             rarity = rarity,
             bonus = bonus,
@@ -178,15 +165,21 @@ object ItemGenerator {
         return stats
     }
 
-    private fun buildName(base: ItemBaseType, rarity: Rarity, bonus: Stats, random: Random): String {
+    /**
+     * Language-independent name recipe (stored in [Item.nameSpec], composed in the UI language).
+     * Common: base only; uncommon: adjective or stat suffix; rare/epic: adjective + stat suffix;
+     * legendary: adjective + legendary suffix.
+     */
+    private fun buildNameSpec(rarity: Rarity, bonus: Stats, random: Random): String {
         val top = StatType.entries.maxBy { bonus[it] }
-        val adjective = adjectives[rarity]?.let { it[random.nextInt(it.size)] + base.gender.adjectiveEnding }
+        val adj = ItemNames.adjectivesDe[rarity]?.let { random.nextInt(it.size) }
         return when (rarity) {
-            Rarity.COMMON -> base.displayName
+            Rarity.COMMON -> ""
             Rarity.UNCOMMON ->
-                if (random.nextBoolean()) "$adjective ${base.displayName}" else "${base.displayName} ${statSuffix.getValue(top)}"
-            Rarity.RARE, Rarity.EPIC -> "$adjective ${base.displayName} ${statSuffix.getValue(top)}"
-            Rarity.LEGENDARY -> "$adjective ${base.displayName} ${legendarySuffixes[random.nextInt(legendarySuffixes.size)]}"
+                if (random.nextBoolean()) ItemNames.encode(adj, null) else ItemNames.encode(null, ItemNames.statSuffixCode(top))
+            Rarity.RARE, Rarity.EPIC -> ItemNames.encode(adj, ItemNames.statSuffixCode(top))
+            Rarity.LEGENDARY ->
+                ItemNames.encode(adj, ItemNames.legendarySuffixCode(random.nextInt(ItemNames.legendarySuffixesDe.size)))
         }
     }
 

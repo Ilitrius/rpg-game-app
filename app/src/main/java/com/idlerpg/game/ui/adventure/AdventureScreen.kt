@@ -719,7 +719,7 @@ private fun formatDuration(millis: Long): String {
 
 @Composable
 private fun WelcomeBackDialog(reward: OfflineReward, onDismiss: () -> Unit) {
-    val fmt = { n: Long -> String.format(Locale.GERMANY, "%,d", n) }
+    val fmt = { n: Long -> String.format(Locale.getDefault(), "%,d", n) }
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.welcome_back_ok)) } },

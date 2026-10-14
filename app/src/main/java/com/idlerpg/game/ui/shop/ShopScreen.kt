@@ -244,13 +244,13 @@ fun ShopScreen() {
 }
 
 
-private val numberFormat: NumberFormat get() = NumberFormat.getIntegerInstance(Locale.GERMANY)
+private val numberFormat: NumberFormat get() = NumberFormat.getIntegerInstance(Locale.getDefault())
 private fun fmt(v: Long): String = numberFormat.format(v)
-private fun fmt1(v: Double) = String.format(Locale.GERMANY, "%.1f", v)
+private fun fmt1(v: Double) = String.format(Locale.getDefault(), "%.1f", v)
 
 private fun formatCountdown(millis: Long): String {
     val total = (millis + 999) / 1000
-    return String.format(Locale.GERMANY, "%d:%02d", total / 60, total % 60)
+    return String.format(Locale.getDefault(), "%d:%02d", total / 60, total % 60)
 }
 
 @Composable

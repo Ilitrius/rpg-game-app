@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="shop_title">Merchant</string>
+    <string name="shop_subtitle">Goods for level %1$d</string>
+    <string name="shop_gold">%1$s gold</string>
+    <string name="shop_tab_buy">Buy</string>
+    <string name="shop_tab_sell">Sell</string>
+
+    <string name="shop_restock_in">New goods in %1$s</string>
+    <string name="shop_restock_arriving">New goods arriving …</string>
+    <string name="shop_restock_paid">Restock (%1$s gold)</string>
+    <string name="shop_restock_hint">Each further restock costs more until the next delivery.</string>
+    <string name="shop_restock_done">The merchant has put out new goods.</string>
+    <string name="shop_restock_no_gold">Not enough gold to restock.</string>
+    <string name="shop_sold_out">Sold out! New goods arrive soon – or restock now.</string>
+    <string name="shop_upgrade">Upgrade</string>
+    <string name="shop_new">New</string>
+
+    <string name="shop_buy">Buy (%1$s gold)</string>
+    <string name="shop_bought">%1$s purchased – now in your inventory.</string>
+    <string name="shop_not_enough_gold">Not enough gold – you are short %1$s gold.</string>
+    <string name="shop_inventory_full">Inventory full – sell something first to make room.</string>
+    <string name="shop_go_to_sell">Go to sell</string>
+    <string name="shop_offer_gone">This offer is no longer available.</string>
+
+    <string name="shop_sell_title">Inventory</string>
+    <string name="shop_sell_count">%1$d / %2$d</string>
+    <string name="shop_sell_empty">Your inventory is empty – defeat monsters to find loot.</string>
+    <string name="shop_sell">Sell (%1$s gold)</string>
+    <string name="shop_sell_all_common">Sell common items</string>
+    <plurals name="shop_sell_all_common_detail">
+        <item quantity="one">%1$d item for %2$s gold</item>
+        <item quantity="other">%1$d items for %2$s gold</item>
+    </plurals>
+    <string name="shop_sell_all_common_confirm_title">Sell common items?</string>
+    <plurals name="shop_sell_all_common_confirm">
+        <item quantity="one">%1$d common item from your inventory will be sold for %2$s gold. Equipped gear and upgrades are kept.</item>
+        <item quantity="other">%1$d common items from your inventory will be sold for %2$s gold. Equipped gear and upgrades are kept.</item>
+    </plurals>
+    <string name="shop_cancel">Cancel</string>
+    <string name="shop_sold_one">%1$s sold for %2$s gold.</string>
+    <plurals name="shop_sold_many">
+        <item quantity="one">%1$d item sold for %2$s gold.</item>
+        <item quantity="other">%1$d items sold for %2$s gold.</item>
+    </plurals>
+
+    <string name="shop_level">Level %1$d</string>
+    <string name="shop_damage">Damage %1$d–%2$d</string>
+    <string name="shop_no_bonus">No attribute bonuses</string>
+    <string name="shop_sell_value">Sell value: %1$s gold</string>
+    <string name="shop_compare_title">Equipped: %1$s</string>
+    <string name="shop_compare_empty">Comparison: nothing equipped in this slot.</string>
+    <string name="shop_compare_same">No change in stats</string>
+    <string name="shop_compare_damage">Damage %1$s / %2$s</string>
+    <string name="shop_compare_dps">Damage/sec: %1$s → %2$s</string>
+    <string name="shop_dps_delta">%1$s damage/sec</string>
+</resources>

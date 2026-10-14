@@ -75,6 +75,12 @@ data class Item(
     val itemLevel: Int = 1,
     /** True until the player looked at the item in the Ausrüstung tab ("Neu"-badge). */
     val isNew: Boolean = false,
+    /**
+     * Language-independent name recipe "<adjectiveIndex>;<suffixCode>" (see domain/equipment/ItemNames),
+     * e.g. "2;s0" or ";l3". "" = legacy item: [name] is shown as stored. [name] is always filled with
+     * the German name as fallback.
+     */
+    val nameSpec: String = "",
 )
 
 @Serializable

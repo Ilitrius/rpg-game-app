@@ -43,6 +43,11 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
+import androidx.compose.material3.RadioButton
+import androidx.compose.material.icons.outlined.Language
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.ui.semantics.Role
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -183,6 +188,13 @@ fun OptionsScreen() {
                 },
             )
 
+            val language by settings.languageFlow.collectAsState()
+            LanguageCard(selected = language, onSelect = {
+                if (it != settings.language) {
+                    settings.language = it
+                    (context as? android.app.Activity)?.recreate()
+                }
+            })
             FutureSettingsCard()
         }
 
@@ -288,6 +300,43 @@ private fun DonateCard(onDonate: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             ActionButton(Icons.Outlined.Favorite, stringResource(R.string.options_donate_button), primary = true, onClick = onDonate)
+        }
+    }
+}
+
+@Composable
+private fun LanguageCard(selected: AppLanguage, onSelect: (AppLanguage) -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            SectionHeader(Icons.Outlined.Language, stringResource(R.string.options_language_title))
+            Text(
+                stringResource(R.string.options_language_description),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Column(Modifier.selectableGroup()) {
+                AppLanguage.entries.forEach { lang ->
+                    val label = when (lang) {
+                        AppLanguage.SYSTEM -> stringResource(R.string.options_language_system)
+                        AppLanguage.GERMAN -> stringResource(R.string.options_language_german)
+                        AppLanguage.ENGLISH -> stringResource(R.string.options_language_english)
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .selectable(selected = lang == selected, role = Role.RadioButton, onClick = { onSelect(lang) })
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(selected = lang == selected, onClick = null)
+                        Spacer(Modifier.width(12.dp))
+                        Text(label, style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+            }
         }
     }
 }

@@ -9,6 +9,22 @@ import kotlinx.coroutines.flow.asStateFlow
 interface SettingsStore {
     fun getBoolean(key: String, default: Boolean): Boolean
     fun putBoolean(key: String, value: Boolean)
+    fun getString(key: String, default: String): String
+    fun putString(key: String, value: String)
+}
+
+/** Selectable UI language. [code] is persisted; [tag] null = follow the system locale. */
+enum class AppLanguage(val code: String, val tag: String?) {
+    SYSTEM("system", null),
+    GERMAN("de", "de"),
+    ENGLISH("en", "en");
+
+    companion object {
+        const val DEFAULT_CODE = "system"
+
+        /** Unknown/corrupt codes fall back to [SYSTEM]. */
+        fun fromCode(code: String?): AppLanguage = entries.firstOrNull { it.code == code } ?: SYSTEM
+    }
 }
 
 /**
@@ -30,7 +46,20 @@ class GameSettings(private val store: SettingsStore) {
             _soundEnabled.value = value
         }
 
+    private val _language = MutableStateFlow(AppLanguage.fromCode(store.getString(KEY_LANGUAGE, AppLanguage.DEFAULT_CODE)))
+
+    val languageFlow: StateFlow<AppLanguage> = _language.asStateFlow()
+
+    /** Language choice, default [AppLanguage.SYSTEM]. Applied by `MainActivity.attachBaseContext`. */
+    var language: AppLanguage
+        get() = _language.value
+        set(value) {
+            store.putString(KEY_LANGUAGE, value.code)
+            _language.value = value
+        }
+
     companion object {
+        const val KEY_LANGUAGE = "language"
         const val KEY_SOUND = "sound_enabled"
         const val DEFAULT_SOUND_ENABLED = true
 
@@ -48,6 +77,8 @@ private class PrefsStore(context: Context) : SettingsStore {
     private val prefs = context.getSharedPreferences("game_settings", Context.MODE_PRIVATE)
     override fun getBoolean(key: String, default: Boolean) = prefs.getBoolean(key, default)
     override fun putBoolean(key: String, value: Boolean) = prefs.edit().putBoolean(key, value).apply()
+    override fun getString(key: String, default: String) = prefs.getString(key, default) ?: default
+    override fun putString(key: String, value: String) = prefs.edit().putString(key, value).apply()
 }
 
 /** Donation link. */

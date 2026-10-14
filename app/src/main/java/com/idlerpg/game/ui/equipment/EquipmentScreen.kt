@@ -159,9 +159,9 @@ fun EquipmentScreen() {
     }
 }
 
-private val numberFormat: NumberFormat get() = NumberFormat.getIntegerInstance(Locale.GERMANY)
+private val numberFormat: NumberFormat get() = NumberFormat.getIntegerInstance(Locale.getDefault())
 
-private fun fmt1(v: Double) = String.format(Locale.GERMANY, "%.1f", v)
+private fun fmt1(v: Double) = String.format(Locale.getDefault(), "%.1f", v)
 
 @Composable
 private fun cardColors() = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
@@ -475,7 +475,7 @@ private fun ItemDetailSheet(
                 ItemIcon(item, Modifier.size(112.dp))
                 Spacer(Modifier.width(16.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(item.name, style = MaterialTheme.typography.titleLarge, color = rarityColor(item.rarity), fontWeight = FontWeight.SemiBold)
+                    Text(itemDisplayName(item), style = MaterialTheme.typography.titleLarge, color = rarityColor(item.rarity), fontWeight = FontWeight.SemiBold)
                     Text(
                         "${rarityLabel(item.rarity)} · ${stringResource(slotLabel(item.slot))}",
                         style = MaterialTheme.typography.bodyMedium,
@@ -571,7 +571,7 @@ private fun ComparisonBlock(state: GameState, item: Item) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
-                        equipped?.name ?: stringResource(R.string.equipment_compare_nothing_equipped),
+                        equipped?.let { itemDisplayName(it) } ?: stringResource(R.string.equipment_compare_nothing_equipped),
                         style = MaterialTheme.typography.titleSmall,
                         color = equipped?.let { rarityColor(it.rarity) } ?: MaterialTheme.colorScheme.onSurfaceVariant,
                     )

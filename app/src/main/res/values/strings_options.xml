@@ -15,7 +15,14 @@
 
     <!-- Weitere Einstellungen (Platzhalter) -->
     <string name="options_more_title">Weitere Einstellungen</string>
-    <string name="options_more_description">Benachrichtigungen und Sprache folgen in einem späteren Update.</string>
+    <string name="options_more_description">Benachrichtigungen folgen in einem späteren Update.</string>
+
+    <!-- Sprache (Sprachnamen sind Eigennamen, nicht übersetzen) -->
+    <string name="options_language_title">Sprache</string>
+    <string name="options_language_description">Wähle die Sprache der App. Die Änderung gilt sofort.</string>
+    <string name="options_language_system">Systemstandard</string>
+    <string name="options_language_german" translatable="false">Deutsch</string>
+    <string name="options_language_english" translatable="false">English</string>
 
     <!-- Ton -->
     <string name="options_sound_title">Ton</string>

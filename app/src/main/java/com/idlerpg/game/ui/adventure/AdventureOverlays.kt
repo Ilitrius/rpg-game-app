@@ -162,7 +162,7 @@ internal fun LootPopup(drop: LootDrop, modifier: Modifier = Modifier, onDone: ()
     val enter = (t / 0.1f).coerceIn(0f, 1f)
     val exit = ((t - 0.85f) / 0.15f).coerceIn(0f, 1f)
     val color = rarityColor(drop.item.rarity)
-    val fmt = { n: Long -> String.format(Locale.GERMANY, "%,d", n) }
+    val fmt = { n: Long -> String.format(Locale.getDefault(), "%,d", n) }
     val shape = RoundedCornerShape(12.dp)
     Row(
         modifier

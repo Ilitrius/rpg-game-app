@@ -57,7 +57,7 @@ fun ItemIcon(
     item: Item,
     modifier: Modifier = Modifier,
     framed: Boolean = true,
-    contentDescription: String? = item.name,
+    contentDescription: String? = itemDisplayName(item),
 ) {
     val sem = if (contentDescription != null) Modifier.semantics { this.contentDescription = contentDescription } else Modifier
     Canvas(modifier.then(sem)) {

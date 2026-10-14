@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="character_level">Level %1$d</string>
+    <string name="character_xp">%1$s / %2$s XP</string>
+    <string name="character_xp_max">Max level reached</string>
+    <string name="character_gold">%1$s Gold</string>
+    <string name="character_unspent_points">%1$d points to spend</string>
+    <string name="character_no_points">No free points – leveling up grants %1$d more.</string>
+
+    <string name="character_weapon_title">Weapon</string>
+    <string name="character_weapon_damage">Damage %1$d–%2$d</string>
+    <string name="character_weapon_none">No weapon – you fight with your bare fists.</string>
+    <string name="character_weapon_fists">Fists</string>
+    <string name="character_weapon_image">Image of the equipped weapon</string>
+
+    <string name="character_actions_title">Combat techniques</string>
+    <string name="character_action_swing">Swing</string>
+    <string name="character_action_stab">Stab</string>
+    <string name="character_action_strike">Smash</string>
+    <string name="character_action_parry">Parry</string>
+    <string name="character_action_swing_hint">against normal enemies</string>
+    <string name="character_action_stab_hint">against open, staggering enemies</string>
+    <string name="character_action_strike_hint">breaks guard</string>
+    <string name="character_action_parry_hint">against wind-up attacks</string>
+    <string name="character_action_damage">×%1$s</string>
+    <string name="character_action_crit">+%1$d %% crit</string>
+    <string name="character_action_parry_value">%1$s %%</string>
+    <string name="character_action_rating">Rating %1$d of 5</string>
+
+    <string name="character_stats_title">Attributes</string>
+    <string name="character_stat_strength">Strength</string>
+    <string name="character_stat_dexterity">Dexterity</string>
+    <string name="character_stat_vitality">Vitality</string>
+    <string name="character_stat_luck">Luck</string>
+    <string name="character_stat_strength_hint">Damage per hit</string>
+    <string name="character_stat_dexterity_hint">Attack speed</string>
+    <string name="character_stat_vitality_hint">Hit points</string>
+    <string name="character_stat_luck_hint">Critical hits</string>
+    <string name="character_stat_bonus">+%1$d</string>
+    <string name="character_stat_spend">Increase %1$s by 1</string>
+
+    <string name="character_derived_title">Combat stats</string>
+    <string name="character_derived_damage">Damage</string>
+    <string name="character_derived_damage_value">%1$d–%2$d</string>
+    <string name="character_derived_aps">Attacks/sec</string>
+    <string name="character_derived_hp">Health</string>
+    <string name="character_derived_crit">Crit chance</string>
+    <string name="character_derived_crit_mult">Crit damage</string>
+    <string name="character_derived_parry">Parry chance</string>
+    <string name="character_derived_dps">Damage/sec (avg.)</string>
+
+    <string name="character_rarity_common">Common</string>
+    <string name="character_rarity_uncommon">Uncommon</string>
+    <string name="character_rarity_rare">Rare</string>
+    <string name="character_rarity_epic">Epic</string>
+    <string name="character_rarity_legendary">Legendary</string>
+</resources>

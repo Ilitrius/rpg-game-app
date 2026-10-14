@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="options_title">Options</string>
+
+    <!-- Save game -->
+    <string name="options_save_title">Save game</string>
+    <string name="options_save_description">Back up your complete progress – character stats, level, equipment, inventory, gold, game world and shop – as a JSON file, or transfer it to another device.</string>
+    <string name="options_export_header">Export</string>
+    <string name="options_import_header">Import</string>
+    <string name="options_export_file">Save as file</string>
+    <string name="options_export_clipboard">Copy to clipboard</string>
+    <string name="options_import_file">Load from file</string>
+    <string name="options_import_clipboard">Paste from clipboard</string>
+
+    <string name="options_more_title">More settings</string>
+    <string name="options_more_description">Notifications will follow in a later update.</string>
+
+    <!-- Language -->
+    <string name="options_language_title">Language</string>
+    <string name="options_language_description">Choose the app language. The change applies immediately.</string>
+    <string name="options_language_system">System default</string>
+
+    <!-- Sound -->
+    <string name="options_sound_title">Sound</string>
+    <string name="options_sound_label">Sound on</string>
+    <string name="options_sound_description">Turns all game sounds on or off. The setting is saved.</string>
+
+    <!-- Donate -->
+    <string name="options_donate_title">Support</string>
+    <string name="options_donate_description">Enjoying the game? A donation helps its further development.</string>
+    <string name="options_donate_button">Donate</string>
+    <string name="options_donate_no_browser">No browser app found.</string>
+
+    <!-- Feedback -->
+    <string name="options_export_file_success">Save game saved.</string>
+    <string name="options_export_file_error">Save game could not be saved.</string>
+    <string name="options_export_clipboard_success">Save game copied to clipboard.</string>
+    <string name="options_import_read_error">File could not be read.</string>
+    <string name="options_import_success">Save game imported successfully.</string>
+    <string name="options_import_write_error">Import failed – your current save game was kept.</string>
+    <string name="options_import_clipboard_empty">The clipboard contains no text.</string>
+    <string name="options_no_file_app">No file picker app found.</string>
+
+    <!-- Confirmation dialog -->
+    <string name="options_confirm_title">Import save game?</string>
+    <string name="options_confirm_summary">Name: %1$s\nLevel: %2$d\nGold: %3$s\nItems: %4$d</string>
+    <string name="options_confirm_warning">Your current progress will be permanently overwritten.</string>
+    <string name="options_confirm_ok">Overwrite</string>
+    <string name="options_confirm_cancel">Cancel</string>
+
+    <!-- Import errors -->
+    <string name="options_error_title">Import not possible</string>
+    <string name="options_error_ok">OK</string>
+    <string name="options_error_empty">Invalid save game: the input is empty.</string>
+    <string name="options_error_too_large">Invalid save game: the file is too large.</string>
+    <string name="options_error_malformed">Invalid save game: this is not a readable Idle RPG save game (malformed JSON).</string>
+    <string name="options_error_newer_version">This save game comes from a newer app version (format %1$d, supported up to %2$d). Please update the app.</string>
+    <string name="options_error_invalid_version">Invalid save game: unknown format version.</string>
+    <string name="options_error_level">Invalid save game: the level must be at least 1.</string>
+    <string name="options_error_slot">Invalid save game: slot “%1$s” holds an item of type “%2$s”.</string>
+    <string name="options_error_invalid">Invalid save game: %1$s</string>
+    <string name="options_error_invalid_at">Invalid save game\n%1$s\n%2$s</string>
+    <string name="options_error_negative">The value “%1$s” (%2$s) must not be negative.</string>
+    <string name="options_error_below_min">The value “%1$s” (%2$s) must be at least %3$d, found: %4$d.</string>
+    <string name="options_error_out_of_range">The value “%1$s” (%2$s) must be between %3$d and %4$d, found: %5$d.</string>
+    <string name="options_error_damage_range">The minimum damage (%1$d) is greater than the maximum damage (%2$d).</string>
+
+    <!-- Locations -->
+    <string name="options_location_character">Character</string>
+    <string name="options_location_equipped">Equipped (%1$s): %2$s</string>
+    <string name="options_location_inventory">Inventory, entry %1$d: %2$s</string>
+    <string name="options_location_shop_offer">Shop offer %1$d: %2$s</string>
+    <string name="options_location_world">Game world</string>
+    <string name="options_location_world_zone">Game world, zone “%1$s”</string>
+    <string name="options_location_shop">Shop</string>
+    <string name="options_quoted">“%1$s”</string>
+    <string name="options_unnamed">(unnamed)</string>
+
+    <!-- Field labels -->
+    <string name="options_field_xp">experience</string>
+    <string name="options_field_unspent_points">unspent attribute points</string>
+    <string name="options_field_strength">Strength</string>
+    <string name="options_field_dexterity">Dexterity</string>
+    <string name="options_field_vitality">Vitality</string>
+    <string name="options_field_luck">Luck</string>
+    <string name="options_field_gold">gold</string>
+    <string name="options_field_price">sell value</string>
+    <string name="options_field_damage_min">minimum damage</string>
+    <string name="options_field_damage_max">maximum damage</string>
+    <string name="options_field_item_level">item level</string>
+    <string name="options_field_hero_hp">hero hit points</string>
+    <string name="options_field_total_kills">total monsters defeated</string>
+    <string name="options_field_zone_kills">monsters defeated in zone</string>
+    <string name="options_field_last_active">time of last activity</string>
+    <string name="options_field_boss_defeated_at_kills">kill count at last boss victory</string>
+    <string name="options_field_restocked_at">time of last restock</string>
+    <string name="options_field_stock_level">stock level</string>
+    <string name="options_field_paid_restocks">paid restocks</string>
+
+    <!-- Notes in confirmation dialog -->
+    <string name="options_note_unknown_zone">Unknown zone “%1$s” – your hero starts in zone “%2$s”.</string>
+    <string name="options_note_unknown_zones">Progress in unknown zones is ignored: %1$s</string>
+    <string name="options_note_unknown_zones_more">Progress in unknown zones is ignored: %1$s and %2$d more</string>
+</resources>

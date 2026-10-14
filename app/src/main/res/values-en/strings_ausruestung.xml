@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- English strings of the Equipment tab. Array order must match values/strings_ausruestung.xml. -->
+<resources>
+    <string name="equipment_title">Equipment</string>
+    <string name="equipment_gold">%1$s gold</string>
+
+    <string name="equipment_slot_weapon">Weapon</string>
+    <string name="equipment_slot_helmet">Helmet</string>
+    <string name="equipment_slot_armor">Armor</string>
+    <string name="equipment_slot_gloves">Gloves</string>
+    <string name="equipment_slot_boots">Boots</string>
+    <string name="equipment_slot_ring">Ring</string>
+    <string name="equipment_slot_amulet">Amulet</string>
+    <string name="equipment_slot_empty">%1$s – empty</string>
+
+    <string name="equipment_stat_strength">Strength</string>
+    <string name="equipment_stat_dexterity">Dexterity</string>
+    <string name="equipment_stat_vitality">Vitality</string>
+    <string name="equipment_stat_luck">Luck</string>
+
+    <string name="equipment_rarity_common">Common</string>
+    <string name="equipment_rarity_uncommon">Uncommon</string>
+    <string name="equipment_rarity_rare">Rare</string>
+    <string name="equipment_rarity_epic">Epic</string>
+    <string name="equipment_rarity_legendary">Legendary</string>
+
+    <string name="equipment_bonus_title">Equipment bonus</string>
+    <string name="equipment_bonus_weapon_damage">Weapon damage</string>
+    <string name="equipment_bonus_dps">Damage/sec. (avg.)</string>
+    <string name="equipment_fists">Fists</string>
+
+    <string name="equipment_inventory_title">Inventory</string>
+    <string name="equipment_inventory_count">%1$d / %2$d</string>
+    <string name="equipment_inventory_empty">No loot yet – defeat monsters to find items.</string>
+    <string name="equipment_inventory_full">Full – new loot is sold automatically.</string>
+    <string name="equipment_inventory_capacity_description">Inventory: %1$d of %2$d slots used</string>
+    <string name="equipment_new_badge">New</string>
+    <string name="equipment_level_short">Lv. %1$d</string>
+
+    <string name="equipment_detail_level">Level %1$d</string>
+    <string name="equipment_detail_damage">Damage %1$d–%2$d</string>
+    <string name="equipment_detail_value">Value: %1$s gold</string>
+    <string name="equipment_detail_equipped">Equipped</string>
+    <string name="equipment_detail_no_bonus">No attribute bonuses</string>
+    <string name="equipment_compare_equipped_label">Currently equipped</string>
+    <string name="equipment_compare_nothing_equipped">Nothing – this slot is empty</string>
+    <string name="equipment_compare_same">No change in values</string>
+    <string name="equipment_compare_damage">Damage</string>
+    <string name="equipment_compare_dps">Damage/sec.: %1$s → %2$s</string>
+    <string name="equipment_action_equip">Equip</string>
+    <string name="equipment_action_unequip">Unequip</string>
+    <string name="equipment_action_sell">Sell (%1$s gold)</string>
+    <string name="equipment_unequip_full">Inventory full – free up space before unequipping.</string>
+
+    <string name="equipment_capacity_full_title">Inventory full</string>
+    <string name="equipment_capacity_full_body">New loot is now sold automatically for its gold value – including rare finds. Free up space so you don\'t miss anything.</string>
+    <string name="equipment_capacity_nearly_title">Inventory almost full</string>
+    <plurals name="equipment_capacity_free_slots">
+        <item quantity="one">%1$d slot left</item>
+        <item quantity="other">%1$d slots left</item>
+    </plurals>
+    <string name="equipment_capacity_nearly_body">When the inventory is full, new loot is sold automatically. Sell what you don\'t need in time.</string>
+    <string name="equipment_capacity_sell_tip">Tap an item and choose \"Sell\". In the shop, under \"Sell\", you can sell all common items at once.</string>
+    <string name="equipment_capacity_go_to_inventory">Go to inventory</string>
+
+    <!-- Item names: adjective + noun + suffix ("Sturdy Leather Boots of Strength"). No declension. -->
+    <string name="item_name_rusty_dagger">Rusty Dagger</string>
+    <string name="item_base_dolch">Dagger</string>
+    <string name="item_base_kurzschwert">Short Sword</string>
+    <string name="item_base_streitkolben">Mace</string>
+    <string name="item_base_axt">Axe</string>
+    <string name="item_base_lederkappe">Leather Cap</string>
+    <string name="item_base_eisenhelm">Iron Helm</string>
+    <string name="item_base_lederwams">Leather Vest</string>
+    <string name="item_base_kettenhemd">Chainmail</string>
+    <string name="item_base_lederhandschuhe">Leather Gloves</string>
+    <string name="item_base_panzerhandschuhe">Gauntlets</string>
+    <string name="item_base_lederstiefel">Leather Boots</string>
+    <string name="item_base_plattenstiefel">Plate Boots</string>
+    <string name="item_base_silberring">Silver Ring</string>
+    <string name="item_base_goldring">Gold Ring</string>
+    <string name="item_base_amulett">Amulet</string>
+    <string name="item_base_talisman">Talisman</string>
+    <string name="item_ending_masculine"></string>
+    <string name="item_ending_feminine"></string>
+    <string name="item_ending_neuter"></string>
+    <string name="item_ending_plural"></string>
+    <string-array name="item_adj_uncommon">
+        <item>Solid</item>
+        <item>Hardened</item>
+        <item>Sturdy</item>
+        <item>Sharpened</item>
+    </string-array>
+    <string-array name="item_adj_rare">
+        <item>Masterful</item>
+        <item>Noble</item>
+        <item>Blessed</item>
+        <item>Splendid</item>
+    </string-array>
+    <string-array name="item_adj_epic">
+        <item>Rune-Inscribed</item>
+        <item>Enchanted</item>
+        <item>Glowing</item>
+        <item>Starforged</item>
+    </string-array>
+    <string-array name="item_adj_legendary">
+        <item>Mythic</item>
+        <item>Fabled</item>
+        <item>Ancient</item>
+        <item>Divine</item>
+    </string-array>
+    <string name="item_suffix_strength">of Strength</string>
+    <string name="item_suffix_dexterity">of Agility</string>
+    <string name="item_suffix_vitality">of Vitality</string>
+    <string name="item_suffix_luck">of Fortune</string>
+    <string-array name="item_suffix_legendary">
+        <item>of the Ancestors</item>
+        <item>of Eternity</item>
+        <item>of the Dragon</item>
+        <item>of the Stars</item>
+        <item>of the Storm King</item>
+    </string-array>
+</resources>
