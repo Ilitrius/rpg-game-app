@@ -25,11 +25,6 @@
     <string name="options_sound_label">Sound on</string>
     <string name="options_sound_description">Turns all game sounds on or off. The setting is saved.</string>
 
-    <!-- Donate -->
-    <string name="options_donate_title">Support</string>
-    <string name="options_donate_description">Enjoying the game? A donation helps its further development.</string>
-    <string name="options_donate_button">Donate</string>
-    <string name="options_donate_no_browser">No browser app found.</string>
 
     <!-- Feedback -->
     <string name="options_export_file_success">Save game saved.</string>

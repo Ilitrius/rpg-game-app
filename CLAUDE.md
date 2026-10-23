@@ -37,7 +37,7 @@ Zusätzlich `spielwelt`: Abenteuer-Ansicht (Ich-Perspektive), Gebiete, Monster, 
 ## Stack
 - Kotlin 2.0.21, Jetpack Compose (BOM 2024.12.01), Material3
 - AGP 8.7.3, Gradle 8.11.1 (Wrapper), JDK 17
-- compileSdk/targetSdk 35, minSdk 26, Portrait
+- compileSdk 35, targetSdk 36, minSdk 26, Portrait
 - Persistenz: DataStore + kotlinx.serialization (vorgesehen)
 - Package (Quellcode/namespace): `com.idlerpg.game`; applicationId: `com.rp.IDLEGAMERP`
 

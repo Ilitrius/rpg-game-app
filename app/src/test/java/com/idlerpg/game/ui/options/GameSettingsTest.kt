@@ -49,12 +49,4 @@ class GameSettingsTest {
         settings.soundEnabled = true
         assertTrue(GameSettings(store).soundEnabled)
     }
-
-    @Test
-    fun donateUrlIsHttps() {
-        assertTrue(DonateLink.isValid())
-        assertFalse(DonateLink.isValid("http://x.de"))
-        assertFalse(DonateLink.isValid("https://"))
-        assertTrue(DonateLink.URL.startsWith("https://buy.stripe.com/"))
-    }
 }

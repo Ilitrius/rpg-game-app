@@ -174,20 +174,6 @@ fun OptionsScreen() {
             val soundOn by settings.soundEnabledFlow.collectAsState()
             SoundCard(soundOn = soundOn, onChange = { settings.soundEnabled = it })
 
-            DonateCard(
-                onDonate = {
-                    try {
-                        context.startActivity(
-                            Intent(Intent.ACTION_VIEW, Uri.parse(DonateLink.URL)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                        )
-                    } catch (e: ActivityNotFoundException) {
-                        notify(context.getString(R.string.options_donate_no_browser))
-                    } catch (e: SecurityException) {
-                        notify(context.getString(R.string.options_donate_no_browser))
-                    }
-                },
-            )
-
             val language by settings.languageFlow.collectAsState()
             LanguageCard(selected = language, onSelect = {
                 if (it != settings.language) {
@@ -282,24 +268,6 @@ private fun SoundCard(soundOn: Boolean, onChange: (Boolean) -> Unit) {
                 )
                 Switch(checked = soundOn, onCheckedChange = onChange)
             }
-        }
-    }
-}
-
-@Composable
-private fun DonateCard(onDonate: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-    ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            SectionHeader(Icons.Outlined.Favorite, stringResource(R.string.options_donate_title))
-            Text(
-                stringResource(R.string.options_donate_description),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            ActionButton(Icons.Outlined.Favorite, stringResource(R.string.options_donate_button), primary = true, onClick = onDonate)
         }
     }
 }

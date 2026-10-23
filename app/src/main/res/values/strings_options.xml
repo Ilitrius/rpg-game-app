@@ -29,11 +29,6 @@
     <string name="options_sound_label">Ton an</string>
     <string name="options_sound_description">Schaltet alle Spielgeräusche ein oder aus. Die Einstellung bleibt gespeichert.</string>
 
-    <!-- Spenden -->
-    <string name="options_donate_title">Unterstützen</string>
-    <string name="options_donate_description">Gefällt dir das Spiel? Mit einer Spende hilfst du bei der Weiterentwicklung.</string>
-    <string name="options_donate_button">Spenden</string>
-    <string name="options_donate_no_browser">Keine Browser-App gefunden.</string>
 
     <!-- Feedback -->
     <string name="options_export_file_success">Spielstand gespeichert.</string>
