@@ -20,8 +20,8 @@ android {
         applicationId = "com.rp.IDLEGAMERP"
         minSdk = 26
         targetSdk = 36
-        versionCode = 6
-        versionName = "0.1.0-rc5"
+        versionCode = 7
+        versionName = "0.1.0-rc6"
     }
 
     signingConfigs {

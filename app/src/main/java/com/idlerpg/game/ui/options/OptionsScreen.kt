@@ -27,6 +27,8 @@ import androidx.compose.material.icons.outlined.ContentPaste
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.FileOpen
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.OpenInBrowser
+import androidx.compose.material.icons.outlined.PrivacyTip
 import androidx.compose.material.icons.outlined.SaveAlt
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material.icons.outlined.Tune
@@ -90,6 +92,7 @@ fun OptionsScreen() {
     var pendingImport by rememberSaveable { mutableStateOf<String?>(null) }
     // Why the last import was rejected; shown in a dialog (the messages are too long for a snackbar).
     var importError by rememberSaveable { mutableStateOf<String?>(null) }
+    var showPrivacySummary by rememberSaveable { mutableStateOf(false) }
 
     fun notify(message: String) {
         scope.launch {
@@ -181,6 +184,18 @@ fun OptionsScreen() {
                     (context as? android.app.Activity)?.recreate()
                 }
             })
+            PrivacyCard(
+                onShowSummary = { showPrivacySummary = true },
+                onOpenPolicy = {
+                    try {
+                        context.startActivity(
+                            Intent(Intent.ACTION_VIEW, Uri.parse(context.getString(R.string.options_privacy_url))),
+                        )
+                    } catch (e: ActivityNotFoundException) {
+                        notify(context.getString(R.string.options_privacy_no_browser))
+                    }
+                },
+            )
             FutureSettingsCard()
         }
 
@@ -209,6 +224,41 @@ fun OptionsScreen() {
 
     importError?.let { message ->
         ImportErrorDialog(message = message, onDismiss = { importError = null })
+    }
+
+    if (showPrivacySummary) {
+        AlertDialog(
+            onDismissRequest = { showPrivacySummary = false },
+            icon = { Icon(Icons.Outlined.PrivacyTip, contentDescription = null) },
+            title = { Text(stringResource(R.string.options_privacy_title)) },
+            text = {
+                Column(Modifier.verticalScroll(rememberScrollState())) {
+                    Text(stringResource(R.string.options_privacy_summary), style = MaterialTheme.typography.bodyMedium)
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showPrivacySummary = false }) { Text(stringResource(R.string.options_error_ok)) }
+            },
+        )
+    }
+}
+
+@Composable
+private fun PrivacyCard(onShowSummary: () -> Unit, onOpenPolicy: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SectionHeader(Icons.Outlined.PrivacyTip, stringResource(R.string.options_privacy_title))
+            Text(
+                stringResource(R.string.options_privacy_description),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            ActionButton(Icons.Outlined.Info, stringResource(R.string.options_privacy_summary_button), primary = false, onClick = onShowSummary)
+            ActionButton(Icons.Outlined.OpenInBrowser, stringResource(R.string.options_privacy_open), primary = false, onClick = onOpenPolicy)
+        }
     }
 }
 

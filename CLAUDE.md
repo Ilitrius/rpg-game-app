@@ -48,7 +48,7 @@ Zusätzlich `spielwelt`: Abenteuer-Ansicht (Ich-Perspektive), Gebiete, Monster, 
 - Kein Android Studio installiert — Build/Run per CLI.
 
 ## Repo
-- GitHub (privat): https://github.com/Ilitrius/rpg-game-app, Branch `master`
+- GitHub (öffentlich): https://github.com/Ilitrius/rpg-game-app, Branch `master`; Datenschutzerklärung via GitHub Pages (`docs/`) unter https://ilitrius.github.io/rpg-game-app/ (in Optionen verlinkt, `options_privacy_url`)
 - Git-Identität nur repo-lokal gesetzt (Ilitrius / rene.puf@gmail.com)
 
 ## Befehle
