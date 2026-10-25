@@ -30,6 +30,12 @@
     <string name="options_sound_description">Schaltet alle Spielgeräusche ein oder aus. Die Einstellung bleibt gespeichert.</string>
 
 
+    <!-- Spenden -->
+    <string name="options_donate_title">Unterstützen</string>
+    <string name="options_donate_description">Gefällt dir das Spiel? Mit einer freiwilligen Spende hilfst du bei der Weiterentwicklung. Die Spende wird extern über Stripe im Browser abgewickelt und schaltet nichts im Spiel frei.</string>
+    <string name="options_donate_button">Spenden</string>
+    <string name="options_donate_no_browser">Keine Browser-App gefunden.</string>
+
     <!-- Datenschutz (Policy-URL = GitHub Pages aus docs/index.html) -->
     <string name="options_privacy_url" translatable="false">https://ilitrius.github.io/rpg-game-app/</string>
     <string name="options_privacy_title">Datenschutz</string>
@@ -37,7 +43,7 @@
     <string name="options_privacy_summary_button">Kurzfassung lesen</string>
     <string name="options_privacy_open">Datenschutzerklärung öffnen</string>
     <string name="options_privacy_no_browser">Kein Browser zum Öffnen des Links gefunden.</string>
-    <string name="options_privacy_summary">Idle RPG erhebt, überträgt und teilt keine personenbezogenen Daten.\n\n• Spielstand und Einstellungen (Charakter, Ausrüstung, Gold, Sprache, Ton) werden ausschließlich lokal auf deinem Gerät gespeichert; es gibt keine Cloud-Sicherung.\n• Die App benötigt keine Berechtigungen und hat keinen Internetzugriff. Es gibt keine Konten, Werbung, Analyse- oder Tracking-Dienste und keine Drittanbieter-SDKs.\n• Export und Import des Spielstands erfolgen manuell per Datei oder Zwischenablage. Die Daten verlassen dein Gerät nur, wenn du sie selbst weitergibst.\n• Deinstallieren der App löscht alle Daten. Ein Import überschreibt den bisherigen Spielstand.\n• Die App richtet sich nicht gezielt an Kinder unter 13 Jahren.\n\nKontakt: rene.puf@gmail.com\n\nDie vollständige Erklärung öffnest du über „Datenschutzerklärung öffnen“ (der Link wird in deinem Browser geöffnet).</string>
+    <string name="options_privacy_summary">Idle RPG erhebt, überträgt und teilt keine personenbezogenen Daten.\n\n• Spielstand und Einstellungen (Charakter, Ausrüstung, Gold, Sprache, Ton) werden ausschließlich lokal auf deinem Gerät gespeichert; es gibt keine Cloud-Sicherung.\n• Die App benötigt keine Berechtigungen und hat keinen Internetzugriff. Es gibt keine Konten, Werbung, Analyse- oder Tracking-Dienste und keine Drittanbieter-SDKs.\n• Freiwillige Spende: Der Button „Spenden“ öffnet im Browser eine externe Stripe-Zahlungsseite. Die App übergibt dabei keine Daten; die Zahlung wird allein von Stripe abgewickelt (Datenschutzerklärung von Stripe).\n• Export und Import des Spielstands erfolgen manuell per Datei oder Zwischenablage. Die Daten verlassen dein Gerät nur, wenn du sie selbst weitergibst.\n• Deinstallieren der App löscht alle Daten. Ein Import überschreibt den bisherigen Spielstand.\n• Die App richtet sich nicht gezielt an Kinder unter 13 Jahren.\n\nKontakt: rene.puf@gmail.com\n\nDie vollständige Erklärung öffnest du über „Datenschutzerklärung öffnen“ (der Link wird in deinem Browser geöffnet).</string>
 
     <!-- Feedback -->
     <string name="options_export_file_success">Spielstand gespeichert.</string>

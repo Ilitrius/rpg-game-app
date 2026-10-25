@@ -184,6 +184,19 @@ fun OptionsScreen() {
                     (context as? android.app.Activity)?.recreate()
                 }
             })
+            DonateCard(
+                onDonate = {
+                    try {
+                        context.startActivity(
+                            Intent(Intent.ACTION_VIEW, Uri.parse(DonateLink.URL)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                        )
+                    } catch (e: ActivityNotFoundException) {
+                        notify(context.getString(R.string.options_donate_no_browser))
+                    } catch (e: SecurityException) {
+                        notify(context.getString(R.string.options_donate_no_browser))
+                    }
+                },
+            )
             PrivacyCard(
                 onShowSummary = { showPrivacySummary = true },
                 onOpenPolicy = {
@@ -240,6 +253,24 @@ fun OptionsScreen() {
                 TextButton(onClick = { showPrivacySummary = false }) { Text(stringResource(R.string.options_error_ok)) }
             },
         )
+    }
+}
+
+@Composable
+private fun DonateCard(onDonate: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            SectionHeader(Icons.Outlined.Favorite, stringResource(R.string.options_donate_title))
+            Text(
+                stringResource(R.string.options_donate_description),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            ActionButton(Icons.Outlined.Favorite, stringResource(R.string.options_donate_button), primary = true, onClick = onDonate)
+        }
     }
 }
 

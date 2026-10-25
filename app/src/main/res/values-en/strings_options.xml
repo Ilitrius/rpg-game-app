@@ -26,13 +26,19 @@
     <string name="options_sound_description">Turns all game sounds on or off. The setting is saved.</string>
 
 
+    <!-- Donate -->
+    <string name="options_donate_title">Support</string>
+    <string name="options_donate_description">Enjoying the game? A voluntary donation helps with further development. The donation is handled externally via Stripe in your browser and unlocks nothing in the game.</string>
+    <string name="options_donate_button">Donate</string>
+    <string name="options_donate_no_browser">No browser app found.</string>
+
     <!-- Privacy -->
     <string name="options_privacy_title">Privacy</string>
     <string name="options_privacy_description">Idle RPG does not collect any personal data. You can find the privacy policy here.</string>
     <string name="options_privacy_summary_button">Read summary</string>
     <string name="options_privacy_open">Open privacy policy</string>
     <string name="options_privacy_no_browser">No browser found to open the link.</string>
-    <string name="options_privacy_summary">Idle RPG does not collect, transmit or share any personal data.\n\n• Save game and settings (character, equipment, gold, language, sound) are stored only locally on your device; there is no cloud backup.\n• The app requests no permissions and has no internet access. There are no accounts, ads, analytics or tracking, and no third-party SDKs.\n• Save export and import are manual via file or clipboard. Data leaves your device only if you share it yourself.\n• Uninstalling the app deletes all data. An import overwrites the current save game.\n• The app is not directed at children under 13.\n\nContact: rene.puf@gmail.com\n\nOpen the full policy via “Open privacy policy” (the link opens in your browser).</string>
+    <string name="options_privacy_summary">Idle RPG does not collect, transmit or share any personal data.\n\n• Save game and settings (character, equipment, gold, language, sound) are stored only locally on your device; there is no cloud backup.\n• The app requests no permissions and has no internet access. There are no accounts, ads, analytics or tracking, and no third-party SDKs.\n• Voluntary donation: the “Donate” button opens an external Stripe payment page in your browser. The app passes no data; the payment is handled solely by Stripe (see Stripe’s privacy policy).\n• Save export and import are manual via file or clipboard. Data leaves your device only if you share it yourself.\n• Uninstalling the app deletes all data. An import overwrites the current save game.\n• The app is not directed at children under 13.\n\nContact: rene.puf@gmail.com\n\nOpen the full policy via “Open privacy policy” (the link opens in your browser).</string>
 
     <!-- Feedback -->
     <string name="options_export_file_success">Save game saved.</string>

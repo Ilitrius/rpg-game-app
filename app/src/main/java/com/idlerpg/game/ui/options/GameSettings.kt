@@ -80,3 +80,12 @@ private class PrefsStore(context: Context) : SettingsStore {
     override fun getString(key: String, default: String) = prefs.getString(key, default) ?: default
     override fun putString(key: String, value: String) = prefs.edit().putString(key, value).apply()
 }
+
+/** Donation link. */
+object DonateLink {
+    // Stripe Payment Link (public URL, no secret key involved).
+    const val URL = "https://buy.stripe.com/dRmaEY3Me3TO5Z54R1eUU00"
+
+    fun isValid(url: String = URL): Boolean =
+        url.startsWith("https://") && url.length > "https://".length && url.none { it.isWhitespace() }
+}
