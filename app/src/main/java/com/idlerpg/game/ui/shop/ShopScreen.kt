@@ -82,6 +82,8 @@ import com.idlerpg.game.domain.character.StatType
 import com.idlerpg.game.domain.character.get
 import com.idlerpg.game.domain.equipment.Inventory
 import com.idlerpg.game.domain.shop.Shop
+import com.idlerpg.game.audio.Sfx
+import com.idlerpg.game.audio.SoundManager
 import com.idlerpg.game.ui.equipment.ItemIcon
 import com.idlerpg.game.ui.equipment.itemDisplayName
 import com.idlerpg.game.ui.equipment.localizedName
@@ -135,6 +137,7 @@ fun ShopScreen() {
     }
 
     val res = context.resources
+    val sound = remember { SoundManager.get(context) }
     fun toast(text: String) = scope.launch {
         snackbar.currentSnackbarData?.dismiss()
         snackbar.showSnackbar(text)
@@ -146,6 +149,7 @@ fun ShopScreen() {
             var result: Shop.BuyResult? = null
             repository.update { s -> Shop.buy(s, item.id).also { result = it }.state }
             val r = result ?: return@launch
+            if (r.outcome == Shop.BuyOutcome.BOUGHT) sound.play(Sfx.COIN)
             toast(
                 when (r.outcome) {
                     Shop.BuyOutcome.BOUGHT -> res.getString(R.string.shop_bought, item.localizedName(res))
@@ -162,6 +166,7 @@ fun ShopScreen() {
         scope.launch {
             var gold = 0L
             repository.update { s -> Shop.sell(s, item.id).also { gold = it.gold - s.gold } }
+            if (gold > 0) sound.play(Sfx.COIN)
             if (gold > 0 || item.price == 0L) toast(res.getString(R.string.shop_sold_one, item.localizedName(res), fmt(gold)))
         }
     }
@@ -171,6 +176,7 @@ fun ShopScreen() {
             var result: Shop.SellResult? = null
             repository.update { s -> Shop.sellCommonJunk(s).also { result = it }.state }
             val r = result ?: return@launch
+            if (r.count > 0) sound.play(Sfx.COIN)
             if (r.count > 0) toast(res.getQuantityString(R.plurals.shop_sold_many, r.count, r.count, fmt(r.gold)))
         }
     }

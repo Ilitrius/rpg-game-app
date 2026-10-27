@@ -44,7 +44,8 @@ enum class UpdateUiState {
  */
 class InAppUpdater(private val activity: ComponentActivity) : DefaultLifecycleObserver {
 
-    private val manager: AppUpdateManager? = runCatching { AppUpdateManagerFactory.create(activity) }.getOrNull()
+    // Lazy: the activity has no base context yet while it is being constructed; first used in onStart.
+    private val manager: AppUpdateManager? by lazy { runCatching { AppUpdateManagerFactory.create(activity) }.getOrNull() }
     private val _state = MutableStateFlow(UpdateUiState.IDLE)
     val state: StateFlow<UpdateUiState> = _state.asStateFlow()
 

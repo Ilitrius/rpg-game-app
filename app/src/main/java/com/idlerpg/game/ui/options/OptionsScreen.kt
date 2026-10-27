@@ -44,7 +44,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
+import com.idlerpg.game.audio.Sfx
+import com.idlerpg.game.audio.SoundManager
 import androidx.compose.material3.RadioButton
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.foundation.selection.selectable
@@ -78,6 +81,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.NumberFormat
 import java.util.Locale
+import kotlin.math.roundToInt
 import com.idlerpg.game.data.Item
 import com.idlerpg.game.ui.equipment.localizedName
 
@@ -177,7 +181,14 @@ fun OptionsScreen() {
 
             val settings = remember { GameSettings.get(context) }
             val soundOn by settings.soundEnabledFlow.collectAsStateWithLifecycle()
-            SoundCard(soundOn = soundOn, onChange = { settings.soundEnabled = it })
+            val volume by settings.soundVolumeFlow.collectAsStateWithLifecycle()
+            SoundCard(
+                soundOn = soundOn,
+                volume = volume,
+                onChange = { settings.soundEnabled = it },
+                onVolumeChange = { settings.soundVolume = it },
+                onVolumeFinished = { SoundManager.get(context).play(Sfx.COIN) },
+            )
 
             val language by settings.languageFlow.collectAsStateWithLifecycle()
             LanguageCard(selected = language, onSelect = {
@@ -328,7 +339,13 @@ private fun SaveGameCard(
 }
 
 @Composable
-private fun SoundCard(soundOn: Boolean, onChange: (Boolean) -> Unit) {
+private fun SoundCard(
+    soundOn: Boolean,
+    volume: Int,
+    onChange: (Boolean) -> Unit,
+    onVolumeChange: (Int) -> Unit,
+    onVolumeFinished: () -> Unit,
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
@@ -350,6 +367,22 @@ private fun SoundCard(soundOn: Boolean, onChange: (Boolean) -> Unit) {
                     modifier = Modifier.weight(1f),
                 )
                 Switch(checked = soundOn, onCheckedChange = onChange)
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    stringResource(R.string.options_sound_volume, volume),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = if (soundOn) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(112.dp),
+                )
+                Slider(
+                    value = volume.toFloat(),
+                    onValueChange = { onVolumeChange(it.roundToInt()) },
+                    onValueChangeFinished = onVolumeFinished,
+                    valueRange = 0f..100f,
+                    enabled = soundOn,
+                    modifier = Modifier.weight(1f),
+                )
             }
         }
     }

@@ -24,6 +24,7 @@
     <string name="options_sound_title">Sound</string>
     <string name="options_sound_label">Sound on</string>
     <string name="options_sound_description">Turns all game sounds on or off. The setting is saved.</string>
+    <string name="options_sound_volume">Volume: %1$d %%</string>
 
 
     <!-- Donate -->

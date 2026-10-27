@@ -22,7 +22,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import com.idlerpg.game.audio.Sfx
+import com.idlerpg.game.audio.SoundManager
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.idlerpg.game.R
 import com.idlerpg.game.ui.adventure.AdventureScreen
@@ -42,6 +45,8 @@ fun MainScreen(updater: InAppUpdater? = null) {
     var selectedTab by rememberSaveable { mutableStateOf<MainTab?>(null) }
 
     val snackbar = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    val sound = remember { SoundManager.get(context) }
     if (updater != null) UpdatePrompt(updater, snackbar)
 
     Scaffold(
@@ -49,7 +54,10 @@ fun MainScreen(updater: InAppUpdater? = null) {
         bottomBar = {
             MainMenuBar(
                 selected = selectedTab,
-                onSelect = { tab -> selectedTab = if (selectedTab == tab) null else tab },
+                onSelect = { tab ->
+                    sound.play(Sfx.CLICK)
+                    selectedTab = if (selectedTab == tab) null else tab
+                },
             )
         },
     ) { innerPadding ->

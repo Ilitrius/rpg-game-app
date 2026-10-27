@@ -63,7 +63,11 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import com.idlerpg.game.audio.SoundManager
+import com.idlerpg.game.audio.Sfx
+import com.idlerpg.game.ui.character.weapon.WEAPON_IMPACT_FRACTION
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -134,15 +138,25 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
     var banner by remember { mutableStateOf<BannerMessage?>(null) }
     var showZones by remember { mutableStateOf(false) }
 
+    val context = LocalContext.current
+    val sound = remember { SoundManager.get(context) }
     LaunchedEffect(vm) {
         vm.events.collect { e ->
             when (e) {
                 is AdventureEvent.HeroAttack -> {
+                    // Impact sound in sync with the animation's hit point.
+                    val impactDelay = (ui.attackDurationMillis * WEAPON_IMPACT_FRACTION).toLong()
+                    val crit = e.hit.critical
+                    scope.launch {
+                        kotlinx.coroutines.delay(impactDelay)
+                        sound.play(if (crit) Sfx.CRIT else Sfx.HIT)
+                    }
                     pendingHits.addLast(e.hit)
                     while (pendingHits.size > 3) pendingHits.removeFirst()
                     attacks++
                 }
                 is AdventureEvent.MonsterHit -> {
+                    sound.play(Sfx.HURT)
                     // x = horizontal jitter (0..1) next to the hero HP bar, see FloatingLabel.
                     floats += FloatText(nextFloatId++, FloatKind.HERO_DAMAGE, e.damage.toLong(), 0, Random.nextFloat(), 0f)
                     scope.launch {
@@ -151,12 +165,18 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
                     }
                 }
                 is AdventureEvent.Kill -> {
+                    sound.play(Sfx.MONSTER_DIE)
                     floats += FloatText(nextFloatId++, FloatKind.REWARD, e.xp, e.gold, 0f, -0.30f)
                 }
+                AdventureEvent.LevelUp -> sound.play(Sfx.LEVEL_UP)
                 is AdventureEvent.Loot -> {
+                    sound.play(Sfx.LOOT)
                     if (loot.size < 4) loot += e.drop
                 }
-                is AdventureEvent.BossVictory -> banner = BannerMessage.Victory(e.zone, e.unlocked)
+                is AdventureEvent.BossVictory -> {
+                    sound.play(Sfx.BOSS_VICTORY)
+                    banner = BannerMessage.Victory(e.zone, e.unlocked)
+                }
                 is AdventureEvent.BossFailed -> banner = BannerMessage.Failed(e.outcome)
             }
         }
@@ -281,7 +301,10 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
         Hud(
             ui, monsterName,
             onZoneClick = { showZones = true },
-            onChallengeBoss = vm::challengeBoss,
+            onChallengeBoss = {
+                sound.play(Sfx.BOSS_START)
+                vm.challengeBoss()
+            },
             loot = {
                 // Bottom-left above the hero block: clear of the weapon (right) and the monster (above).
                 loot.firstOrNull()?.let { drop ->
@@ -306,6 +329,7 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
             current = ui.zone,
             onSelect = { zone ->
                 showZones = false
+                sound.play(Sfx.CLICK)
                 vm.travelTo(zone.id)
             },
             onDismiss = { showZones = false },

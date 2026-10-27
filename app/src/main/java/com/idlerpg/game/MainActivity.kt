@@ -10,6 +10,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import com.idlerpg.game.audio.SoundManager
 import com.idlerpg.game.ui.MainScreen
 import com.idlerpg.game.update.InAppUpdater
 import com.idlerpg.game.ui.theme.IdleRPGTheme
@@ -17,6 +20,12 @@ import com.idlerpg.game.ui.theme.IdleRPGTheme
 class MainActivity : ComponentActivity() {
     // Created during construction: registers an activity-result launcher (Play in-app update).
     private val updater = InAppUpdater(this)
+
+    // Sound plays only while the activity is visible (SoundPool is released in the background).
+    private val soundLifecycle = object : DefaultLifecycleObserver {
+        override fun onStart(owner: LifecycleOwner) = SoundManager.get(this@MainActivity).onForeground()
+        override fun onStop(owner: LifecycleOwner) = SoundManager.get(this@MainActivity).onBackground()
+    }
 
     override fun attachBaseContext(newBase: Context) {
         val tag = runCatching { GameSettings.get(newBase).language.tag }.getOrNull()
@@ -35,6 +44,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        lifecycle.addObserver(soundLifecycle)
         // Game is always dark-themed, so force light system bar icons
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),

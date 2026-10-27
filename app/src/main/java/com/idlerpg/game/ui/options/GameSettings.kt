@@ -11,6 +11,10 @@ interface SettingsStore {
     fun putBoolean(key: String, value: Boolean)
     fun getString(key: String, default: String): String
     fun putString(key: String, value: String)
+
+    /** Defaults keep older [SettingsStore] implementations working. */
+    fun getInt(key: String, default: Int): Int = getString(key, default.toString()).toIntOrNull() ?: default
+    fun putInt(key: String, value: Int) = putString(key, value.toString())
 }
 
 /** Selectable UI language. [code] is persisted; [tag] null = follow the system locale. */
@@ -30,8 +34,7 @@ enum class AppLanguage(val code: String, val tag: String?) {
 /**
  * Device-level app settings (not part of the save game: importing a save must not change them).
  *
- * Audio API for later use: read [soundEnabled] (or collect [soundEnabledFlow]) before playing any
- * sound. Currently the game has no audio; only the preference is stored.
+ * Audio API: `audio/SoundManager` reads [soundEnabled] and [soundVolume] before playing any effect.
  */
 class GameSettings(private val store: SettingsStore) {
     private val _soundEnabled = MutableStateFlow(store.getBoolean(KEY_SOUND, DEFAULT_SOUND_ENABLED))
@@ -44,6 +47,19 @@ class GameSettings(private val store: SettingsStore) {
         set(value) {
             store.putBoolean(KEY_SOUND, value)
             _soundEnabled.value = value
+        }
+
+    private val _volume = MutableStateFlow(store.getInt(KEY_VOLUME, DEFAULT_VOLUME_PERCENT).coerceIn(0, 100))
+
+    val soundVolumeFlow: StateFlow<Int> = _volume.asStateFlow()
+
+    /** Effect volume in percent (0..100), default [DEFAULT_VOLUME_PERCENT]. Persisted immediately. */
+    var soundVolume: Int
+        get() = _volume.value
+        set(value) {
+            val v = value.coerceIn(0, 100)
+            store.putInt(KEY_VOLUME, v)
+            _volume.value = v
         }
 
     private val _language = MutableStateFlow(AppLanguage.fromCode(store.getString(KEY_LANGUAGE, AppLanguage.DEFAULT_CODE)))
@@ -62,6 +78,8 @@ class GameSettings(private val store: SettingsStore) {
         const val KEY_LANGUAGE = "language"
         const val KEY_SOUND = "sound_enabled"
         const val DEFAULT_SOUND_ENABLED = true
+        const val KEY_VOLUME = "sound_volume"
+        const val DEFAULT_VOLUME_PERCENT = 70
 
         @Volatile
         private var instance: GameSettings? = null

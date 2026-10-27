@@ -35,6 +35,21 @@ class GameSettingsTest {
     }
 
     @Test
+    fun volumeDefaultsPersistsAndIsClamped() {
+        val store = FakeStore()
+        val settings = GameSettings(store)
+        assertEquals(GameSettings.DEFAULT_VOLUME_PERCENT, settings.soundVolume)
+        settings.soundVolume = 35
+        assertEquals(35, GameSettings(store).soundVolume)
+        settings.soundVolume = 250
+        assertEquals(100, settings.soundVolume)
+        settings.soundVolume = -4
+        assertEquals(0, settings.soundVolume)
+        store.strings[GameSettings.KEY_VOLUME] = "garbage"
+        assertEquals(GameSettings.DEFAULT_VOLUME_PERCENT, GameSettings(store).soundVolume)
+    }
+
+    @Test
     fun soundDefaultsToOn() {
         assertTrue(GameSettings(FakeStore()).soundEnabled)
     }

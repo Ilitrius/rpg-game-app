@@ -28,6 +28,7 @@
     <string name="options_sound_title">Ton</string>
     <string name="options_sound_label">Ton an</string>
     <string name="options_sound_description">Schaltet alle Spielgeräusche ein oder aus. Die Einstellung bleibt gespeichert.</string>
+    <string name="options_sound_volume">Lautstärke: %1$d %%</string>
 
 
     <!-- Spenden -->
