@@ -4,5 +4,5 @@ Legende: `[ ]` offen · `[x]` erledigt
 
 ## Offen
 - [ ] Update-Hinweis: App merkt sich, wenn es ein Update gibt (Play In-App Updates API, `app-update`-Bibliothek über Version Catalog), und benachrichtigt den Nutzer (Hinweis/Snackbar mit "Aktualisieren"). Texte in `values/` + `values-de/`; Datenschutz/Data Safety prüfen (Play-Dienste-Abfrage). Gilt für alle Apps (Kind Words, RPCT, Idle RPG).
-- [x] Sprachumschaltung geprüft (System/DE/EN): String-Parität vollständig. Behoben: Itemnamen in Shop (Kauf/Verkauf/Details/Vergleich) und Beute-Popup nutzten den deutschen Fallback-Namen statt der lokalisierten Variante; Import-Dialog formatierte Gold immer deutsch.
-- [ ] Build/Emulator-Test der Sprachumschaltung in allen Menüfeldern (Charakter, Ausrüstung, Shop, Optionen, Abenteuer); `SaveTransfer`-Fehlermeldungen nennen Items noch mit deutschem Namen (qa-tester)
+- [ ] Systemsprache umschalten ergänzen bzw. prüfen: Auswahl System/Deutsch/Englisch in den Optionen, und kontrollieren, dass wirklich alle Menüfelder und In-App-Texte (inkl. Benachrichtigungen, Datum/Zahlen) auf die gewählte Sprache wechseln. Gilt für alle Apps.
+- [ ] Idle RPG, bei der Sprachprüfung gefunden: Shop (Kauf/Verkauf/Details/Vergleich) und Beute-Popup zeigen `item.name` (deutscher Fallback) statt `itemDisplayName`/`localizedName`; Import-Dialog formatiert Gold mit `Locale.GERMANY`; `SaveTransfer`-Meldungen nennen Items deutsch.

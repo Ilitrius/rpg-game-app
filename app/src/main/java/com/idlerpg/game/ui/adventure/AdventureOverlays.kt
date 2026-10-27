@@ -74,7 +74,6 @@ import com.idlerpg.game.domain.world.WorldProgress
 import com.idlerpg.game.domain.world.Zone
 import com.idlerpg.game.domain.world.Zones
 import com.idlerpg.game.ui.equipment.ItemIcon
-import com.idlerpg.game.ui.equipment.itemDisplayName
 import com.idlerpg.game.ui.equipment.rarityColor
 import java.util.Locale
 import kotlin.math.ceil
@@ -202,7 +201,7 @@ internal fun LootPopup(drop: LootDrop, modifier: Modifier = Modifier, onDone: ()
                 maxLines = 1,
             )
             Text(
-                itemDisplayName(drop.item),
+                drop.item.name,
                 style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = color, lineHeight = 17.sp),
                 maxLines = 2, overflow = TextOverflow.Ellipsis,
             )
