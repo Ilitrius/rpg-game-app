@@ -83,6 +83,7 @@ import com.idlerpg.game.domain.character.Hit
 import com.idlerpg.game.domain.combat.CombatRules
 import com.idlerpg.game.domain.world.LootDrop
 import com.idlerpg.game.domain.world.MonsterType
+import com.idlerpg.game.domain.world.DurationParts
 import com.idlerpg.game.domain.world.OfflineProgress
 import com.idlerpg.game.domain.world.OfflineReward
 import com.idlerpg.game.domain.world.WorldProgress
@@ -704,16 +705,16 @@ private fun DefeatOverlay() {
     }
 }
 
-/** "8 Std. 12 Min.", "8 Std." or "45 Min." */
+/** "3 Tg. 2 Std.", "8 Std. 12 Min.", "8 Std." or "45 Min." (days only for long absences). */
 @Composable
 private fun formatDuration(millis: Long): String {
-    val totalMinutes = (millis / 60_000).toInt()
-    val h = totalMinutes / 60
-    val m = totalMinutes % 60
+    val d = DurationParts.of(millis)
     return when {
-        h == 0 -> stringResource(R.string.duration_minutes, m)
-        m == 0 -> stringResource(R.string.duration_hours, h)
-        else -> stringResource(R.string.duration_hours_minutes, h, m)
+        d.days > 0 && d.hours == 0 -> stringResource(R.string.duration_days, d.days)
+        d.days > 0 -> stringResource(R.string.duration_days_hours, d.days, d.hours)
+        d.hours == 0 -> stringResource(R.string.duration_minutes, d.minutes)
+        d.minutes == 0 -> stringResource(R.string.duration_hours, d.hours)
+        else -> stringResource(R.string.duration_hours_minutes, d.hours, d.minutes)
     }
 }
 

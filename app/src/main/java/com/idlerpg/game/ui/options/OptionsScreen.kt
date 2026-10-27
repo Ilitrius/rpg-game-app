@@ -78,6 +78,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.NumberFormat
 import java.util.Locale
+import com.idlerpg.game.data.Item
+import com.idlerpg.game.ui.equipment.localizedName
 
 /** "Optionen" tab: save-game export/import, room for future settings. */
 @Composable
@@ -438,7 +440,7 @@ private fun ActionButton(icon: ImageVector, label: String, primary: Boolean, onC
 
 @Composable
 private fun ConfirmImportDialog(summary: SaveSummary, notes: List<String>, onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    val gold = NumberFormat.getIntegerInstance(Locale.GERMANY).format(summary.gold)
+    val gold = NumberFormat.getIntegerInstance(Locale.getDefault()).format(summary.gold)
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = { Icon(Icons.Outlined.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
@@ -543,15 +545,20 @@ private fun locationText(context: Context, location: SaveLocation): String? = wh
     is SaveLocation.EquippedItem -> context.getString(
         R.string.options_location_equipped,
         context.getString(slotLabel(location.slot)),
-        itemNameText(context, location.itemName),
+        itemNameText(context, location.item, location.itemName),
     )
     is SaveLocation.InventoryItem ->
-        context.getString(R.string.options_location_inventory, location.position, itemNameText(context, location.itemName))
+        context.getString(R.string.options_location_inventory, location.position, itemNameText(context, location.item, location.itemName))
     is SaveLocation.ShopOffer ->
-        context.getString(R.string.options_location_shop_offer, location.position, itemNameText(context, location.itemName))
+        context.getString(R.string.options_location_shop_offer, location.position, itemNameText(context, location.item, location.itemName))
     SaveLocation.World -> context.getString(R.string.options_location_world)
     is SaveLocation.WorldZone -> context.getString(R.string.options_location_world_zone, location.zoneId)
     SaveLocation.Shop -> context.getString(R.string.options_location_shop)
+}
+
+private fun itemNameText(context: Context, item: Item?, fallback: String): String {
+    val name = if (item != null) SaveTransfer.shortName(item.localizedName(context.resources)) else fallback
+    return itemNameText(context, name)
 }
 
 private fun itemNameText(context: Context, name: String): String =

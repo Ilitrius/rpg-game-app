@@ -60,6 +60,8 @@
     <string name="duration_hours_minutes">%1$d Std. %2$d Min.</string>
     <string name="duration_minutes">%1$d Min.</string>
     <string name="duration_hours">%1$d Std.</string>
+    <string name="duration_days_hours">%1$d Tg. %2$d Std.</string>
+    <string name="duration_days">%1$d Tg.</string>
     <!-- Zones / travel -->
     <string name="zone_levels">Stufe %1$d–%2$d</string>
     <string name="zone_sheet_title">Gebiete</string>

@@ -80,6 +80,8 @@ import com.idlerpg.game.domain.character.get
 import com.idlerpg.game.domain.equipment.Inventory
 import com.idlerpg.game.domain.shop.Shop
 import com.idlerpg.game.ui.equipment.ItemIcon
+import com.idlerpg.game.ui.equipment.itemDisplayName
+import com.idlerpg.game.ui.equipment.localizedName
 import com.idlerpg.game.ui.equipment.rarityColor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -139,7 +141,7 @@ fun ShopScreen() {
             val r = result ?: return@launch
             toast(
                 when (r.outcome) {
-                    Shop.BuyOutcome.BOUGHT -> res.getString(R.string.shop_bought, item.name)
+                    Shop.BuyOutcome.BOUGHT -> res.getString(R.string.shop_bought, item.localizedName(res))
                     Shop.BuyOutcome.INVENTORY_FULL -> res.getString(R.string.shop_inventory_full)
                     Shop.BuyOutcome.NOT_ENOUGH_GOLD -> res.getString(R.string.shop_not_enough_gold, fmt(r.price - r.state.gold))
                     Shop.BuyOutcome.SOLD_OUT -> res.getString(R.string.shop_offer_gone)
@@ -153,7 +155,7 @@ fun ShopScreen() {
         scope.launch {
             var gold = 0L
             repository.update { s -> Shop.sell(s, item.id).also { gold = it.gold - s.gold } }
-            if (gold > 0 || item.price == 0L) toast(res.getString(R.string.shop_sold_one, item.name, fmt(gold)))
+            if (gold > 0 || item.price == 0L) toast(res.getString(R.string.shop_sold_one, item.localizedName(res), fmt(gold)))
         }
     }
 
@@ -430,7 +432,7 @@ private fun ItemRowCard(
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
-                    item.name,
+                    itemDisplayName(item),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                     color = rarityColor(item.rarity),
@@ -513,7 +515,7 @@ private fun ItemSheet(state: GameState, item: Item, mode: ShopMode, onDismiss: (
                 ItemIcon(item, Modifier.size(112.dp))
                 Spacer(Modifier.width(16.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(item.name, style = MaterialTheme.typography.titleLarge, color = rarityColor(item.rarity), fontWeight = FontWeight.SemiBold)
+                    Text(itemDisplayName(item), style = MaterialTheme.typography.titleLarge, color = rarityColor(item.rarity), fontWeight = FontWeight.SemiBold)
                     Text(
                         "${rarityLabel(item.rarity)} · ${stringResource(slotLabel(item.slot))}",
                         style = MaterialTheme.typography.bodyMedium,
@@ -578,7 +580,7 @@ private fun ComparisonBlock(state: GameState, item: Item) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     ItemIcon(equipped, Modifier.size(36.dp), contentDescription = null)
                     Spacer(Modifier.width(10.dp))
-                    Text(stringResource(R.string.shop_compare_title, equipped.name), style = MaterialTheme.typography.titleSmall, color = rarityColor(equipped.rarity))
+                    Text(stringResource(R.string.shop_compare_title, itemDisplayName(equipped)), style = MaterialTheme.typography.titleSmall, color = rarityColor(equipped.rarity))
                 }
             } else {
                 Text(stringResource(R.string.shop_compare_empty), style = MaterialTheme.typography.titleSmall)

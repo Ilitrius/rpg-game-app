@@ -17,6 +17,8 @@ class MainActivity : ComponentActivity() {
     override fun attachBaseContext(newBase: Context) {
         val tag = runCatching { GameSettings.get(newBase).language.tag }.getOrNull()
         if (tag == null) {
+            // "System": restore the device locale (an earlier explicit choice changed Locale.getDefault()).
+            Locale.setDefault(newBase.resources.configuration.locales[0])
             super.attachBaseContext(newBase)
             return
         }
