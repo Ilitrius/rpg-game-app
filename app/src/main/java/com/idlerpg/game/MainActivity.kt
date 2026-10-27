@@ -11,9 +11,13 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.idlerpg.game.ui.MainScreen
+import com.idlerpg.game.update.InAppUpdater
 import com.idlerpg.game.ui.theme.IdleRPGTheme
 
 class MainActivity : ComponentActivity() {
+    // Created during construction: registers an activity-result launcher (Play in-app update).
+    private val updater = InAppUpdater(this)
+
     override fun attachBaseContext(newBase: Context) {
         val tag = runCatching { GameSettings.get(newBase).language.tag }.getOrNull()
         if (tag == null) {
@@ -38,7 +42,7 @@ class MainActivity : ComponentActivity() {
         )
         setContent {
             IdleRPGTheme {
-                MainScreen()
+                MainScreen(updater = updater)
             }
         }
     }

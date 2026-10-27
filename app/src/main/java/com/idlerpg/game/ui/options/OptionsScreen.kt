@@ -53,7 +53,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -176,10 +176,10 @@ fun OptionsScreen() {
             )
 
             val settings = remember { GameSettings.get(context) }
-            val soundOn by settings.soundEnabledFlow.collectAsState()
+            val soundOn by settings.soundEnabledFlow.collectAsStateWithLifecycle()
             SoundCard(soundOn = soundOn, onChange = { settings.soundEnabled = it })
 
-            val language by settings.languageFlow.collectAsState()
+            val language by settings.languageFlow.collectAsStateWithLifecycle()
             LanguageCard(selected = language, onSelect = {
                 if (it != settings.language) {
                     settings.language = it

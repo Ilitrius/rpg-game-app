@@ -14,7 +14,7 @@ Quelle der Ablehnung: Programmrichtlinien + Play-Console-Anforderungen. Genauen 
 - URL eintragen: Play Console → Richtlinie → App-Inhalt → Datenschutzerklärung.
 
 ## App-Inhalt (alle Formulare ausfüllen & absenden)
-- Datensicherheit: "Keine Daten erhoben" / "Keine Daten geteilt"; Verschlüsselung/Löschung nicht zutreffend.
+- Datensicherheit: "Keine Daten erhoben" / "Keine Daten geteilt"; Verschlüsselung/Löschung nicht zutreffend. Der Update-Hinweis nutzt die Play-Bibliothek `app-update` (In-App Updates): Sie fragt nur den Update-Status der eigenen App über die Play-Dienste ab, die App sendet keine Nutzerdaten; keine zusätzliche Berechtigung (kein INTERNET). In der Console daher weiterhin keine Datenerhebung angeben; Abfrage dennoch in der Datenschutzerklärung erwähnt (erledigt). Vor dem Release im Manifest-Merge prüfen, dass keine neue Berechtigung hinzukam.
 - Werbung: "Enthält keine Werbung".
 - Inhaltseinstufung (IARC): Fantasy-Gewalt gegen Monster, keine Glücksspiel-/Echtgeld-Elemente.
 - Zielgruppe: 13+ (nicht "Kinder" wählen, sonst Families-Richtlinie).
@@ -36,3 +36,7 @@ Quelle der Ablehnung: Programmrichtlinien + Play-Console-Anforderungen. Genauen 
 
 ## Datenschutz in der App
 - Optionen → Karte "Datenschutz": Kurzfassung (Dialog, offline) + Button zur öffentlichen Erklärung `https://ilitrius.github.io/rpg-game-app/` (GitHub Pages aus `docs/`, Quelle `docs/index.html`). Dieselbe URL in der Play Console eintragen.
+
+## Update-Hinweis (In-App Updates)
+- Flexibler Flow über `com.google.android.play:app-update` (Version Catalog). Nur wirksam bei Installation aus dem Play Store (Closed/Internal Test oder Produktion); per `adb install` bleibt der Hinweis stumm.
+- Test: Internal App Sharing / Interner Test mit niedrigerem versionCode installieren, höheren Build hochladen; Hinweis "Aktualisieren" erscheint nach Start, nach Download "Neu starten".

@@ -50,7 +50,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -101,17 +104,21 @@ fun ShopScreen() {
     val context = LocalContext.current
     val repository = remember { (context.applicationContext as IdleRpgApp).repository }
     val scope = rememberCoroutineScope()
-    val state by repository.state.collectAsState(initial = null)
+    val state by repository.state.collectAsStateWithLifecycle(initialValue = null)
     val snackbar = remember { SnackbarHostState() }
     var mode by rememberSaveable { mutableIntStateOf(ShopMode.BUY.ordinal) }
     var selectedId by rememberSaveable { mutableStateOf<String?>(null) }
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     var confirmBulkSell by rememberSaveable { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        while (true) {
-            now = System.currentTimeMillis()
-            delay(1000)
+    // Clock for the restock countdown: only ticks while the screen is visible (battery).
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    LaunchedEffect(lifecycle) {
+        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            while (true) {
+                now = System.currentTimeMillis()
+                delay(1000)
+            }
         }
     }
 

@@ -222,6 +222,8 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         loopJob = null
         hpSaveJob?.cancel()
         hpSaveJob = null
+        // A zone change interrupted by pausing the loop is completed right away.
+        _ui.update { st -> st.travelingTo?.let { st.copy(zone = it, travelingTo = null, monster = null, phase = MonsterPhase.GONE) } ?: st }
         if (_ui.value.bossFight) endBossFight()
         val now = System.currentTimeMillis()
         val hp = currentHp()

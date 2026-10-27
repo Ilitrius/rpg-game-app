@@ -38,7 +38,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -80,7 +80,7 @@ fun CharacterScreen() {
     val context = LocalContext.current
     val repository = remember { (context.applicationContext as IdleRpgApp).repository }
     val scope = rememberCoroutineScope()
-    val state by repository.state.collectAsState(initial = null)
+    val state by repository.state.collectAsStateWithLifecycle(initialValue = null)
 
     // Saves imported at runtime may still lack the starter weapon.
     LaunchedEffect(state?.starterWeaponGranted) {

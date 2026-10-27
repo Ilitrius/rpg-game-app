@@ -40,7 +40,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -107,7 +107,7 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = viewModel()) {
-    val ui by vm.ui.collectAsState()
+    val ui by vm.ui.collectAsStateWithLifecycle()
 
     // Pause the combat loop in the background; offline progress covers the gap.
     val lifecycleOwner = LocalLifecycleOwner.current
