@@ -438,7 +438,7 @@ private fun ActionButton(icon: ImageVector, label: String, primary: Boolean, onC
 
 @Composable
 private fun ConfirmImportDialog(summary: SaveSummary, notes: List<String>, onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    val gold = NumberFormat.getIntegerInstance(Locale.GERMANY).format(summary.gold)
+    val gold = NumberFormat.getIntegerInstance(Locale.getDefault()).format(summary.gold)
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = { Icon(Icons.Outlined.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
