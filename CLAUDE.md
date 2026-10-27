@@ -34,6 +34,10 @@ Zusätzlich `spielwelt`: Abenteuer-Ansicht (Ich-Perspektive), Gebiete, Monster, 
 - Shop-API (`shop`, `domain/shop/Shop`): `ShopState` (`offers`, `restockedAtEpochMillis`, `stockLevel`, `paidRestocks`); Kaufpreis berechnet (`Shop.buyPrice` = `price` × `markup(itemLevel)`, nie gespeichert); `ensureStock` (gratis alle 30 min / bei 3 Stufen Vorsprung, nur bei offenem Tab), `paidRestock`, `buy`, `isUpgrade`, `bulkSellCandidates`.
 - Import-Validierung (`optionen`, `ui/options/SaveTransfer`): prüft alle GameState-Felder über `SaveField`/`SaveLocation`; neue Felder dem Optionen-Agenten melden. Unbekannte Zonen-IDs werden normalisiert statt abgelehnt.
 
+## Audio, Updates (Stand)
+- Ton: `audio/SoundManager` (SoundPool), Effekte aus `tools/generate_sounds.py` -> `res/raw/sfx_*.wav` (siehe `tools/SOUNDS.md`); Ein/Aus + Lautstärke in `GameSettings`.
+- Update-Hinweis: `update/InAppUpdater` (Play In-App Updates, flexibel, fail-safe), Snackbar in `MainScreen`, Strings `strings_update.xml`.
+
 ## Stack
 - Kotlin 2.0.21, Jetpack Compose (BOM 2024.12.01), Material3
 - AGP 8.7.3, Gradle 8.11.1 (Wrapper), JDK 17

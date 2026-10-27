@@ -3,9 +3,14 @@
 Legende: `[ ]` offen · `[x]` erledigt
 
 ## Offen
-- [ ] Update-Hinweis: App merkt sich, wenn es ein Update gibt (Play In-App Updates API, `app-update`-Bibliothek über Version Catalog), und benachrichtigt den Nutzer (Hinweis/Snackbar mit "Aktualisieren"). Texte in `values/` + `values-de/`; Datenschutz/Data Safety prüfen (Play-Dienste-Abfrage). Gilt für alle Apps (Kind Words, RPCT, Idle RPG).
-- [ ] Systemsprache umschalten ergänzen bzw. prüfen: Auswahl System/Deutsch/Englisch in den Optionen, und kontrollieren, dass wirklich alle Menüfelder und In-App-Texte (inkl. Benachrichtigungen, Datum/Zahlen) auf die gewählte Sprache wechseln. Gilt für alle Apps.
-- [ ] Idle RPG, bei der Sprachprüfung gefunden: Shop (Kauf/Verkauf/Details/Vergleich) und Beute-Popup zeigen `item.name` (deutscher Fallback) statt `itemDisplayName`/`localizedName`; Import-Dialog formatiert Gold mit `Locale.GERMANY`; `SaveTransfer`-Meldungen nennen Items deutsch.
-- [ ] Akkuschonend: App soll möglichst wenig Energie verbrauchen — keine unnötigen Hintergrund-Jobs/Wakelocks/Polling, Alarme nur wenn nötig (inexakt statt exakt), Coroutines/Flows nur bei sichtbarer UI sammeln (`collectAsStateWithLifecycle`), Animationen/Render-Schleifen im Hintergrund stoppen, Wiederholungen und Neuzeichnen minimieren. Per Profiler/Battery Historian prüfen. Gilt für alle Apps.
-- [ ] Sound hinzufügen, wo es Sinn macht: Kampfgeräusche (Treffer, Monstertod), Beute-/Levelup-/Boss-Sounds, Shop-Kauf/Verkauf, UI-Klicks; ggf. leise Hintergrundmusik pro Zone. Lautstärke/Aus-Schalter in den Optionen (neues Feld in `GameSettings`, Import-Validierung beachten); bei App im Hintergrund stoppen (Akku); Offline-Fortschritt ohne Ton; hochwertige, lizenzfreie Audiodateien, Lizenz dokumentieren (Agent: spielwelt/optionen).
-- [ ] Offline-Fortschritt prüfen: Nach längerem Pausieren und Wiederstarten der App wird die Zeitanzeige für die maximale Weiterlaufzeit (max. 8 h, Willkommen-Dialog ab 30 min, `OfflineProgress`/`OfflineReward.capped`) nicht richtig angezeigt. Reproduzieren (z. B. `lastActiveEpochMillis` zurückdatieren), Berechnung und Anzeige (Dauer, Kappung, Formatierung, Sprache) prüfen und korrigieren; Unit-Test ergänzen (Agent: spielwelt).
+- [ ] Alles Folgende wurde ohne baubares Android-SDK umgesetzt (dl.google.com gesperrt): `.\gradlew.bat testDebugUnitTest lintDebug assembleDebug` laufen lassen, Fehler beheben, dann auf dem Emulator prüfen: Sprachwechsel (System/DE/EN, alle Tabs), Sounds (Pegel/Latenz anhören), Offline-Dialog nach zurückdatiertem `lastActiveEpochMillis`, Update-Hinweis (nur mit Play-Store-Installation, Internal Test).
+- [ ] Offline-Anzeige: Ursache der falschen Zeitanzeige nicht eindeutig reproduziert (Berechnung/Kappung/Stempel im Code und per Unit-Test korrekt). Behoben: Dauer ab 24 h wird in Tagen angezeigt statt "960 Std.". Falls auf dem Gerät weiter falsch: Screenshot des Dialogs + Zeit der letzten Sitzung notieren.
+- [ ] Alle Apps: Update-Hinweis, Sprachprüfung, Akkuschonung analog in Kind Words und RPCT umsetzen (hier nur Idle RPG).
+
+## Erledigt (Idle RPG)
+- [x] Update-Hinweis (Play In-App Updates, flexibler Flow, `update/InAppUpdater`, `app-update` über Version Catalog, `strings_update.xml`, Datenschutz-Seite/In-App-Kurzfassung/Checkliste angepasst).
+- [x] Sprachumschaltung geprüft: Auswahl System/DE/EN in Optionen vorhanden; Lücke behoben: "System" setzte `Locale.getDefault()` nach vorheriger Auswahl nicht zurück; Waffenname im Charakter-Tab war unlokalisiert.
+- [x] Itemnamen lokalisiert (Shop, Beute-Popup, Charakter), Import-Dialog `Locale.getDefault()`, `SaveTransfer`-Meldungen mit lokalisiertem Itemnamen.
+- [x] Akkuschonend: `collectAsStateWithLifecycle`, Shop-Ticker nur sichtbar, Kampfschleife/Ton im Hintergrund aus, Offline-Berechnung einmalig beim Start (kein Dauerlauf); keine Wakelocks/Alarme/Jobs im Projekt.
+- [x] Sound (SoundPool, synthetisiert in `tools/generate_sounds.py`, Lizenz in `tools/SOUNDS.md`, Ein/Aus + Lautstärke in Optionen). Hintergrundmusik pro Zone bewusst nicht umgesetzt.
+- [x] Offline-Fortschritt geprüft + Test ergänzt (siehe oben).
