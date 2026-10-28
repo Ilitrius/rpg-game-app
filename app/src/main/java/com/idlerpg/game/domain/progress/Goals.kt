@@ -3,6 +3,7 @@ package com.idlerpg.game.domain.progress
 import com.idlerpg.game.data.GameState
 import com.idlerpg.game.data.GoalState
 import kotlin.math.roundToLong
+import com.idlerpg.game.domain.stats.Stats
 
 /** Goal counter names (values of [GoalState.type]). Plain strings: unknown ones in a save must not crash. */
 object GoalTypes {
@@ -116,6 +117,7 @@ object Goals {
         val p = state.progress
         val updated = state.copy(
             gold = state.gold + gold,
+            stats = Stats.addGold(state.stats, gold),
             progress = p.copy(
                 goals = p.goals.map { if (it.id == goalId) it.copy(claimed = true) else it },
                 goalsCompleted = p.goalsCompleted + 1,

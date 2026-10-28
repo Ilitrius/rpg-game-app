@@ -23,6 +23,7 @@ Zusätzlich `spielwelt`: Abenteuer-Ansicht (Ich-Perspektive), Gebiete, Monster, 
 
 ## Datenvertrag (Stand)
 - `GameState`: `character`, `equipment`, `gold`, `starterWeaponGranted`, `world: WorldState` (Zone, freigeschaltete Zonen, Kills, `lastActiveEpochMillis`), `shop: ShopState`.
+- `stats: StatsState` (`playTimeMillis`, `highestHit`, `goldEarned`, `tapCount`; Defaults, Alt-Saves laden): hochgezählt über `domain/stats/Stats` (monoton, saturierend). Gold in `CombatRules.applyKillReward`/`DailyReward.claim`/`Goals.claim`; Treffer/Taps/Spielzeit sammelt `AdventureViewModel` im Speicher und schreibt sie mit dem nächsten Beute-/Background-Save. Anzeige `ui/character/StatisticsCard`; Import prüft >= 0.
 - `Item.damageMin/damageMax`: Grundschaden für Waffen.
 - `IdleRpgApp.onCreate` gibt einmalig den Startdolch (`StarterItems.ensureStarterWeapon`).
 - Kampf-API (`charakter`): `CombatStats.of(state)`, `rollHit()`, `attackIntervalMillis`, `Progression.applyXp`, `spendPoint`.

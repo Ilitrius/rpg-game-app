@@ -108,6 +108,7 @@ fun CharacterScreen() {
         DerivedCard(combat)
         GoalsCard(current)
         TapCard(combat)
+        StatisticsCard(current)
     }
 }
 

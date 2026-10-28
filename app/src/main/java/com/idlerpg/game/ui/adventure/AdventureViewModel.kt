@@ -15,6 +15,7 @@ import com.idlerpg.game.domain.character.Progression
 import com.idlerpg.game.domain.character.TapStats
 import com.idlerpg.game.domain.combat.CombatRules
 import com.idlerpg.game.domain.combat.ComboTracker
+import com.idlerpg.game.domain.stats.Stats
 import com.idlerpg.game.domain.world.AutoBossGate
 import com.idlerpg.game.ui.options.GameSettings
 import com.idlerpg.game.domain.world.BossOutcome
@@ -184,6 +185,24 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
     private var offlineJob: Deferred<Unit>? = null
     private var foreground = false
 
+    // Statistics gathered in memory; written together with the next reward/background save (no extra writes).
+    private var statHit = 0L
+    private var statTaps = 0L
+    private var statPlaySince = 0L
+
+    /** Takes the pending statistics and returns the state transform that persists them. */
+    private fun takeStats(): (GameState) -> GameState {
+        val now = SystemClock.elapsedRealtime()
+        val play = if (statPlaySince > 0) now - statPlaySince else 0L
+        if (statPlaySince > 0) statPlaySince = now
+        val hit = statHit
+        val taps = statTaps
+        statTaps = 0
+        return { s ->
+            s.copy(stats = Stats.recordTap(Stats.recordHit(Stats.addPlayTime(s.stats, play), hit), taps))
+        }
+    }
+
     /** Wakes the fight loop right after a tap so a tap kill is processed without the polling delay. */
     private val settings = GameSettings.get(app)
     private val autoBossGate = AutoBossGate()
@@ -241,6 +260,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
     fun onForeground() {
         if (foreground) return
         foreground = true
+        statPlaySince = SystemClock.elapsedRealtime()
         offlineJob = grantOfflineProgress()
         startLoop()
         hpSaveJob = viewModelScope.launch {
@@ -263,9 +283,11 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         val now = System.currentTimeMillis()
         val hp = currentHp()
         lastSavedHp = hp
+        val pendingStats = takeStats()
+        statPlaySince = 0
         idleApp.appScope.launch {
             runCatching {
-                repository.update { it.copy(world = it.world.copy(lastActiveEpochMillis = now, heroHp = hp)) }
+                repository.update { pendingStats(it.copy(world = it.world.copy(lastActiveEpochMillis = now, heroHp = hp))) }
             }
         }
     }
@@ -289,6 +311,8 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
             n ?: st
         }
         if (!applied) return null
+        statTaps++
+        if (hit.damage > statHit) statHit = hit.damage
         _events.tryEmit(AdventureEvent.TapHit(hit, n))
         wake.trySend(Unit)
         return hit
@@ -462,6 +486,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
             val p = pending
             if (p != null && now >= pendingAt) {
                 pending = null
+                if (p.damage > statHit) statHit = p.damage
                 _ui.update { st ->
                     val m = st.monster ?: return@update st
                     st.copy(monster = m.copy(hp = (m.hp - p.damage).coerceAtLeast(0)))
@@ -514,6 +539,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         val now = System.currentTimeMillis()
         val hp = currentHp()
         lastSavedHp = hp
+        val pendingStats = takeStats()
         // App scope: the reward must be saved even if the loop is cancelled right now.
         idleApp.appScope.launch {
             var drop: LootDrop? = null
@@ -525,7 +551,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
                         n = withItem
                         drop = d
                     }
-                    n.copy(world = n.world.copy(heroHp = hp))
+                    pendingStats(n.copy(world = n.world.copy(heroHp = hp)))
                 }
             }
             drop?.let { _events.tryEmit(AdventureEvent.Loot(it)) }
@@ -549,6 +575,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         val now = System.currentTimeMillis()
         val hp = currentHp()
         lastSavedHp = hp
+        val pendingStats = takeStats()
         idleApp.appScope.launch {
             var drop: LootDrop? = null
             runCatching {
@@ -556,7 +583,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
                     val won = WorldProgress.applyBossVictory(s, zone, xp, gold, now)
                     val (withItem, d) = Loot.grant(won, item)
                     drop = d
-                    withItem.copy(world = withItem.world.copy(heroHp = hp))
+                    pendingStats(withItem.copy(world = withItem.world.copy(heroHp = hp)))
                 }
             }
             _events.tryEmit(AdventureEvent.BossVictory(zone, if (wasOpen) null else Zones.next(zone)))

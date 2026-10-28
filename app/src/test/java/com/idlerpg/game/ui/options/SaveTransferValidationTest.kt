@@ -7,6 +7,7 @@ import com.idlerpg.game.data.GameState
 import com.idlerpg.game.data.GoalState
 import com.idlerpg.game.data.Item
 import com.idlerpg.game.data.ProgressState
+import com.idlerpg.game.data.StatsState
 import com.idlerpg.game.data.Rarity
 import com.idlerpg.game.data.ShopState
 import com.idlerpg.game.data.Stats
@@ -87,6 +88,7 @@ class SaveTransferValidationTest {
             ),
             goalsCompleted = 1,
         ),
+        stats = StatsState(playTimeMillis = 7_200_000L, highestHit = 1234, goldEarned = 98_765, tapCount = 321),
     )
 
     private val equippedWeapon = SaveLocation.EquippedItem(EquipmentSlot.WEAPON, "Gehärteter Dolch")
@@ -381,6 +383,24 @@ class SaveTransferValidationTest {
             assertEquals(save, valid.state)
             assertTrue(valid.notes.isEmpty())
         }
+    }
+
+    @Test
+    fun negativeStatsAreRejected() {
+        val loc = SaveLocation.Stats
+        assertEquals(SaveError.NegativeValue(SaveField.STATS_PLAY_TIME, loc), rejected(base.copy(stats = StatsState(playTimeMillis = -1))))
+        assertEquals(SaveError.NegativeValue(SaveField.STATS_HIGHEST_HIT, loc), rejected(base.copy(stats = StatsState(highestHit = -1))))
+        assertEquals(SaveError.NegativeValue(SaveField.STATS_GOLD_EARNED, loc), rejected(base.copy(stats = StatsState(goldEarned = -1))))
+        assertEquals(SaveError.NegativeValue(SaveField.STATS_TAP_COUNT, loc), rejected(base.copy(stats = StatsState(tapCount = -1))))
+        assertEquals(base.stats, accepted(base).state.stats)
+    }
+
+    @Test
+    fun oldSaveWithoutStatsDecodesWithDefaults() {
+        val json = com.idlerpg.game.data.GameJson.encode(base)
+        val obj = kotlinx.serialization.json.Json.parseToJsonElement(json) as kotlinx.serialization.json.JsonObject
+        val old = kotlinx.serialization.json.JsonObject(obj - "stats").toString()
+        assertEquals(StatsState(), com.idlerpg.game.data.GameJson.decode(old).stats)
     }
 
     // ------------------------------------------------------------------ progress

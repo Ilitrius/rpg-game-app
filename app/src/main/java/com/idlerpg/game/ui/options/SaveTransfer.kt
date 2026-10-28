@@ -5,6 +5,7 @@ import com.idlerpg.game.data.GameJson
 import com.idlerpg.game.data.GameState
 import com.idlerpg.game.data.Item
 import com.idlerpg.game.data.ProgressState
+import com.idlerpg.game.data.StatsState
 import com.idlerpg.game.data.ShopState
 import com.idlerpg.game.data.WorldState
 import com.idlerpg.game.domain.equipment.ItemGenerator
@@ -51,6 +52,10 @@ enum class SaveField(val key: String) {
     GOALS_COMPLETED("goalsCompleted"),
     GOAL_TARGET("target"),
     GOAL_BASELINE("baseline"),
+    STATS_PLAY_TIME("playTimeMillis"),
+    STATS_HIGHEST_HIT("highestHit"),
+    STATS_GOLD_EARNED("goldEarned"),
+    STATS_TAP_COUNT("tapCount"),
 }
 
 /** Where a rejected value sits in the save, so the error message can point the player to it. */
@@ -80,6 +85,9 @@ sealed interface SaveLocation {
 
     /** Daily reward / goals counters. */
     data object Progress : SaveLocation
+
+    /** Lifetime statistics (`stats`). */
+    data object Stats : SaveLocation
 
     /** Goal entry number [position] (1-based) with catalog id [goalId]. */
     data class ProgressGoal(val position: Int, val goalId: String) : SaveLocation
@@ -211,6 +219,7 @@ object SaveTransfer {
         validateWorld(state.world)?.let { return it }
         validateShop(state.shop)?.let { return it }
         validateProgress(state.progress)?.let { return it }
+        validateStats(state.stats)?.let { return it }
         return null
     }
 
@@ -296,6 +305,14 @@ object SaveTransfer {
         }
         return null
     }
+
+    private fun validateStats(s: StatsState): SaveError? =
+        listOf(
+            SaveField.STATS_PLAY_TIME to s.playTimeMillis,
+            SaveField.STATS_HIGHEST_HIT to s.highestHit,
+            SaveField.STATS_GOLD_EARNED to s.goldEarned,
+            SaveField.STATS_TAP_COUNT to s.tapCount,
+        ).firstOrNull { it.second < 0 }?.let { SaveError.NegativeValue(it.first, SaveLocation.Stats) }
 
     private fun validateShop(shop: ShopState): SaveError? {
         val loc = SaveLocation.Shop

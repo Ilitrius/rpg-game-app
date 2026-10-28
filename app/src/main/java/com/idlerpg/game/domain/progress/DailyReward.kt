@@ -6,6 +6,7 @@ import com.idlerpg.game.domain.world.MonsterScaling
 import com.idlerpg.game.domain.world.Zones
 import kotlin.math.min
 import kotlin.math.roundToLong
+import com.idlerpg.game.domain.stats.Stats
 
 /**
  * Daily reward (pure, time injected). Honest note: this is a purely local protection. Anyone who edits
@@ -96,6 +97,7 @@ object DailyReward {
         val p = state.progress
         return state.copy(
             gold = state.gold + s.reward,
+            stats = Stats.addGold(state.stats, s.reward),
             progress = p.copy(
                 dailyLastClaimEpochMillis = now,
                 dailyStreak = s.nextStreak,
