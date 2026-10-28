@@ -249,6 +249,10 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         val zone = Zones.all.firstOrNull { it.id == zoneId } ?: return
         if (!WorldProgress.isUnlocked(cur.world, zone) || cur.travelingTo != null) return
         if (zone.id == cur.zone.id && !cur.bossFight) return
+        startTravel(zone)
+    }
+
+    private fun startTravel(zone: Zone) {
         loopJob?.cancel()
         bossRequested = false
         pendingZoneId = zone.id
@@ -486,6 +490,9 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         }
         waitWithRegen(CombatRules.DEATH_MILLIS * 2)
         _ui.update { it.copy(monster = null, phase = MonsterPhase.GONE) }
+        // Boss besiegt: automatisch in die nächste Ebene wechseln (letzte Zone: bleiben).
+        // Die Zone ist durch den Sieg freigeschaltet, auch wenn der UI-State noch nachzieht.
+        Zones.next(zone)?.let { startTravel(it) }
     }
 
     private suspend fun onDefeat() {
