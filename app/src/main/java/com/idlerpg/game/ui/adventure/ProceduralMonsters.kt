@@ -30,15 +30,28 @@ internal object ProceduralMonsters {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Creature>?) = size > 12
     }
 
+    // last creature kept outside the map: no key allocation in the per-frame path
+    private var lastZone: Zone? = null
+    private var lastType: MonsterType? = null
+    private var last: Creature? = null
+
     fun draw(scope: DrawScope, zone: Zone, type: MonsterType, time: Float) {
-        val key = zone.id + "/" + type.id
-        val c = synchronized(cache) { cache.getOrPut(key) { Creature(zone, type) } }
+        var c = last
+        if (c == null || lastZone !== zone || lastType !== type) {
+            val key = zone.id + "/" + type.id
+            c = synchronized(cache) { cache.getOrPut(key) { Creature(zone, type) } }
+            last = c; lastZone = zone; lastType = type
+        }
         c.draw(scope, time)
     }
 
+    /** Number of draw ops of the creature (for the performance budget test). */
+    fun opCount(zone: Zone, type: MonsterType): Int = synchronized(cache) { cache.getOrPut(zone.id + "/" + type.id) { Creature(zone, type) } }.opCount
+
     /** Fear level 0..1 of [type] in [zone] (drives all the scary detail). */
     fun fear(zone: Zone, type: MonsterType): Float {
-        val base = 0.12f + 0.78f * zone.threat + 0.02f * zone.stage
+        // overall escalation (0.6) plus escalation inside the biome (0.4): stage 0..4 is clearly visible
+        val base = 0.08f + 0.6f * zone.threat + 0.4f * (zone.stage / 4f)
         return (if (type.isBoss) base + 0.12f else base).coerceIn(0f, 1f)
     }
 }
@@ -84,6 +97,8 @@ private class Creature(val zone: Zone, val type: MonsterType) {
         }
         if (boss) bossCrest()
     }
+
+    val opCount: Int get() = back.size + ops.size + front.size
 
     fun draw(scope: DrawScope, time: Float) {
         back.forEach { scope.it(time) }
@@ -210,13 +225,14 @@ private class Creature(val zone: Zone, val type: MonsterType) {
         val br = Brush.radialGradient(0.2f to accent.copy(alpha = 0.35f * strength), 0.65f to accent.copy(alpha = 0.12f * strength), 1f to Color.Transparent, center = c, radius = rad)
         back += { t -> drawCircle(br, rad * (1f + 0.04f * sin(t * 2f)), c) }
         val wisps = (strength * 6).toInt() + (if (boss) 2 else 0)
+        val wispBrush = Brush.radialGradient(listOf(Color.White.copy(alpha = 0.9f), accent.copy(alpha = 0.5f), Color.Transparent), center = Offset.Zero, radius = 7f)
         repeat(wisps) { i ->
             val phase = i * 2f * PI.toFloat() / wisps; val orbit = 70f + (i % 3) * 14f
             front += { t ->
                 val a = phase + t * (0.5f + 0.15f * (i % 3)) * (if (i % 2 == 0) 1f else -1f)
                 val o = Offset(100f + cos(a) * orbit, 115f + sin(a) * orbit * 0.55f - 20f)
                 val vis = if (sin(a) > 0f) 1f else 0.5f
-                drawCircle(Brush.radialGradient(listOf(Color.White.copy(alpha = 0.9f * vis), accent.copy(alpha = 0.5f * vis), Color.Transparent), center = o, radius = 7f), 7f, o)
+                withTransform({ translate(o.x, o.y) }) { drawCircle(wispBrush, 7f, Offset.Zero, alpha = vis) }
             }
         }
     }
@@ -348,8 +364,8 @@ private class Creature(val zone: Zone, val type: MonsterType) {
         val legs = Path(); val legsHi = Path()
         for (i in 0 until 4) for (d in listOf(-1f, 1f)) {
             val ox = 100f + d * (20f + i * 8f); val oy = 128f + i * 4f
-            val kx = 100f + d * (78f + i * 14f); val ky = 62f + i * 22f
-            val fx = 100f + d * (92f + i * 20f); val fy = 198f
+            val kx = 100f + d * (58f + i * 9f); val ky = 62f + i * 22f
+            val fx = 100f + d * (66f + i * 13f); val fy = 198f
             legs.moveTo(ox, oy); legs.cubicTo(ox + d * 24f, oy - 40f, kx - d * 10f, ky - 10f, kx, ky); legs.cubicTo(kx + d * 10f, ky + 40f, fx, fy - 60f, fx, fy)
             legsHi.moveTo(ox, oy - 1f); legsHi.cubicTo(ox + d * 24f, oy - 41f, kx - d * 10f, ky - 11f, kx, ky - 1f)
         }
@@ -383,7 +399,7 @@ private class Creature(val zone: Zone, val type: MonsterType) {
     private fun winged() {
         for (d in listOf(-1f, 1f)) {
             val sx = 100f + d * 18f; val sy = 100f
-            val tipX = 100f + d * 150f; val tipY = 14f - 20f * fear
+            val tipX = 100f + d * 106f; val tipY = 14f - 20f * fear
             val membrane = path {
                 moveTo(sx, sy)
                 cubicTo(sx + d * 40f, sy - 50f, tipX - d * 40f, tipY + 6f, tipX, tipY)

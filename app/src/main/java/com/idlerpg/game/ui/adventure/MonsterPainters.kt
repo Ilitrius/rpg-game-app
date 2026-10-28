@@ -58,7 +58,8 @@ object MonsterPainters {
         }) {
             drawGroundShadow(alpha * (1f - 0.5f * squash))
             val bounds = Rect(-90f, -90f, 290f, 215f)
-            drawIntoCanvas { it.saveLayer(bounds, Paint().apply { this.alpha = alpha }) }
+            layerPaint.alpha = alpha
+            drawIntoCanvas { it.saveLayer(bounds, layerPaint) }
             withTransform({
                 scale(1f - 0.025f * breath + 0.12f * squash, 1f + 0.035f * breath - 0.35f * squash, Offset(100f, GROUND))
             }) {
@@ -96,6 +97,9 @@ object MonsterPainters {
             drawIntoCanvas { it.restore() }
         }
     }
+
+    /** Reused paint of the per-monster layer (draw runs on the main thread only). */
+    private val layerPaint = Paint()
 
     private val shadowBrush = Brush.radialGradient(
         0f to Color.Black.copy(alpha = 0.55f),

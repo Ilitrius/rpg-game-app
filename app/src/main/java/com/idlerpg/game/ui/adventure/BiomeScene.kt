@@ -4,6 +4,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Canvas
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathFillType
@@ -29,8 +34,9 @@ import kotlin.random.Random
  */
 internal class BiomeScene(zone: Zone, size: Size) : ZoneScene {
     private val st = BiomeStyles.of(zone.biome!!)
-    private val t = zone.threat
     private val stage = zone.stage
+    /** Intensity 0..1: overall zone threat (60 %) plus escalation inside the biome (40 %). */
+    private val t = 0.6f * zone.threat + 0.4f * (zone.stage / 4f)
     /** 0..1 intensity inside the biome. */
     private val si = stage / 4f
     private val w = size.width
@@ -107,7 +113,7 @@ internal class BiomeScene(zone: Zone, size: Size) : ZoneScene {
                     val peak = baseY - amp * (0.4f + r.nextFloat() * 0.8f)
                     val step = w * (0.05f + r.nextFloat() * 0.09f) / density.coerceAtLeast(0.6f).pow(0.3f)
                     if (kind == Far.PEAKS) { lineTo(x + step * 0.5f, peak); lineTo(x + step, baseY - amp * 0.1f * r.nextFloat()) }
-                    else { lineTo(x, peak); lineTo(x + step * 0.8f, peak + amp * 0.03f); lineTo(x + step * 0.85f, baseY - amp * 0.2f * r.nextFloat()) }
+                    else { lineTo(x + step * 0.12f, peak); lineTo(x + step * 0.55f, peak + amp * 0.05f * r.nextFloat()); lineTo(x + step * 0.7f, peak + amp * 0.12f); lineTo(x + step, baseY - amp * 0.25f * r.nextFloat()) }
                     x += step
                 }
                 ground()
@@ -144,7 +150,7 @@ internal class BiomeScene(zone: Zone, size: Size) : ZoneScene {
                         val n = (tall / (h * 0.03f)).toInt().coerceIn(0, 6)
                         repeat(n) { j -> if (r.nextFloat() < 0.6f) lights.addRect(Rect(x + wd * 0.3f, baseY - tall + j * h * 0.03f + h * 0.01f, x + wd * 0.3f + wd * 0.12f, baseY - tall + j * h * 0.03f + h * 0.025f)) }
                     }
-                    x += wd + w * (0.005f + r.nextFloat() * 0.05f) / density.coerceAtLeast(0.7f)
+                    x += wd + w * (if (kind == Far.COLUMNS) 0.03f + r.nextFloat() * 0.07f else 0.005f + r.nextFloat() * 0.05f) / density.coerceAtLeast(0.7f)
                 }
                 lineTo(w * 1.05f, baseY); ground()
             }
@@ -173,11 +179,12 @@ internal class BiomeScene(zone: Zone, size: Size) : ZoneScene {
             }
             Far.GEARS -> {
                 fillType = PathFillType.EvenOdd
-                val n = (3 * density).toInt() + 2
-                repeat(n) {
-                    val cx = r.nextFloat() * w
-                    val rad = amp * (0.8f + r.nextFloat() * 1.4f)
-                    val cy = baseY - rad * (0.2f + r.nextFloat() * 0.6f)
+                val n = if (density > 2f) 3 else 2
+                val gap = w / n
+                repeat(n) { gi ->
+                    val rad = minOf(amp * (2.4f + r.nextFloat() * 1.6f), gap * 0.5f)
+                    val cx = gap * (gi + 0.5f) + (r.nextFloat() - 0.5f) * gap * 0.2f
+                    val cy = baseY - rad * (0.25f + r.nextFloat() * 0.4f)
                     val teeth = 12 + r.nextInt(8)
                     for (k in 0 until teeth * 2) {
                         val a = k * PI.toFloat() / teeth
@@ -251,7 +258,7 @@ internal class BiomeScene(zone: Zone, size: Size) : ZoneScene {
         fun crack(p: Path, from: Offset, depth: Int) {
             var o = from; var dir = -PI.toFloat() / 2 + (r.nextFloat() - 0.5f) * 1.4f
             p.moveTo(o.x, o.y)
-            val len = h * (0.02f + r.nextFloat() * 0.03f)
+            val len = h * (0.012f + r.nextFloat() * 0.022f)
             val steps = 5 + r.nextInt(5)
             repeat(steps) {
                 dir += (r.nextFloat() - 0.5f) * 0.9f
@@ -275,7 +282,7 @@ internal class BiomeScene(zone: Zone, size: Size) : ZoneScene {
                 target.moveTo(x - l, y); target.quadraticTo(x, y - l * 0.1f, x + l, y)
             }
             GroundKind.ROCK, GroundKind.TILES -> { grid(groundDark); repeat(n) { val d = r.nextFloat().pow(1.6f); val y = yAt(d); val x = r.nextFloat() * w; val l = w * 0.03f * (0.3f + d); groundLight.moveTo(x, y); groundLight.lineTo(x + l, y + l * 0.15f) } }
-            GroundKind.LAVA -> { repeat(6 + (t * 12).toInt()) { crack(groundGlow, Offset(w * (0.05f + r.nextFloat() * 0.9f), h * (0.78f + r.nextFloat() * 0.2f)), 0) }; repeat(n) { val d = r.nextFloat().pow(1.5f); val y = yAt(d); val x = r.nextFloat() * w; groundDark.moveTo(x, y); groundDark.lineTo(x + w * 0.04f * d, y + 2f) } }
+            GroundKind.LAVA -> { repeat(3 + (t * 5).toInt()) { crack(groundGlow, Offset(w * (0.05f + r.nextFloat() * 0.9f), h * (0.78f + r.nextFloat() * 0.2f)), 0) }; repeat(n) { val d = r.nextFloat().pow(1.5f); val y = yAt(d); val x = r.nextFloat() * w; groundDark.moveTo(x, y); groundDark.lineTo(x + w * 0.04f * d, y + 2f) } }
             GroundKind.ICE -> { repeat(8 + (t * 10).toInt()) { crack(groundLight, Offset(w * (0.05f + r.nextFloat() * 0.9f), h * (0.75f + r.nextFloat() * 0.22f)), 0) }; grid(groundDark) }
             GroundKind.WATER -> repeat(n) {
                 val d = r.nextFloat().pow(1.4f); val y = yAt(d); val x = r.nextFloat() * w * 1.2f - w * 0.1f; val l = w * (0.03f + 0.12f * d)
@@ -287,8 +294,8 @@ internal class BiomeScene(zone: Zone, size: Size) : ZoneScene {
                 groundLight.moveTo(x, y); groundLight.lineTo(x + cos(a) * l, y + sin(a) * l * 0.3f)
                 if (r.nextFloat() < 0.12f) groundDark.addOval(Rect(x - l * 0.3f, y - l * 0.3f, x + l * 0.3f, y + l * 0.3f))
             }
-            GroundKind.FLESH -> { repeat(10 + (t * 12).toInt()) { crack(groundGlow, Offset(w * (0.05f + r.nextFloat() * 0.9f), h * (0.78f + r.nextFloat() * 0.2f)), 0) }; repeat(n) { val d = r.nextFloat().pow(1.5f); val y = yAt(d); val x = r.nextFloat() * w; groundDark.addOval(Rect(x, y, x + w * 0.03f * (0.3f + d), y + w * 0.012f * (0.3f + d))) } }
-            GroundKind.VOID -> { grid(groundGlow); repeat(n * 2) { val d = r.nextFloat().pow(1.4f); groundLight.addOval(Rect(r.nextFloat() * w, yAt(d), r.nextFloat() * w + 2f, yAt(d) + 2f)) } }
+            GroundKind.FLESH -> { repeat(4 + (t * 6).toInt()) { crack(groundGlow, Offset(w * (0.05f + r.nextFloat() * 0.9f), h * (0.78f + r.nextFloat() * 0.2f)), 0) }; repeat(n) { val d = r.nextFloat().pow(1.5f); val y = yAt(d); val x = r.nextFloat() * w; groundDark.addOval(Rect(x, y, x + w * 0.03f * (0.3f + d), y + w * 0.012f * (0.3f + d))) } }
+            GroundKind.VOID -> { grid(groundGlow); repeat(n * 2) { val d = r.nextFloat().pow(1.4f); groundLight.addOval(Rect(r.nextFloat() * w, yAt(d), 0f, 0f).let { q -> Rect(q.left, q.top, q.left + 2.2f, q.top + 2.2f) }) } }
         }
         groundGlowWide.addPath(groundGlow)
     }
@@ -333,43 +340,96 @@ internal class BiomeScene(zone: Zone, size: Size) : ZoneScene {
             close()
         }
     }
-    private val frameBrush = Brush.verticalGradient(0f to mix(st.skinMid, Color.Black, 0.8f), 1f to Color.Black, startY = h * 0.3f, endY = h)
+    private val frameBrush = Brush.verticalGradient(0f to mix(st.skinMid, Color.Black, 0.75f), 1f to mix(st.skinDark, Color.Black, 0.8f), startY = h * 0.3f, endY = h)
     private val vignette = SceneKit.vignette(w, h, 0.5f + 0.35f * t + 0.1f * si, mix(Color.Black, st.skinDark, 0.2f))
     private val darkness = Brush.verticalGradient(0f to Color.Black.copy(alpha = 0.18f * t), 1f to Color.Black.copy(alpha = 0.32f * t), startY = 0f, endY = h)
 
-    // ------------------------------------------------------------------ draw
-    override fun drawBackground(scope: DrawScope, drift: Float, time: Float) = with(scope) {
-        drawRect(skyBrush, size = androidx.compose.ui.geometry.Size(w, horizonY + 1f))
-        if (st.particle == Particle.STARS || st.orb == Orb.PLANET || st.ground == GroundKind.VOID) drawStars(time)
-        drawOrb(time)
-        layers.forEachIndexed { i, l ->
-            withTransform({ translate(((drift * 2f - 1f) * w * 0.004f * (i + 1)), 0f) }) {
+    // ------------------------------------------------------------------ static layers baked once
+    private class Star(val x: Float, val y: Float, val r: Float, val cycles: Int, val phase: Float)
+    private val stars: List<Star> = Random(seed + 1).let { r ->
+        if (st.particle == Particle.STARS || st.orb == Orb.PLANET || st.ground == GroundKind.VOID)
+            List(60 + (40 * t).toInt()) { Star(r.nextFloat() * w, r.nextFloat() * horizonY * 0.95f, (0.8f + r.nextFloat() * 1.8f) * w / 1080f, 1 + it % 4, it * 1.3f) }
+        else emptyList()
+    }
+
+    /** Ground kinds whose detail strokes animate; all others are baked into the ground layer. */
+    private val animatedGround = st.ground == GroundKind.LAVA || st.ground == GroundKind.FLESH || st.ground == GroundKind.VOID || st.ground == GroundKind.WATER
+
+    private val bakeH = (horizonY + h * 0.06f).toInt().coerceAtMost(h.toInt())
+    private var skyLayer: ImageBitmap? = null      // sky + calm stars, 0..horizonY
+    private var farLayer: ImageBitmap? = null      // far silhouettes + fog, 0..bakeH (transparent sky)
+    private var groundLayer: ImageBitmap? = null   // ground (+ static details + glow), horizonY..h
+
+    private fun bake(width: Int, height: Int, block: DrawScope.() -> Unit): ImageBitmap {
+        val bmp = ImageBitmap(width.coerceAtLeast(1), height.coerceAtLeast(1))
+        CanvasDrawScope().draw(Density(1f), LayoutDirection.Ltr, Canvas(bmp), Size(width.toFloat(), height.toFloat())) { block() }
+        return bmp
+    }
+
+    private fun ensureBaked() {
+        if (skyLayer != null) return
+        val wi = w.toInt(); val hz = horizonY.toInt()
+        skyLayer = bake(wi, hz + 1) {
+            drawRect(skyBrush, size = Size(w, horizonY + 1f))
+            stars.forEachIndexed { i, sp -> if (i % 5 != 0) drawCircle(Color.White.copy(alpha = 0.55f), sp.r, Offset(sp.x, sp.y)) }
+        }
+        farLayer = bake(wi, bakeH) {
+            layers.forEach { l ->
                 drawPath(l.path, l.brush)
-                l.lights?.let { lp -> drawPath(lp, st.glow.copy(alpha = 0.25f + 0.2f * SceneKit.wave(time, 3, i * 2f))) }
+                l.lights?.let { lp -> drawPath(lp, st.glow.copy(alpha = 0.35f)) }
+            }
+            drawRect(fogBrush, topLeft = Offset(0f, horizonY - h * 0.1f), size = Size(w, h * 0.22f))
+        }
+        groundLayer = bake(wi, (h - horizonY).toInt() + 1) {
+            withTransform({ translate(0f, -horizonY) }) {
+                drawRect(groundBrush, topLeft = Offset(0f, horizonY), size = Size(w, h - horizonY))
+                if (!animatedGround) drawGroundDetails(0f)
+                drawRect(glowBrush, topLeft = Offset(0f, horizonY), size = Size(w, h - horizonY))
             }
         }
-        drawRect(fogBrush, topLeft = Offset(0f, horizonY - h * 0.1f), size = androidx.compose.ui.geometry.Size(w, h * 0.22f))
+    }
+
+    // cached per-eye halo brushes (eyes do not move)
+    private val eyeSize = w * 0.0045f
+    private val eyeHalo: List<Brush> = eyes.map { e -> Brush.radialGradient(listOf(eyeColor.copy(alpha = 0.5f), Color.Transparent), center = e, radius = eyeSize * 4f) }
+
+    // ------------------------------------------------------------------ draw
+    override fun drawBackground(scope: DrawScope, drift: Float, time: Float) = with(scope) {
+        ensureBaked()
+        drawImage(skyLayer!!)
+        stars.forEachIndexed { i, sp ->
+            if (i % 5 == 0) drawCircle(Color.White, sp.r, Offset(sp.x, sp.y), alpha = (0.28f + 0.5f * (0.5f + 0.5f * SceneKit.wave(time, sp.cycles, sp.phase))).coerceIn(0f, 1f))
+        }
+        drawOrb(time)
+        drawImage(farLayer!!)
+        layers.forEachIndexed { i, l -> l.lights?.let { lp -> drawPath(lp, st.glow.copy(alpha = 0.12f * (0.5f + 0.5f * SceneKit.wave(time, 3, i * 2f)))) } }
         eyes.forEachIndexed { i, e ->
             val a = (0.55f + 0.45f * SceneKit.wave(time, 2 + i % 3, i * 1.7f)).coerceIn(0f, 1f) * (if (time % 20f in 0f..0.25f && i % 2 == 0) 0.2f else 1f)
-            val s = w * 0.0045f
-            drawCircle(Brush.radialGradient(listOf(eyeColor.copy(alpha = 0.5f * a), Color.Transparent), center = e, radius = s * 4f), s * 4f, e)
-            drawCircle(eyeColor.copy(alpha = a), s, Offset(e.x - s * 2f, e.y))
-            drawCircle(eyeColor.copy(alpha = a), s, Offset(e.x + s * 2f, e.y))
+            val s = eyeSize
+            drawCircle(eyeHalo[i], s * 4f, e, alpha = a)
+            drawCircle(eyeColor, s, Offset(e.x - s * 2f, e.y), alpha = a)
+            drawCircle(eyeColor, s, Offset(e.x + s * 2f, e.y), alpha = a)
         }
-        drawRect(groundBrush, topLeft = Offset(0f, horizonY), size = androidx.compose.ui.geometry.Size(w, h - horizonY))
-        drawGround(time)
-        drawRect(glowBrush, topLeft = Offset(0f, horizonY), size = androidx.compose.ui.geometry.Size(w, h - horizonY))
+        drawImage(groundLayer!!, Offset(0f, horizonY))
+        if (animatedGround) drawGroundDetails(time)
         drawParticles(time)
         if (lightning) strike(time)
     }
 
-    private fun DrawScope.drawStars(time: Float) {
-        val r = Random(seed + 1)
-        repeat(60 + (40 * t).toInt()) { i ->
-            val x = r.nextFloat() * w; val y = r.nextFloat() * horizonY * 0.95f; val s = 0.8f + r.nextFloat() * 1.8f
-            val a = 0.35f + 0.65f * (0.5f + 0.5f * SceneKit.wave(time, 1 + i % 4, i * 1.3f))
-            drawCircle(Color.White.copy(alpha = a * 0.8f), s * w / 1080f, Offset(x, y))
-        }
+    // orb brushes are built once; the pulse scales them around the orb center
+    private val orbSunColor = if (st.orb == Orb.RED_SUN) Color(0xFFFF4A1A) else mix(Color(0xFFFFE9A8), st.glow, 0.3f)
+    private val orbHalo: Brush? = when (st.orb) {
+        Orb.SUN, Orb.RED_SUN -> Brush.radialGradient(listOf(orbSunColor.copy(alpha = 0.55f), Color.Transparent), center = orbCenter, radius = orbRadius * 4f)
+        Orb.MOON -> Brush.radialGradient(listOf(Color(0xFFDDE8FF).copy(alpha = 0.35f), Color.Transparent), center = orbCenter, radius = orbRadius * 3.2f)
+        Orb.ECLIPSE -> Brush.radialGradient(0.7f to st.glow.copy(alpha = 0.7f), 0.85f to st.glow.copy(alpha = 0.25f), 1f to Color.Transparent, center = orbCenter, radius = orbRadius * 2.6f)
+        Orb.PLANET -> Brush.radialGradient(listOf(st.glow.copy(alpha = 0.4f), Color.Transparent), center = orbCenter, radius = orbRadius * 3f)
+        else -> null
+    }
+    private val orbBody: Brush? = when (st.orb) {
+        Orb.SUN, Orb.RED_SUN -> Brush.radialGradient(listOf(Color.White.copy(alpha = 0.9f), orbSunColor, mix(orbSunColor, Color.Black, 0.3f)), center = orbCenter, radius = orbRadius)
+        Orb.MOON -> Brush.radialGradient(listOf(Color(0xFFF4F6FF), Color(0xFFB9C3DC)), center = orbCenter.copy(x = orbCenter.x - orbRadius * 0.3f, y = orbCenter.y - orbRadius * 0.3f), radius = orbRadius * 1.4f)
+        Orb.PLANET -> Brush.linearGradient(listOf(mix(st.skinLight, Color.White, 0.2f), st.skinMid, st.skinDark), start = orbCenter.copy(y = orbCenter.y - orbRadius), end = orbCenter.copy(y = orbCenter.y + orbRadius))
+        else -> null
     }
 
     private fun DrawScope.drawOrb(time: Float) {
@@ -377,28 +437,27 @@ internal class BiomeScene(zone: Zone, size: Size) : ZoneScene {
         when (st.orb) {
             Orb.NONE -> Unit
             Orb.SUN, Orb.RED_SUN -> {
-                val col = if (st.orb == Orb.SUN) mix(Color(0xFFFFE9A8), st.glow, 0.3f) else Color(0xFFFF4A1A)
                 val pulse = 1f + 0.03f * SceneKit.wave(time, 3)
-                drawCircle(Brush.radialGradient(listOf(col.copy(alpha = 0.55f), Color.Transparent), center = c, radius = rad * 4f * pulse), rad * 4f * pulse, c)
-                drawCircle(Brush.radialGradient(listOf(Color.White.copy(alpha = 0.9f), col, mix(col, Color.Black, 0.3f)), center = c, radius = rad), rad, c)
+                withTransform({ scale(pulse, pulse, c) }) { drawCircle(orbHalo!!, rad * 4f, c) }
+                drawCircle(orbBody!!, rad, c)
             }
             Orb.MOON -> {
-                drawCircle(Brush.radialGradient(listOf(Color(0xFFDDE8FF).copy(alpha = 0.35f), Color.Transparent), center = c, radius = rad * 3.2f), rad * 3.2f, c)
-                drawCircle(Brush.radialGradient(listOf(Color(0xFFF4F6FF), Color(0xFFB9C3DC)), center = c.copy(x = c.x - rad * 0.3f, y = c.y - rad * 0.3f), radius = rad * 1.4f), rad, c)
-                craters.forEach { (o, rr, a) -> drawCircle(Color(0xFF6A7490).copy(alpha = a), rr, c + o) }
+                drawCircle(orbHalo!!, rad * 3.2f, c)
+                drawCircle(orbBody!!, rad, c)
+                craters.forEach { (o, rr, a) -> drawCircle(Color(0xFF6A7490), rr, c + o, alpha = a) }
                 if (t > 0.5f) drawCircle(Color(0xFFB02030).copy(alpha = (t - 0.5f) * 0.8f), rad, c, blendMode = androidx.compose.ui.graphics.BlendMode.SrcAtop)
             }
             Orb.ECLIPSE -> {
                 val pulse = 1f + 0.04f * SceneKit.wave(time, 2)
-                drawCircle(Brush.radialGradient(0.7f to st.glow.copy(alpha = 0.7f), 0.85f to st.glow.copy(alpha = 0.25f), 1f to Color.Transparent, center = c, radius = rad * 2.6f * pulse), rad * 2.6f * pulse, c)
+                withTransform({ scale(pulse, pulse, c) }) { drawCircle(orbHalo!!, rad * 2.6f, c) }
                 drawCircle(Color(0xFF020104), rad, c)
-                drawCircle(st.glow.copy(alpha = 0.9f), rad * 1.02f, c, style = Stroke(width = rad * 0.05f))
+                drawCircle(st.glow, rad * 1.02f, c, alpha = 0.9f, style = Stroke(width = rad * 0.05f))
             }
             Orb.PLANET -> {
-                drawCircle(Brush.radialGradient(listOf(st.glow.copy(alpha = 0.4f), Color.Transparent), center = c, radius = rad * 3f), rad * 3f, c)
-                drawCircle(Brush.linearGradient(listOf(mix(st.skinLight, Color.White, 0.2f), st.skinMid, st.skinDark), start = c.copy(y = c.y - rad), end = c.copy(y = c.y + rad)), rad * 1.3f, c)
-                repeat(4) { k -> drawArc(Color.White.copy(alpha = 0.1f), 0f, 360f, false, topLeft = Offset(c.x - rad * 1.3f, c.y - rad * 0.9f + k * rad * 0.5f), size = androidx.compose.ui.geometry.Size(rad * 2.6f, rad * 0.15f)) }
-                drawOval(st.accent.copy(alpha = 0.55f), Offset(c.x - rad * 2.4f, c.y - rad * 0.28f), androidx.compose.ui.geometry.Size(rad * 4.8f, rad * 0.56f), style = Stroke(width = rad * 0.08f))
+                drawCircle(orbHalo!!, rad * 3f, c)
+                drawCircle(orbBody!!, rad * 1.3f, c)
+                repeat(4) { k -> drawArc(Color.White.copy(alpha = 0.1f), 0f, 360f, false, topLeft = Offset(c.x - rad * 1.3f, c.y - rad * 0.9f + k * rad * 0.5f), size = Size(rad * 2.6f, rad * 0.15f)) }
+                drawOval(st.accent.copy(alpha = 0.55f), Offset(c.x - rad * 2.4f, c.y - rad * 0.28f), Size(rad * 4.8f, rad * 0.56f), style = Stroke(width = rad * 0.08f))
             }
             Orb.RIFT -> {
                 val a = 0.75f + 0.25f * SceneKit.wave(time, 4)
@@ -409,7 +468,7 @@ internal class BiomeScene(zone: Zone, size: Size) : ZoneScene {
         }
     }
 
-    private fun DrawScope.drawGround(time: Float) {
+    private fun DrawScope.drawGroundDetails(time: Float) {
         val sw = groundStrokeW
         when (st.ground) {
             GroundKind.GRASS -> { drawPath(groundDark, st.skinDark.copy(alpha = 0.7f), style = Stroke(sw, cap = StrokeCap.Round)); drawPath(groundLight, mix(st.groundTop, st.skinLight, 0.4f).copy(alpha = 0.6f), style = Stroke(sw, cap = StrokeCap.Round)) }
@@ -451,7 +510,7 @@ internal class BiomeScene(zone: Zone, size: Size) : ZoneScene {
                 Particle.EMBERS -> { val y = h * (1f - f); val a = (1f - f) * (0.6f + 0.4f * sin(time * 6f + p.phase)); drawCircle(st.accent.copy(alpha = a.coerceIn(0f, 1f)), w * 0.003f * p.size, Offset(p.x * w + sway, y)) }
                 Particle.ASH -> drawCircle(Color(0xFFBDB6A8).copy(alpha = 0.5f), w * 0.0025f * p.size, Offset(p.x * w + sway, h * f))
                 Particle.SNOW -> drawCircle(Color.White.copy(alpha = 0.85f), w * 0.0032f * p.size, Offset(p.x * w + sway, h * f))
-                Particle.SPORES, Particle.MOTES -> { val a = 0.3f + 0.4f * (0.5f + 0.5f * sin(time * 2f + p.phase)); val o = Offset(p.x * w + sway, h * (1f - f)); drawCircle(Brush.radialGradient(listOf(st.accent.copy(alpha = a), Color.Transparent), center = o, radius = w * 0.012f * p.size), w * 0.012f * p.size, o) }
+                Particle.SPORES, Particle.MOTES -> { val a = 0.3f + 0.4f * (0.5f + 0.5f * sin(time * 2f + p.phase)); val o = Offset(p.x * w + sway, h * (1f - f)); drawCircle(st.accent, w * 0.011f * p.size, o, alpha = a * 0.3f); drawCircle(st.accent, w * 0.0035f * p.size, o, alpha = a) }
                 Particle.SAND -> { val y = yAt(0.15f + p.y * 0.6f); drawLine(st.skinLight.copy(alpha = 0.35f), Offset(g * w, y), Offset(g * w - w * 0.06f * p.size, y + 4f), strokeWidth = 2f) }
                 Particle.RAIN -> drawLine(Color(0xFFBFD8E8).copy(alpha = 0.45f), Offset(p.x * w + f * w * 0.1f, h * f), Offset(p.x * w + f * w * 0.1f - w * 0.012f, h * f + h * 0.03f), strokeWidth = 2.2f)
                 Particle.PETALS -> drawCircle(st.accent.copy(alpha = 0.8f), w * 0.004f * p.size, Offset(p.x * w + sway * 2f, h * f))
