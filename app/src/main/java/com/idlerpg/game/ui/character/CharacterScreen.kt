@@ -106,6 +106,7 @@ fun CharacterScreen() {
             scope.launch { repository.update { Progression.spendPoint(it, type) } }
         }
         DerivedCard(combat)
+        TapCard(combat)
     }
 }
 
