@@ -121,4 +121,12 @@
     <string name="options_autoboss_title">Boss</string>
     <string name="options_autoboss_label">Boss automatisch herausfordern</string>
     <string name="options_autoboss_description">Startet den Bosskampf selbst, sobald er möglich ist. Nach einer Niederlage gibt es eine kurze Pause.</string>
+    <string name="options_backup_title">Sicherung</string>
+    <string name="options_backup_never">Noch nie gesichert.</string>
+    <string name="options_backup_last">Letzte Sicherung: %1$s</string>
+    <string name="options_backup_warning">Dein Held ist weit gekommen. Exportiere den Spielstand, damit nichts verloren geht, etwa beim Gerätewechsel.</string>
+    <string name="options_backup_reminders">Erinnerungen</string>
+    <string name="options_backup_dialog_title">Spielstand sichern?</string>
+    <string name="options_backup_dialog_text">Deine letzte Sicherung ist lange her. Exportiere deinen Spielstand unter Optionen, damit er nicht verloren geht.</string>
+    <string name="options_backup_dialog_ok">Verstanden</string>
 </resources>
