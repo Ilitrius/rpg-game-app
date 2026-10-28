@@ -36,3 +36,8 @@
 - [2026-10-12] Freie HUD-Flächen in der Abenteueransicht (1080x2400): links unten über dem Heldenblock (bis 0,52 × Breite), rechts neben dem Helden-HP-Balken. Rechts unten liegt die ruhende Waffe. — **Warum:** Overlays dürfen weder Waffe noch Monster verdecken.
 - [2026-10-11] Hochwertig wirkt: mehrere Verlaufsschichten, Glanzlichter, Schattierung, Bodenschatten, kleine Details (Rost, Nieten, Edelsteine), leichte Idle-Animation. Einfarbige Grundformen wirken billig. — **Warum:** User-Regel "nur hochauflösende Grafik"; diese Mittel haben bei Dolch, Monstern, Items überzeugt.
 - [2026-10-11] Seltenheitsfarben einheitlich über `rarityColor()` (grau/grün/blau/lila/orange). — **Warum:** gleiche Sprache in Ausrüstung, Beute-Popup, Waffen-Glow.
+
+## Ziele (Tagesbelohnung & Ziele)
+- [2026-10-28] Neue Zähler-Ziele aus bestehenden GameState-Zählern ableiten (Zähler − `baseline`), nicht per Hook in der Kampfschleife: Offline-Fortschritt zählt automatisch. Katalog-Ziele relativ (Zuwachs) statt absolut, sonst sind sie für Veteranen sofort fertig. — **Warum:** keine Eingriffe in `spielwelt` nötig.
+- [2026-10-28] Katalog-Reihenfolge nach Tiers verschränkt (je Tier ein Ziel pro Typ), "nächstes Ziel" ist der erste Katalogeintrag, der noch nicht in der Liste steht — das ist nicht zwingend derselbe Typ wie das geclaimte. Tests nicht auf "gleicher Typ rückt nach" auslegen.
+- [2026-10-28] Neue Strings für Import-Validierung (Feldnamen, Orte, Notes) dürfen in der Feature-Stringdatei liegen (`strings_ziele.xml`), `OptionsStringsTest` prüft nur `strings_options.xml`.

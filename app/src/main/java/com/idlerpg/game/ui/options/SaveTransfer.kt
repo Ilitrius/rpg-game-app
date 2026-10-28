@@ -4,9 +4,11 @@ import com.idlerpg.game.data.EquipmentSlot
 import com.idlerpg.game.data.GameJson
 import com.idlerpg.game.data.GameState
 import com.idlerpg.game.data.Item
+import com.idlerpg.game.data.ProgressState
 import com.idlerpg.game.data.ShopState
 import com.idlerpg.game.data.WorldState
 import com.idlerpg.game.domain.equipment.ItemGenerator
+import com.idlerpg.game.domain.progress.Goals
 import com.idlerpg.game.domain.world.Zones
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -43,6 +45,12 @@ enum class SaveField(val key: String) {
     RESTOCKED_AT("restockedAtEpochMillis"),
     STOCK_LEVEL("stockLevel"),
     PAID_RESTOCKS("paidRestocks"),
+    DAILY_LAST_CLAIM("dailyLastClaimEpochMillis"),
+    DAILY_STREAK("dailyStreak"),
+    CLOCK_HIGH_WATER("clockHighWaterMillis"),
+    GOALS_COMPLETED("goalsCompleted"),
+    GOAL_TARGET("target"),
+    GOAL_BASELINE("baseline"),
 }
 
 /** Where a rejected value sits in the save, so the error message can point the player to it. */
@@ -69,6 +77,12 @@ sealed interface SaveLocation {
 
     /** Merchant state (`shop`). */
     data object Shop : SaveLocation
+
+    /** Daily reward / goals counters. */
+    data object Progress : SaveLocation
+
+    /** Goal entry number [position] (1-based) with catalog id [goalId]. */
+    data class ProgressGoal(val position: Int, val goalId: String) : SaveLocation
 }
 
 /** Reasons an imported save is rejected. Mapped to German strings in the UI. */
@@ -106,6 +120,9 @@ sealed interface ImportNote {
 
     /** Progress entries for zones this app version doesn't know. They are kept (no effect in the game). */
     data class UnknownZonesIgnored(val zoneIds: List<String>) : ImportNote
+
+    /** [count] goals of unknown type/id (newer app version or edited file) were removed. */
+    data class UnknownGoalsDropped(val count: Int) : ImportNote
 }
 
 sealed interface ImportResult {
@@ -193,6 +210,7 @@ object SaveTransfer {
 
         validateWorld(state.world)?.let { return it }
         validateShop(state.shop)?.let { return it }
+        validateProgress(state.progress)?.let { return it }
         return null
     }
 
@@ -217,6 +235,12 @@ object SaveTransfer {
             .filter { it !in knownZoneIds }
             .distinct()
         if (unknown.isNotEmpty()) notes += ImportNote.UnknownZonesIgnored(unknown)
+        val goals = result.progress.goals
+        val known = goals.filter { Goals.defOf(it) != null }
+        if (known.size != goals.size) {
+            notes += ImportNote.UnknownGoalsDropped(goals.size - known.size)
+            result = result.copy(progress = result.progress.copy(goals = known))
+        }
         return result to notes
     }
 
@@ -253,6 +277,22 @@ object SaveTransfer {
         }
         world.bossDefeatedAtKills.entries.firstOrNull { it.value < 0 }?.let {
             return SaveError.NegativeValue(SaveField.BOSS_DEFEATED_AT_KILLS, SaveLocation.WorldZone(shortName(it.key)))
+        }
+        return null
+    }
+
+    private fun validateProgress(p: ProgressState): SaveError? {
+        val loc = SaveLocation.Progress
+        listOf(
+            SaveField.DAILY_LAST_CLAIM to p.dailyLastClaimEpochMillis,
+            SaveField.DAILY_STREAK to p.dailyStreak.toLong(),
+            SaveField.CLOCK_HIGH_WATER to p.clockHighWaterMillis,
+            SaveField.GOALS_COMPLETED to p.goalsCompleted,
+        ).firstOrNull { it.second < 0 }?.let { return SaveError.NegativeValue(it.first, loc) }
+        p.goals.forEachIndexed { i, g ->
+            val gloc = SaveLocation.ProgressGoal(i + 1, shortName(g.id))
+            if (g.target < 0) return SaveError.NegativeValue(SaveField.GOAL_TARGET, gloc)
+            if (g.baseline < 0) return SaveError.NegativeValue(SaveField.GOAL_BASELINE, gloc)
         }
         return null
     }

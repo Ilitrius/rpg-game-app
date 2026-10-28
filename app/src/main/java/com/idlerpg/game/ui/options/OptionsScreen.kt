@@ -552,6 +552,9 @@ private fun locationText(context: Context, location: SaveLocation): String? = wh
     SaveLocation.World -> context.getString(R.string.options_location_world)
     is SaveLocation.WorldZone -> context.getString(R.string.options_location_world_zone, location.zoneId)
     SaveLocation.Shop -> context.getString(R.string.options_location_shop)
+    SaveLocation.Progress -> context.getString(R.string.options_location_progress)
+    is SaveLocation.ProgressGoal ->
+        context.getString(R.string.options_location_progress_goal, location.position, location.goalId)
 }
 
 private fun itemNameText(context: Context, name: String): String =
@@ -578,6 +581,12 @@ private fun fieldLabel(context: Context, field: SaveField): String = context.get
         SaveField.RESTOCKED_AT -> R.string.options_field_restocked_at
         SaveField.STOCK_LEVEL -> R.string.options_field_stock_level
         SaveField.PAID_RESTOCKS -> R.string.options_field_paid_restocks
+        SaveField.DAILY_LAST_CLAIM -> R.string.options_field_daily_last_claim
+        SaveField.DAILY_STREAK -> R.string.options_field_daily_streak
+        SaveField.CLOCK_HIGH_WATER -> R.string.options_field_clock_high_water
+        SaveField.GOALS_COMPLETED -> R.string.options_field_goals_completed
+        SaveField.GOAL_TARGET -> R.string.options_field_goal_target
+        SaveField.GOAL_BASELINE -> R.string.options_field_goal_baseline
     },
 )
 
@@ -606,6 +615,7 @@ private fun noteMessage(context: Context, note: ImportNote): String = when (note
         SaveTransfer.shortName(note.zoneId),
         context.getString(Zones.byId(note.fallbackZoneId).nameRes()),
     )
+    is ImportNote.UnknownGoalsDropped -> context.getString(R.string.options_note_unknown_goals, note.count)
     is ImportNote.UnknownZonesIgnored -> {
         val shown = note.zoneIds.take(MAX_LISTED_ZONES)
             .joinToString(", ") { context.getString(R.string.options_quoted, SaveTransfer.shortName(it)) }

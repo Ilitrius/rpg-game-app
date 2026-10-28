@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="goals_title">Daily reward &amp; goals</string>
+    <string name="goals_daily_title">Daily reward</string>
+    <string name="goals_daily_streak">Streak: %1$s</string>
+    <plurals name="goals_days">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+    <string name="goals_daily_reward">+%1$s gold</string>
+    <string name="goals_daily_claim">Claim</string>
+    <string name="goals_daily_next_in">Next reward in %1$s</string>
+    <string name="goals_daily_clock_rewound">The system clock is running behind. The reward is locked until the time is correct again.</string>
+    <string name="goals_daily_week_bonus">Weekly bonus active</string>
+    <string name="goals_goals_title">Goals</string>
+    <string name="goals_none_left">All goals done. More will come with an update.</string>
+    <string name="goals_claim">Claim</string>
+    <string name="goals_reward">+%1$s gold</string>
+    <string name="goals_progress">%1$s / %2$s</string>
+    <plurals name="goals_kills">
+        <item quantity="one">Defeat %1$d monster</item>
+        <item quantity="other">Defeat %1$d monsters</item>
+    </plurals>
+    <plurals name="goals_bosses">
+        <item quantity="one">Defeat %1$d boss</item>
+        <item quantity="other">Defeat %1$d bosses</item>
+    </plurals>
+    <plurals name="goals_level">
+        <item quantity="one">Gain %1$d level</item>
+        <item quantity="other">Gain %1$d levels</item>
+    </plurals>
+    <plurals name="goals_zones">
+        <item quantity="one">Unlock %1$d new area</item>
+        <item quantity="other">Unlock %1$d new areas</item>
+    </plurals>
+    <!-- Import (Options) -->
+    <string name="options_field_daily_last_claim">time of last daily reward</string>
+    <string name="options_field_daily_streak">daily reward streak</string>
+    <string name="options_field_clock_high_water">clock high-water mark</string>
+    <string name="options_field_goals_completed">completed goals</string>
+    <string name="options_field_goal_target">goal target</string>
+    <string name="options_field_goal_baseline">goal baseline</string>
+    <string name="options_location_progress">Daily reward &amp; goals</string>
+    <string name="options_location_progress_goal">Goal %1$d: %2$s</string>
+    <string name="options_note_unknown_goals">Unknown goals are removed: %1$d</string>
+</resources>
