@@ -177,6 +177,9 @@ fun OptionsScreen() {
             val soundOn by settings.soundEnabledFlow.collectAsState()
             SoundCard(soundOn = soundOn, onChange = { settings.soundEnabled = it })
 
+            val autoBoss by settings.autoBossFlow.collectAsState()
+            AutoBossCard(autoBoss = autoBoss, onChange = { settings.autoBoss = it })
+
             val language by settings.languageFlow.collectAsState()
             LanguageCard(selected = language, onSelect = {
                 if (it != settings.language) {
@@ -348,6 +351,31 @@ private fun SoundCard(soundOn: Boolean, onChange: (Boolean) -> Unit) {
                     modifier = Modifier.weight(1f),
                 )
                 Switch(checked = soundOn, onCheckedChange = onChange)
+            }
+        }
+    }
+}
+
+@Composable
+private fun AutoBossCard(autoBoss: Boolean, onChange: (Boolean) -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SectionHeader(Icons.Outlined.Tune, stringResource(R.string.options_autoboss_title))
+            Text(
+                stringResource(R.string.options_autoboss_description),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    stringResource(R.string.options_autoboss_label),
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.weight(1f),
+                )
+                Switch(checked = autoBoss, onCheckedChange = onChange)
             }
         }
     }

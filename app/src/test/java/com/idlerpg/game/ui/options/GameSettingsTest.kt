@@ -1,7 +1,6 @@
 package com.idlerpg.game.ui.options
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -48,5 +47,23 @@ class GameSettingsTest {
         assertFalse(GameSettings(store).soundEnabled)
         settings.soundEnabled = true
         assertTrue(GameSettings(store).soundEnabled)
+    }
+
+    @Test
+    fun autoBossDefaultsToOff() {
+        assertFalse(GameSettings(FakeStore()).autoBoss)
+        assertFalse(GameSettings(FakeStore()).autoBossFlow.value)
+    }
+
+    @Test
+    fun autoBossPersistsAndFlowUpdates() {
+        val store = FakeStore()
+        val settings = GameSettings(store)
+        settings.autoBoss = true
+        assertTrue(settings.autoBossFlow.value)
+        assertTrue(store.map[GameSettings.KEY_AUTO_BOSS] == true)
+        assertTrue(GameSettings(store).autoBoss)
+        settings.autoBoss = false
+        assertFalse(GameSettings(store).autoBoss)
     }
 }

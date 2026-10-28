@@ -118,4 +118,7 @@
     <string name="options_note_unknown_zone">Unbekanntes Gebiet „%1$s“ – dein Held startet im Gebiet „%2$s“.</string>
     <string name="options_note_unknown_zones">Fortschritt in unbekannten Gebieten wird ignoriert: %1$s</string>
     <string name="options_note_unknown_zones_more">Fortschritt in unbekannten Gebieten wird ignoriert: %1$s und %2$d weitere</string>
+    <string name="options_autoboss_title">Boss</string>
+    <string name="options_autoboss_label">Boss automatisch herausfordern</string>
+    <string name="options_autoboss_description">Startet den Bosskampf selbst, sobald er möglich ist. Nach einer Niederlage gibt es eine kurze Pause.</string>
 </resources>
