@@ -53,6 +53,16 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+        // Offline sandboxes: point ROBOLECTRIC_DEPS at a folder holding the android-all-instrumented jar.
+        unitTests.all { test ->
+            System.getenv("ROBOLECTRIC_DEPS")?.let {
+                test.systemProperty("robolectric.offline", "true")
+                test.systemProperty("robolectric.dependency.dir", it)
+            }
+        }
+    }
 }
 
 dependencies {
@@ -70,4 +80,5 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     debugImplementation(libs.androidx.ui.tooling)
     testImplementation(libs.junit)
+    testImplementation(libs.robolectric) // offscreen zone previews (ZonePreviewTest)
 }
