@@ -53,6 +53,13 @@ Zusätzlich `spielwelt`: Abenteuer-Ansicht (Ich-Perspektive), Gebiete, Monster, 
 - GitHub (öffentlich): https://github.com/Ilitrius/rpg-game-app, Branch `master`; Datenschutzerklärung via GitHub Pages (`docs/`) unter https://ilitrius.github.io/rpg-game-app/ (in Optionen verlinkt, `options_privacy_url`)
 - Git-Identität nur repo-lokal gesetzt (Ilitrius / rene.puf@gmail.com)
 
+## Stand & nächste Schritte (Ende 2026-10-28)
+- Version `0.1.0-rc9` (versionCode 10), Branch `claude/dann-46ungl`, alles gepusht, Vollbuild + Unit-Tests grün (nur in der Cloud-Umgebung, nie auf Gerät/Emulator gesehen).
+- Neu seit rc8: 100 Zonen (19 Biome x 5 Stufen, Auto-Wechsel nach Bosssieg, prozedurale Grafik), Clicker + Combo (`TapStats`, `ComboTracker`), Auto-Boss (`AutoBossGate`, Geräteeinstellung `autoBoss`), Zonenliste mit Biom-Köpfen, Schnellverkauf im Shop (nach Seltenheit + "Alles", Verbesserungen bleiben), Tagesbelohnung + Ziele, Statistiken, Backup-Erinnerung, HUD-Hinweispunkt.
+- Offen: Prestige/Wiedergeburt (erst Plan, greift stark in Zonen/Save ein), Release-Skript für signiertes Bundle (`.\gradlew.bat bundleRelease` macht der Nutzer lokal, Key liegt dort), neue Play-Store-Screenshots (Gerät/Emulator nötig).
+- Vor dem Release auf Gerät prüfen: neue Zonengrafik (Uhrwerk-Zahnräder wirken klumpig), Zonenliste, Karten im Charakter-Tab, Hinweispunkt. Auto-Wechsel greift auch bei erneutem Sieg über alten Boss (ggf. nur beim ersten Sieg); Ziele rücken per Katalogreihenfolge nach (nicht gleicher Typ).
+- Arbeitsweise: Nutzer will vor größeren Aufgaben einen durchdachten Plan; Aufgaben an Feld-Agenten delegieren, Agenten committen/pushen selbst, Haupt-Thread committet nichts Halbfertiges. Cloud-Build: `bash gradlew testDebugUnitTest assembleDebug -Pkotlin.compiler.execution.strategy=in-process` (SDK `/opt/android-sdk`, Maven kann 429 liefern; Vorschau-Tests brauchen Robolectric-Jars). Vorschaubilder: `app/build/zone-preview/` (Test `ZonePreviewTest`).
+
 ## Befehle
 - Build: `.\gradlew.bat assembleDebug`
 - Emulator: `D:\Android\Sdk\emulator\emulator.exe -avd Pixel_API35`
