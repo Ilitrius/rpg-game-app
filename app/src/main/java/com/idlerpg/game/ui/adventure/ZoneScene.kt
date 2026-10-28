@@ -28,7 +28,7 @@ interface ZoneScene {
 }
 
 /** Creates the scene of [zone] for a canvas of [size]. */
-fun createZoneScene(zone: Zone, size: Size): ZoneScene = when (zone.id) {
+fun createZoneScene(zone: Zone, size: Size): ZoneScene = if (zone.biome != null) BiomeScene(zone, size) else when (zone.id) {
     Zones.WALD_ID -> ForestScene(size)
     Zones.SUMPF_ID -> SwampScene(size)
     Zones.GEBIRGE_ID -> MountainScene(size)

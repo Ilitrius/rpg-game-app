@@ -38,6 +38,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.math.ceil
@@ -503,7 +505,10 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         val gold = m.stats.rollGold()
         val xp = m.stats.xp
         val item = Loot.bossDrop(m.stats.level)
-        val wasOpen = Zones.next(zone)?.let { WorldProgress.isUnlocked(_ui.value.world, it) } ?: true
+        val next = Zones.next(zone)
+        val wasOpen = next?.let { WorldProgress.isUnlocked(_ui.value.world, it) } ?: true
+        // The victory moves the saved zone forward; keep showing this zone until the travel transition.
+        if (next != null) pendingZoneId = zone.id
         _ui.update { it.copy(phase = MonsterPhase.DYING) }
         _events.tryEmit(AdventureEvent.Kill(xp, gold))
         endBossFight()
@@ -525,6 +530,10 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         }
         waitWithRegen(CombatRules.DEATH_MILLIS * 2)
         _ui.update { it.copy(monster = null, phase = MonsterPhase.GONE) }
+        if (next != null) {
+            travelTo(next.id) // restarts the loop in the next zone
+            currentCoroutineContext().ensureActive()
+        }
     }
 
     private suspend fun onDefeat() {

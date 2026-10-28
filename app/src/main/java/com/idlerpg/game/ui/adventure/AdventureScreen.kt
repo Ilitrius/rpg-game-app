@@ -204,7 +204,7 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
         if (dying) death.animateTo(1f, tween(CombatRules.DEATH_MILLIS.toInt(), easing = FastOutSlowInEasing))
     }
 
-    val monsterName = monster?.let { stringResource(it.stats.type.nameRes()) } ?: ""
+    val monsterName = monster?.let { stringResource(it.stats.type.nameRes(ui.zone)) } ?: ""
     val sceneDescription = stringResource(R.string.adventure_scene_description, monsterName)
 
     Box(
@@ -263,6 +263,7 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
                 flash = flash,
                 alpha = (a * 2.5f).coerceAtMost(1f) * (1f - d),
                 squash = d * 0.7f,
+                zone = ui.zone,
             )
         }
 
@@ -373,9 +374,20 @@ fun MonsterType.nameRes(): Int = when (this) {
     MonsterType.HYDRA -> R.string.monster_sumpfhydra
     MonsterType.YETI -> R.string.monster_yeti
     MonsterType.DRAGON -> R.string.monster_hoehlendrache
+    MonsterType.GEN_SWARM, MonsterType.GEN_BEAST, MonsterType.GEN_BRUTE, MonsterType.GEN_BOSS -> R.string.monster_generic
 }
 
-fun Zone.nameRes(): Int = when (id) {
+/** Name of this monster type as it appears in [zone] (generated zones name by biome, stage and role). */
+fun MonsterType.nameRes(zone: Zone): Int {
+    val biome = zone.biome ?: return nameRes()
+    return when {
+        !isGenerated -> nameRes()
+        isBoss -> WorldNames.boss[biome.ordinal][zone.stage]
+        else -> WorldNames.monster[biome.ordinal][zone.monsters.indexOf(this).coerceAtLeast(0)]
+    }
+}
+
+fun Zone.nameRes(): Int = if (biome != null) WorldNames.zone[biome.ordinal][stage] else when (id) {
     Zones.WALD_ID -> R.string.zone_wald
     Zones.SUMPF_ID -> R.string.zone_sumpf
     Zones.GEBIRGE_ID -> R.string.zone_gebirge
@@ -400,6 +412,10 @@ internal fun MonsterType.sizeFactor(): Float = when (this) {
     MonsterType.SLIME_KING -> 1.3f
     MonsterType.TREANT, MonsterType.HYDRA, MonsterType.YETI -> 1.38f
     MonsterType.DRAGON -> 1.25f
+    MonsterType.GEN_SWARM -> 0.88f
+    MonsterType.GEN_BEAST -> 1.0f
+    MonsterType.GEN_BRUTE -> 1.15f
+    MonsterType.GEN_BOSS -> 1.38f
 }
 
 // ------------------------------------------------------------------ HUD

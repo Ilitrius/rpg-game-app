@@ -80,7 +80,7 @@
     <string name="boss_badge">BOSS</string>
     <string name="boss_time_left">%1$d s</string>
     <string name="boss_victory_title">Boss defeated!</string>
-    <string name="boss_victory_unlocked">New area unlocked: %1$s</string>
+    <string name="boss_victory_unlocked">On to the next zone: %1$s</string>
     <string name="boss_failed_timeout">Time is up!</string>
     <string name="boss_failed_defeat">The boss was too strong</string>
     <string name="boss_failed_hint">The boss retreats – try again.</string>
@@ -91,4 +91,6 @@
     <string name="welcome_back_items">Loot: %1$d items</string>
     <string name="welcome_back_items_sold">of which %1$d sold (+%2$s gold, inventory full)</string>
     <string name="adventure_tap_description">Tap the enemy for bonus damage</string>
+    <string name="boss_victory_final">All zones conquered - you are the hero of the world!</string>
+    <string name="monster_generic">Fiend</string>
 </resources>

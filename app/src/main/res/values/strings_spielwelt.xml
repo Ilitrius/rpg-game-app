@@ -80,7 +80,7 @@
     <string name="boss_badge">BOSS</string>
     <string name="boss_time_left">%1$d s</string>
     <string name="boss_victory_title">Boss besiegt!</string>
-    <string name="boss_victory_unlocked">Neues Gebiet freigeschaltet: %1$s</string>
+    <string name="boss_victory_unlocked">Weiter zum nächsten Gebiet: %1$s</string>
     <string name="boss_failed_timeout">Zeit abgelaufen!</string>
     <string name="boss_failed_defeat">Der Boss war zu stark</string>
     <string name="boss_failed_hint">Der Boss zieht sich zurück – versuch es erneut.</string>
@@ -91,4 +91,6 @@
     <string name="welcome_back_items">Beute: %1$d Gegenstände</string>
     <string name="welcome_back_items_sold">davon %1$d verkauft (+%2$s Gold, Inventar voll)</string>
     <string name="adventure_tap_description">Gegner antippen für Extra-Schaden</string>
+    <string name="boss_victory_final">Alle Gebiete bezwungen – du bist der Held der Welt!</string>
+    <string name="monster_generic">Unhold</string>
 </resources>

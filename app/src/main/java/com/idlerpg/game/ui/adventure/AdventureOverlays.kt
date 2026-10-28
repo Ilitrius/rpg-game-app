@@ -232,7 +232,8 @@ internal fun BossBanner(message: BannerMessage, onDone: () -> Unit) {
     val (title, sub, color) = when (message) {
         is BannerMessage.Victory -> Triple(
             stringResource(R.string.boss_victory_title),
-            message.unlocked?.let { stringResource(R.string.boss_victory_unlocked, stringResource(it.nameRes())) },
+            message.unlocked?.let { stringResource(R.string.boss_victory_unlocked, stringResource(it.nameRes())) }
+                ?: if (Zones.next(message.zone) == null) stringResource(R.string.boss_victory_final) else null,
             Color(0xFFFFD54F),
         )
         is BannerMessage.Failed -> Triple(
@@ -381,13 +382,13 @@ private fun ZoneRow(zone: Zone, world: WorldState, isCurrent: Boolean, onClick: 
                     !unlocked -> {
                         val prev = Zones.previous(zone)
                         if (prev != null) {
-                            stringResource(R.string.zone_locked_requirement, stringResource(prev.boss.nameRes()), stringResource(prev.nameRes()))
+                            stringResource(R.string.zone_locked_requirement, stringResource(prev.boss.nameRes(prev)), stringResource(prev.nameRes()))
                         } else {
                             lockedCd
                         }
                     }
                     bossDefeated -> stringResource(R.string.zone_boss_defeated)
-                    else -> stringResource(R.string.zone_boss_open, stringResource(zone.boss.nameRes()))
+                    else -> stringResource(R.string.zone_boss_open, stringResource(zone.boss.nameRes(zone)))
                 }
                 Text(
                     status,
