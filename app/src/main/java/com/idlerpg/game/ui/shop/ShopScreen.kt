@@ -1,7 +1,9 @@
 package com.idlerpg.game.ui.shop
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +31,7 @@ import androidx.compose.material.icons.filled.Sell
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -93,6 +96,13 @@ private val GoldColor = Color(0xFFE6BC58)
 
 private enum class ShopMode { BUY, SELL }
 
+private const val SELL_NONE = -1
+/** Pending bulk-sale request: [SELL_ALL] or a [Rarity] ordinal. */
+private const val SELL_ALL = -2
+
+private fun sellRarities(code: Int): Set<Rarity> =
+    if (code == SELL_ALL) Rarity.entries.toSet() else setOfNotNull(Rarity.entries.getOrNull(code))
+
 /** "Shop" tab: merchant banner, buy (timed/paid restock) and sell (single + bulk) lists, item details. */
 @Composable
 fun ShopScreen() {
@@ -104,7 +114,7 @@ fun ShopScreen() {
     var mode by rememberSaveable { mutableIntStateOf(ShopMode.BUY.ordinal) }
     var selectedId by rememberSaveable { mutableStateOf<String?>(null) }
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    var confirmBulkSell by rememberSaveable { mutableStateOf(false) }
+    var pendingSell by rememberSaveable { mutableIntStateOf(SELL_NONE) }
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -157,10 +167,11 @@ fun ShopScreen() {
         }
     }
 
-    fun sellAllCommon() {
+    // Recomputes the candidates inside the update (loot may have dropped since the dialog opened).
+    fun bulkSell(rarities: Set<Rarity>) {
         scope.launch {
             var result: Shop.SellResult? = null
-            repository.update { s -> Shop.sellCommonJunk(s).also { result = it }.state }
+            repository.update { s -> Shop.bulkSell(s, rarities).also { result = it }.state }
             val r = result ?: return@launch
             if (r.count > 0) toast(res.getQuantityString(R.plurals.shop_sold_many, r.count, r.count, fmt(r.gold)))
         }
@@ -199,7 +210,7 @@ fun ShopScreen() {
                 }
             } else {
                 val inventory = Inventory.sorted(current.equipment.inventory)
-                item(key = "invhead") { SellHeader(current, onSellAllCommon = { confirmBulkSell = true }) }
+                item(key = "invhead") { SellHeader(current, onSell = { pendingSell = it }) }
                 if (inventory.isEmpty()) {
                     item(key = "invempty") { HintText(stringResource(R.string.shop_sell_empty)) }
                 }
@@ -211,22 +222,47 @@ fun ShopScreen() {
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(12.dp))
     }
 
-    if (confirmBulkSell) {
-        val bulk = Shop.bulkSellCandidates(current)
+    if (pendingSell != SELL_NONE) {
+        val rarities = sellRarities(pendingSell)
+        val count = Shop.bulkSellCandidates(current, rarities).size
+        val gold = Shop.bulkSellGold(current, rarities)
+        val kept = Shop.keptUpgradeCount(current, rarities)
+        val everything = pendingSell == SELL_ALL
+        val single = rarities.singleOrNull()
         AlertDialog(
-            onDismissRequest = { confirmBulkSell = false },
-            title = { Text(stringResource(R.string.shop_sell_all_common_confirm_title)) },
+            onDismissRequest = { pendingSell = SELL_NONE },
+            title = {
+                Text(
+                    if (everything) stringResource(R.string.shop_sell_everything_confirm_title)
+                    else stringResource(R.string.shop_sell_rarity_confirm_title, rarityLabelText(single ?: Rarity.COMMON)),
+                )
+            },
             text = {
-                Text(pluralStringResource(R.plurals.shop_sell_all_common_confirm, bulk.size, bulk.size, fmt(bulk.sumOf { it.price.coerceAtLeast(0) })))
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        pluralStringResource(
+                            if (everything) R.plurals.shop_sell_everything_confirm else R.plurals.shop_sell_rarity_confirm,
+                            count, count, fmt(gold),
+                        ),
+                    )
+                    Text(stringResource(R.string.shop_sell_keeps_equipped))
+                    if (kept > 0) Text(pluralStringResource(R.plurals.shop_sell_keeps_upgrades, kept, kept))
+                    if (everything || (single != null && single >= Rarity.EPIC)) {
+                        Text(stringResource(R.string.shop_sell_irreversible), color = BadColor, fontWeight = FontWeight.SemiBold)
+                    }
+                }
             },
             confirmButton = {
-                TextButton(onClick = {
-                    confirmBulkSell = false
-                    sellAllCommon()
-                }) { Text(stringResource(R.string.shop_tab_sell)) }
+                TextButton(
+                    enabled = count > 0,
+                    onClick = {
+                        pendingSell = SELL_NONE
+                        bulkSell(rarities)
+                    },
+                ) { Text(stringResource(R.string.shop_tab_sell), color = if (count > 0) BadColor else Color.Unspecified) }
             },
             dismissButton = {
-                TextButton(onClick = { confirmBulkSell = false }) { Text(stringResource(R.string.shop_cancel)) }
+                TextButton(onClick = { pendingSell = SELL_NONE }) { Text(stringResource(R.string.shop_cancel)) }
             },
         )
     }
@@ -455,8 +491,8 @@ private fun ItemRowCard(
 // ------------------------------------------------------------------ sell
 
 @Composable
-private fun SellHeader(state: GameState, onSellAllCommon: () -> Unit) {
-    val bulk = remember(state) { Shop.bulkSellCandidates(state) }
+private fun SellHeader(state: GameState, onSell: (Int) -> Unit) {
+    val groups = remember(state) { Shop.sellGroups(state) }
     Card(Modifier.fillMaxWidth(), colors = cardColors()) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -467,13 +503,35 @@ private fun SellHeader(state: GameState, onSellAllCommon: () -> Unit) {
                     color = if (Inventory.isFull(state)) BadColor else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            if (bulk.isNotEmpty()) {
-                val gold = bulk.sumOf { it.price.coerceAtLeast(0) }
-                FilledTonalButton(onClick = onSellAllCommon, modifier = Modifier.fillMaxWidth()) {
+            if (groups.isNotEmpty()) {
+                Text(stringResource(R.string.shop_quicksell_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                groups.forEach { g ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.size(12.dp).background(rarityColor(g.rarity), CircleShape))
+                        Spacer(Modifier.width(10.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text(rarityLabelText(g.rarity), style = MaterialTheme.typography.titleSmall, color = rarityColor(g.rarity), maxLines = 1)
+                            Text(
+                                pluralStringResource(R.plurals.shop_sell_detail, g.count, g.count, fmt(g.gold)),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                            )
+                        }
+                        FilledTonalButton(onClick = { onSell(g.rarity.ordinal) }) { Text(stringResource(R.string.shop_tab_sell), maxLines = 1) }
+                    }
+                }
+                val total = groups.sumOf { it.count }
+                val gold = groups.sumOf { it.gold }
+                Button(
+                    onClick = { onSell(SELL_ALL) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = BadColor.copy(alpha = 0.85f), contentColor = Color.White),
+                ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(stringResource(R.string.shop_sell_all_common), maxLines = 1)
+                        Text(stringResource(R.string.shop_sell_everything), maxLines = 1)
                         Text(
-                            pluralStringResource(R.plurals.shop_sell_all_common_detail, bulk.size, bulk.size, fmt(gold)),
+                            pluralStringResource(R.plurals.shop_sell_detail, total, total, fmt(gold)),
                             style = MaterialTheme.typography.labelSmall,
                             maxLines = 1,
                         )
@@ -644,7 +702,10 @@ private fun statLabel(t: StatType) = when (t) {
 }
 
 @Composable
-private fun rarityLabel(r: Rarity) = stringResource(
+private fun rarityLabel(r: Rarity) = rarityLabelText(r)
+
+@Composable
+private fun rarityLabelText(r: Rarity) = stringResource(
     when (r) {
         Rarity.COMMON -> R.string.equipment_rarity_common
         Rarity.UNCOMMON -> R.string.equipment_rarity_uncommon
