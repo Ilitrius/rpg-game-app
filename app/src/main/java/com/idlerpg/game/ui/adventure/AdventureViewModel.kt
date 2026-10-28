@@ -81,6 +81,8 @@ data class AdventureUiState(
     val equippedWeapon: Item? = null,
     /** Auto-boss mode (device setting, see [AutoBossGate]). */
     val autoBoss: Boolean = false,
+    /** Daily reward or a goal is ready to claim (HUD hint). */
+    val claimable: Boolean = false,
 ) {
     val killsTowardsBoss: Long get() = WorldProgress.killsTowardsBoss(world, zone)
 
@@ -228,6 +230,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
                 heroHp = ceil(heroHp).toInt(),
                 attackDurationMillis = stab,
                 world = s.world,
+                claimable = hasClaimable(s, System.currentTimeMillis()),
                 equippedWeapon = s.equipment.equipped[EquipmentSlot.WEAPON],
             )
         }

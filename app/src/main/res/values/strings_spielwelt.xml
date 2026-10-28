@@ -102,4 +102,5 @@
     <string name="auto_boss_on">Auto-Boss an</string>
     <string name="auto_boss_off">Auto-Boss aus</string>
     <string name="auto_boss_cd">Auto-Boss umschalten</string>
+    <string name="claim_hint">Belohnung bereit</string>
 </resources>

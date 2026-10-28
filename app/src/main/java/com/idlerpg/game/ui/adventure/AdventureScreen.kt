@@ -14,6 +14,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -576,6 +577,16 @@ private fun Hud(
 @Composable
 private fun HeroBlock(ui: AdventureUiState) {
     Column(Modifier.width(HeroBlockWidth)) {
+        if (ui.claimable) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 3.dp)) {
+                Box(Modifier.size(9.dp).clip(CircleShape).background(Color(0xFFFFC94A)))
+                Spacer(Modifier.width(5.dp))
+                Text(
+                    stringResource(R.string.claim_hint),
+                    style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFFE08A), shadow = hudShadow),
+                )
+            }
+        }
         Text(
             stringResource(R.string.hero_label, ui.heroName, ui.heroLevel),
             style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White, shadow = hudShadow),
