@@ -1,6 +1,22 @@
 package com.idlerpg.game.ui.adventure
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import kotlinx.coroutines.launch
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -307,18 +323,23 @@ internal fun TravelOverlay(target: Zone?) {
 
 // ------------------------------------------------------------------ zone sheet
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 internal fun ZoneSheet(world: WorldState, current: Zone, onSelect: (Zone) -> Unit, onDismiss: () -> Unit) {
     val state = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val model = remember(world) { ZoneSheetModel.build(world) }
+    // Start at the header of the current zone's biome so the current zone is visible right away.
+    val list = rememberLazyListState(initialFirstVisibleItemIndex = model.indexOf(current).coerceAtLeast(1) - 1)
+    val scope = rememberCoroutineScope()
+    var number by remember { mutableStateOf("") }
+    val target = ZoneSheetModel.zoneByNumber(number)
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = state) {
         Column(
             Modifier
                 .fillMaxWidth()
+                .fillMaxHeight(0.92f)
                 .padding(horizontal = 16.dp)
-                .padding(bottom = 16.dp)
                 .navigationBarsPadding(),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(stringResource(R.string.zone_sheet_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             Text(
@@ -326,14 +347,54 @@ internal fun ZoneSheet(world: WorldState, current: Zone, onSelect: (Zone) -> Uni
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Spacer(Modifier.height(4.dp))
-            Zones.all.forEach { zone -> ZoneRow(zone, world, zone.id == current.id) { onSelect(zone) } }
+            Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = number,
+                    onValueChange = { v -> number = v.filter { it.isDigit() }.take(3) },
+                    label = { Text(stringResource(R.string.zone_jump_label, Zones.COUNT)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Go),
+                    keyboardActions = KeyboardActions(onGo = { target?.let { z -> scope.launch { list.animateScrollToItem(model.headerIndexOf(z)) } } }),
+                    modifier = Modifier.weight(1f),
+                )
+                TextButton(onClick = { target?.let { z -> scope.launch { list.animateScrollToItem(model.headerIndexOf(z)) } } }, enabled = target != null) {
+                    Text(stringResource(R.string.zone_jump_go))
+                }
+                TextButton(onClick = { scope.launch { list.animateScrollToItem(model.headerIndexOf(current)) } }) {
+                    Text(stringResource(R.string.zone_jump_current))
+                }
+            }
+            LazyColumn(state = list, modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(bottom = 16.dp)) {
+                model.groups.forEach { g ->
+                    stickyHeader(key = "h_" + (g.biome?.id ?: "home")) { ZoneGroupHeader(g) }
+                    items(g.zones, key = { it.id }) { zone ->
+                        ZoneRow(zone, world, zone.id == current.id, highlighted = zone.order == target?.order) { onSelect(zone) }
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun ZoneRow(zone: Zone, world: WorldState, isCurrent: Boolean, onClick: () -> Unit) {
+private fun ZoneGroupHeader(g: ZoneGroup) {
+    val title = stringResource(if (g.biome == null) R.string.zone_group_home else WorldNames.biome[g.biome.ordinal])
+    Surface(color = MaterialTheme.colorScheme.surfaceContainerLow, modifier = Modifier.fillMaxWidth()) {
+        Row(Modifier.padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.size(10.dp).clip(CircleShape).background(g.zones.first().let { zoneAccent(it) }))
+            Spacer(Modifier.width(8.dp))
+            Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+            Text(
+                stringResource(R.string.zone_group_progress, g.unlocked, g.total),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ZoneRow(zone: Zone, world: WorldState, isCurrent: Boolean, highlighted: Boolean = false, onClick: () -> Unit) {
     val unlocked = WorldProgress.isUnlocked(world, zone)
     val bossDefeated = WorldProgress.isBossDefeated(world, zone)
     val accent = zoneAccent(zone)
@@ -342,7 +403,7 @@ private fun ZoneRow(zone: Zone, world: WorldState, isCurrent: Boolean, onClick: 
     Surface(
         shape = shape,
         color = if (isCurrent) Color(0xFF353A2C) else Color(0xFF2E332C),
-        border = BorderStroke(if (isCurrent) 1.5.dp else 1.dp, if (isCurrent) MaterialTheme.colorScheme.primary else Color(0xFF454B42)),
+        border = BorderStroke(if (isCurrent || highlighted) 1.5.dp else 1.dp, if (isCurrent) MaterialTheme.colorScheme.primary else if (highlighted) Color(0xFFFFD54F) else Color(0xFF454B42)),
         modifier = Modifier
             .fillMaxWidth()
             .alpha(if (unlocked) 1f else 0.62f)
@@ -412,10 +473,17 @@ private fun ZoneRow(zone: Zone, world: WorldState, isCurrent: Boolean, onClick: 
     }
 }
 
-private fun zoneAccent(zone: Zone): Color = when (zone.id) {
-    Zones.WALD_ID -> Color(0xFF2E7D32)
-    Zones.SUMPF_ID -> Color(0xFF5B6B2A)
-    Zones.GEBIRGE_ID -> Color(0xFF5C7A99)
-    Zones.HOEHLE_ID -> Color(0xFF6A4C8C)
-    else -> Color(0xFF7CB342)
+private fun zoneAccent(zone: Zone): Color {
+    val biome = zone.biome
+    if (biome != null) {
+        val st = BiomeStyles.of(biome)
+        return androidx.compose.ui.graphics.lerp(st.skinMid, st.accent, 0.45f)
+    }
+    return when (zone.id) {
+        Zones.WALD_ID -> Color(0xFF2E7D32)
+        Zones.SUMPF_ID -> Color(0xFF5B6B2A)
+        Zones.GEBIRGE_ID -> Color(0xFF5C7A99)
+        Zones.HOEHLE_ID -> Color(0xFF6A4C8C)
+        else -> Color(0xFF7CB342)
+    }
 }

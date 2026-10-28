@@ -63,7 +63,7 @@
     <!-- Zones / travel -->
     <string name="zone_levels">Level %1$d–%2$d</string>
     <string name="zone_sheet_title">Areas</string>
-    <string name="zone_sheet_subtitle">Defeat an area\'s boss to unlock the next one.</string>
+    <string name="zone_sheet_subtitle">Defeat a zone\'s boss to move on to the next zone automatically.</string>
     <string name="zone_locked_requirement">Locked – defeat %1$s (%2$s)</string>
     <string name="zone_current">You are here</string>
     <string name="zone_boss_defeated">Boss defeated</string>
@@ -93,4 +93,9 @@
     <string name="adventure_tap_description">Tap the enemy for bonus damage</string>
     <string name="boss_victory_final">All zones conquered - you are the hero of the world!</string>
     <string name="monster_generic">Fiend</string>
+    <string name="zone_group_home">Homelands</string>
+    <string name="zone_group_progress">%1$d/%2$d unlocked</string>
+    <string name="zone_jump_label">Zone 1–%1$d</string>
+    <string name="zone_jump_go">Go</string>
+    <string name="zone_jump_current">Current zone</string>
 </resources>

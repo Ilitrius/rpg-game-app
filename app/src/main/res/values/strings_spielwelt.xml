@@ -63,7 +63,7 @@
     <!-- Zones / travel -->
     <string name="zone_levels">Stufe %1$d–%2$d</string>
     <string name="zone_sheet_title">Gebiete</string>
-    <string name="zone_sheet_subtitle">Besiege den Boss eines Gebiets, um das nächste freizuschalten.</string>
+    <string name="zone_sheet_subtitle">Besiege den Boss eines Gebiets, um automatisch ins nächste zu ziehen.</string>
     <string name="zone_locked_requirement">Gesperrt – besiege %1$s (%2$s)</string>
     <string name="zone_current">Du bist hier</string>
     <string name="zone_boss_defeated">Boss besiegt</string>
@@ -93,4 +93,9 @@
     <string name="adventure_tap_description">Gegner antippen für Extra-Schaden</string>
     <string name="boss_victory_final">Alle Gebiete bezwungen – du bist der Held der Welt!</string>
     <string name="monster_generic">Unhold</string>
+    <string name="zone_group_home">Heimatlande</string>
+    <string name="zone_group_progress">%1$d/%2$d freigeschaltet</string>
+    <string name="zone_jump_label">Gebiet 1–%1$d</string>
+    <string name="zone_jump_go">Springen</string>
+    <string name="zone_jump_current">Aktuelle Zone</string>
 </resources>
