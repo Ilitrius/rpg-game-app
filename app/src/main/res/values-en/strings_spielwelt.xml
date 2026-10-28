@@ -98,4 +98,8 @@
     <string name="zone_jump_label">Zone 1–%1$d</string>
     <string name="zone_jump_go">Go</string>
     <string name="zone_jump_current">Current zone</string>
+    <string name="combo_label">Combo ×%1$d</string>
+    <string name="auto_boss_on">Auto boss on</string>
+    <string name="auto_boss_off">Auto boss off</string>
+    <string name="auto_boss_cd">Toggle auto boss</string>
 </resources>

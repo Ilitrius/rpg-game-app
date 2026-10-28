@@ -58,7 +58,24 @@ class GameSettings(private val store: SettingsStore) {
             _language.value = value
         }
 
+    private val _autoBoss = MutableStateFlow(store.getBoolean(KEY_AUTO_BOSS, DEFAULT_AUTO_BOSS))
+
+    val autoBossFlow: StateFlow<Boolean> = _autoBoss.asStateFlow()
+
+    /**
+     * Auto-boss mode of the adventure view (starts the zone boss by itself when it is safe, see
+     * `AutoBossGate`), default off. Device setting, not part of the save game.
+     */
+    var autoBoss: Boolean
+        get() = _autoBoss.value
+        set(value) {
+            store.putBoolean(KEY_AUTO_BOSS, value)
+            _autoBoss.value = value
+        }
+
     companion object {
+        const val KEY_AUTO_BOSS = "auto_boss"
+        const val DEFAULT_AUTO_BOSS = false
         const val KEY_LANGUAGE = "language"
         const val KEY_SOUND = "sound_enabled"
         const val DEFAULT_SOUND_ENABLED = true

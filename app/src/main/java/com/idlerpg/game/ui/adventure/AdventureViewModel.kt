@@ -12,7 +12,11 @@ import com.idlerpg.game.data.WorldState
 import com.idlerpg.game.domain.character.CombatStats
 import com.idlerpg.game.domain.character.Hit
 import com.idlerpg.game.domain.character.Progression
+import com.idlerpg.game.domain.character.TapStats
 import com.idlerpg.game.domain.combat.CombatRules
+import com.idlerpg.game.domain.combat.ComboTracker
+import com.idlerpg.game.domain.world.AutoBossGate
+import com.idlerpg.game.ui.options.GameSettings
 import com.idlerpg.game.domain.world.BossOutcome
 import com.idlerpg.game.domain.world.Loot
 import com.idlerpg.game.domain.world.LootDrop
@@ -75,6 +79,8 @@ data class AdventureUiState(
     val travelingTo: Zone? = null,
     /** Currently equipped weapon (null = fists), drawn in first person. */
     val equippedWeapon: Item? = null,
+    /** Auto-boss mode (device setting, see [AutoBossGate]). */
+    val autoBoss: Boolean = false,
 ) {
     val killsTowardsBoss: Long get() = WorldProgress.killsTowardsBoss(world, zone)
 
@@ -106,7 +112,7 @@ sealed interface AdventureEvent {
     data class HeroAttack(val hit: Hit) : AdventureEvent
     data class MonsterHit(val damage: Int) : AdventureEvent
     /** The player tapped the monster and dealt [hit] immediately (independent of the attack timer). */
-    data class TapHit(val hit: Hit) : AdventureEvent
+    data class TapHit(val hit: Hit, val combo: Int = 0) : AdventureEvent
     data class Kill(val xp: Long, val gold: Long) : AdventureEvent
     /** An item dropped (already stored in the inventory or auto-sold). */
     data class Loot(val drop: LootDrop) : AdventureEvent
@@ -177,6 +183,10 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
     private var foreground = false
 
     /** Wakes the fight loop right after a tap so a tap kill is processed without the polling delay. */
+    private val settings = GameSettings.get(app)
+    private val autoBossGate = AutoBossGate()
+    private val combo = ComboTracker()
+
     private val wake = Channel<Unit>(Channel.CONFLATED)
     private var bossRequested = false
 
@@ -184,6 +194,9 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
     private var pendingZoneId: String? = null
 
     init {
+        viewModelScope.launch {
+            settings.autoBossFlow.collect { on -> _ui.update { it.copy(autoBoss = on) } }
+        }
         viewModelScope.launch {
             repository.state.collect { onGameState(it) }
         }
@@ -200,6 +213,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
             heroHp = (heroHp + (newStats.maxHp - old.maxHp)).coerceIn(1.0, newStats.maxHp.toDouble())
         }
         stats = newStats
+        autoBossGate.observeLevel(s.character.level)
         if (pendingZoneId == s.world.currentZoneId) pendingZoneId = null
         val zone = Zones.byId(pendingZoneId ?: s.world.currentZoneId)
         val stab = minOf(DEFAULT_STAB_MILLIS.toLong(), (newStats.attackIntervalMillis * 0.85).toLong()).toInt()
@@ -263,7 +277,8 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
     fun onEnemyTapped(): Hit? {
         val hero = stats ?: return null
         if (!foreground) return null
-        val hit = hero.rollHit()
+        val n = combo.register(SystemClock.elapsedRealtime())
+        val hit = TapStats.tapHit(hero, n)
         var applied = false
         _ui.update { st ->
             val n = applyTapHit(st, hit)
@@ -271,9 +286,14 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
             n ?: st
         }
         if (!applied) return null
-        _events.tryEmit(AdventureEvent.TapHit(hit))
+        _events.tryEmit(AdventureEvent.TapHit(hit, n))
         wake.trySend(Unit)
         return hit
+    }
+
+    /** Switches the auto-boss mode on/off (persisted as device setting). */
+    fun toggleAutoBoss() {
+        settings.autoBoss = !settings.autoBoss
     }
 
     /** Starts the boss fight of the current zone (if the kill requirement is met). */
@@ -362,11 +382,20 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
                 cur.phase == MonsterPhase.APPROACHING -> _ui.update { it.copy(phase = MonsterPhase.FIGHTING) }
             }
             when (fight(deadline = null)) {
-                FightResult.KILL -> onKill()
+                FightResult.KILL -> { onKill(); maybeAutoBoss() }
                 else -> onDefeat()
             }
         }
     }
+
+    /** Auto-boss mode: after a kill, start the zone boss by itself if [AutoBossGate] allows it. */
+    private fun maybeAutoBoss() {
+        val st = _ui.value
+        if (st.bossFight || st.travelingTo != null || st.defeated) return
+        if (autoBossGate.shouldStart(st.autoBoss, st.world, st.zone, currentHp(), st.heroMaxHp)) bossRequested = true
+    }
+
+    private fun zoneKills(zone: Zone): Long = _ui.value.world.zoneKills[zone.id] ?: 0L
 
     private suspend fun spawnNext() {
         val s = _ui.value
@@ -387,8 +416,9 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         spawn(MonsterScaling.boss(zone))
         val deadline = SystemClock.elapsedRealtime() + WorldProgress.BOSS_TIME_LIMIT_MILLIS
         when (fight(deadline)) {
-            FightResult.KILL -> onBossKill(zone)
+            FightResult.KILL -> { autoBossGate.onVictory(); onBossKill(zone) }
             FightResult.TIMEOUT -> {
+                autoBossGate.onFailure(zoneKills(zone))
                 _events.tryEmit(AdventureEvent.BossFailed(BossOutcome.TIMEOUT))
                 endBossFight()
                 _ui.update { it.copy(phase = MonsterPhase.DYING) }
@@ -396,6 +426,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
                 _ui.update { it.copy(monster = null, phase = MonsterPhase.GONE) }
             }
             FightResult.DEFEAT -> {
+                autoBossGate.onFailure(zoneKills(zone))
                 _events.tryEmit(AdventureEvent.BossFailed(BossOutcome.DEFEAT))
                 endBossFight()
                 onDefeat()

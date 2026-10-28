@@ -152,6 +152,7 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
                         nextFloatId++, if (e.hit.critical) FloatKind.CRIT else FloatKind.DAMAGE, e.hit.damage, 0,
                         pos?.x ?: 0f, pos?.y ?: -0.1f,
                     )
+                    if (e.combo >= 2) floats += FloatText(nextFloatId++, FloatKind.COMBO, e.combo.toLong(), 0, pos?.x ?: 0f, (pos?.y ?: -0.1f) + 0.09f)
                     attacks++ // short weapon swing as feedback; no pending hit queued, damage is already applied
                     scope.launch {
                         hitFlash.snapTo(1f)
@@ -319,6 +320,7 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
             ui, monsterName,
             onZoneClick = { showZones = true },
             onChallengeBoss = vm::challengeBoss,
+            onToggleAutoBoss = vm::toggleAutoBoss,
             loot = {
                 // Bottom-left above the hero block: clear of the weapon (right) and the monster (above).
                 loot.firstOrNull()?.let { drop ->
@@ -449,6 +451,7 @@ private fun Hud(
     monsterName: String,
     onZoneClick: () -> Unit,
     onChallengeBoss: () -> Unit,
+    onToggleAutoBoss: () -> Unit,
     loot: @Composable () -> Unit,
 ) {
     Box(Modifier.fillMaxSize().padding(HudPadding)) {
@@ -504,6 +507,7 @@ private fun Hud(
         ) {
             BossChallengeButton(onChallengeBoss)
         }
+        AutoBossChip(ui.autoBoss, onToggleAutoBoss, Modifier.align(Alignment.TopEnd).padding(top = if (ui.canChallengeBoss) 52.dp else 0.dp))
 
         // Monster name + level + HP (top center)
         val m = ui.monster
@@ -649,7 +653,7 @@ private fun HpBar(
 
 // ------------------------------------------------------------------ floating texts
 
-private enum class FloatKind { DAMAGE, CRIT, HERO_DAMAGE, REWARD }
+private enum class FloatKind { DAMAGE, CRIT, HERO_DAMAGE, REWARD, COMBO }
 
 /** [x]/[y] are alignment biases (-1..1) relative to the scene; for [FloatKind.HERO_DAMAGE] [x] is a 0..1 jitter. */
 private data class FloatText(val id: Long, val kind: FloatKind, val a: Long, val b: Long, val x: Float, val y: Float)
@@ -716,6 +720,10 @@ private fun FloatingLabel(f: FloatText, onDone: () -> Unit) {
                 FloatKind.HERO_DAMAGE -> Text(
                     stringResource(R.string.damage_taken, f.a.toInt()),
                     style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color(0xFFFF5A4A), shadow = hudShadow),
+                )
+                FloatKind.COMBO -> Text(
+                    stringResource(R.string.combo_label, f.a.toInt()),
+                    style = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFFFFB74D), shadow = hudShadow),
                 )
                 FloatKind.REWARD -> Text(
                     stringResource(R.string.kill_reward, f.a.toInt(), f.b.toInt()),

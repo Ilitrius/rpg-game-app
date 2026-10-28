@@ -104,6 +104,26 @@ private val goldGradient = listOf(Color(0xFFFFE69A), Color(0xFFE0A82E), Color(0x
 
 // ------------------------------------------------------------------ boss HUD
 
+/** Small toggle for the auto-boss mode, shown below (or instead of) the boss button. */
+@Composable
+internal fun AutoBossChip(enabled: Boolean, onToggle: () -> Unit, modifier: Modifier = Modifier) {
+    val label = stringResource(if (enabled) R.string.auto_boss_on else R.string.auto_boss_off)
+    val color = if (enabled) Color(0xFFFFD54F) else Color(0xFFB9B3A2)
+    Row(
+        modifier
+            .clip(RoundedCornerShape(14.dp))
+            .background(Color(0xCC1B1F1A))
+            .border(1.dp, color.copy(alpha = if (enabled) 0.9f else 0.4f), RoundedCornerShape(14.dp))
+            .clickable(onClickLabel = stringResource(R.string.auto_boss_cd), onClick = onToggle)
+            .padding(horizontal = 10.dp, vertical = 5.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(Icons.Filled.Whatshot, contentDescription = null, tint = color, modifier = Modifier.size(14.dp))
+        Spacer(Modifier.width(4.dp))
+        Text(label, style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Bold, color = color))
+    }
+}
+
 @Composable
 internal fun BossChallengeButton(onClick: () -> Unit) {
     val pulse by rememberInfiniteTransition(label = "bossPulse").animateFloat(
