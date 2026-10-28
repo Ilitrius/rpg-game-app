@@ -92,6 +92,9 @@ import com.idlerpg.game.ui.adventure.MonsterPainters.drawMonster
 import com.idlerpg.game.ui.character.weapon.FirstPersonWeapon
 import java.util.Locale
 import kotlin.math.PI
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.input.pointer.pointerInput
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -132,6 +135,8 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
     val loot = remember { mutableStateListOf<LootDrop>() }
     var banner by remember { mutableStateOf<BannerMessage?>(null) }
     var showZones by remember { mutableStateOf(false) }
+    // Last tap position as alignment bias (-1..1) for the floating damage number.
+    var tapPoint by remember { mutableStateOf<Offset?>(null) }
 
     LaunchedEffect(vm) {
         vm.events.collect { e ->
@@ -140,6 +145,18 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
                     pendingHits.addLast(e.hit)
                     while (pendingHits.size > 3) pendingHits.removeFirst()
                     attacks++
+                }
+                is AdventureEvent.TapHit -> {
+                    val pos = tapPoint
+                    floats += FloatText(
+                        nextFloatId++, if (e.hit.critical) FloatKind.CRIT else FloatKind.DAMAGE, e.hit.damage, 0,
+                        pos?.x ?: 0f, pos?.y ?: -0.1f,
+                    )
+                    attacks++ // short weapon swing as feedback; no pending hit queued, damage is already applied
+                    scope.launch {
+                        hitFlash.snapTo(1f)
+                        hitFlash.animateTo(0f, tween(if (e.hit.critical) 380 else 260))
+                    }
                 }
                 is AdventureEvent.MonsterHit -> {
                     // x = horizontal jitter (0..1) next to the hero HP bar, see FloatingLabel.
@@ -206,7 +223,27 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
         )
 
         // Monster.
-        Canvas(Modifier.fillMaxSize()) {
+        val currentScene by rememberUpdatedState(scene)
+        val currentMonster by rememberUpdatedState(monster)
+        val tapDescription = stringResource(R.string.adventure_tap_description)
+        Canvas(
+            Modifier
+                .fillMaxSize()
+                .semantics { contentDescription = tapDescription }
+                .pointerInput(vm) {
+                    detectTapGestures { p ->
+                        val sc = currentScene ?: return@detectTapGestures
+                        val m = currentMonster ?: return@detectTapGestures
+                        val h = min(size.width * 0.66f, size.height * 0.38f) * m.stats.type.sizeFactor()
+                        val inX = abs(p.x - size.width / 2f) <= h * 0.55f
+                        val inY = p.y in (sc.monsterGroundY - h * 1.05f)..(sc.monsterGroundY + h * 0.08f)
+                        if (inX && inY) {
+                            tapPoint = Offset(p.x / size.width * 2f - 1f, p.y / size.height * 2f - 1f - 0.08f)
+                            vm.onEnemyTapped()
+                        }
+                    }
+                },
+        ) {
             val sc = scene ?: return@Canvas
             val m = monster ?: return@Canvas
             val a = approach.value

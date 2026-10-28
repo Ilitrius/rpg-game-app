@@ -90,4 +90,5 @@
     <string name="loot_autosold">Inventar voll – für %1$s Gold verkauft</string>
     <string name="welcome_back_items">Beute: %1$d Gegenstände</string>
     <string name="welcome_back_items_sold">davon %1$d verkauft (+%2$s Gold, Inventar voll)</string>
+    <string name="adventure_tap_description">Gegner antippen für Extra-Schaden</string>
 </resources>

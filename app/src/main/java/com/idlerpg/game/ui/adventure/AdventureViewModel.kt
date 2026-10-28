@@ -37,7 +37,9 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
@@ -101,6 +103,8 @@ sealed interface AdventureEvent {
     /** The hero starts a stab; the damage lands [impactDelayMillis] later. */
     data class HeroAttack(val hit: Hit) : AdventureEvent
     data class MonsterHit(val damage: Int) : AdventureEvent
+    /** The player tapped the monster and dealt [hit] immediately (independent of the attack timer). */
+    data class TapHit(val hit: Hit) : AdventureEvent
     data class Kill(val xp: Long, val gold: Long) : AdventureEvent
     /** An item dropped (already stored in the inventory or auto-sold). */
     data class Loot(val drop: LootDrop) : AdventureEvent
@@ -130,6 +134,17 @@ const val WELCOME_BACK_MIN_MILLIS = 30L * 60 * 1000
 fun shouldShowWelcomeBack(reward: OfflineReward?): Boolean =
     reward != null && reward.awayMillis >= WELCOME_BACK_MIN_MILLIS && (reward.kills > 0 || reward.heroTooWeak)
 
+/**
+ * Applies a tap [hit] to the monster on screen. Returns the new state, or null if the tap does
+ * nothing: no monster, monster not in [MonsterPhase.FIGHTING] (walking in, dying, gone), already
+ * dead, hero defeated or travelling. Pure, so a fast second tap after the kill is ignored.
+ */
+fun applyTapHit(state: AdventureUiState, hit: Hit): AdventureUiState? {
+    val m = state.monster ?: return null
+    if (state.phase != MonsterPhase.FIGHTING || m.hp <= 0L || state.defeated || state.travelingTo != null) return null
+    return state.copy(monster = m.copy(hp = (m.hp - hit.damage).coerceAtLeast(0)))
+}
+
 private enum class FightResult { KILL, DEFEAT, TIMEOUT }
 
 /**
@@ -158,6 +173,9 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
     private var hpSaveJob: Job? = null
     private var offlineJob: Deferred<Unit>? = null
     private var foreground = false
+
+    /** Wakes the fight loop right after a tap so a tap kill is processed without the polling delay. */
+    private val wake = Channel<Unit>(Channel.CONFLATED)
     private var bossRequested = false
 
     /** Zone the hero travels to until the repository confirms it (avoids flicker back). */
@@ -234,6 +252,27 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun dismissWelcomeBack() = _ui.update { it.copy(welcomeBack = null) }
+
+    /**
+     * The player tapped the monster: deals the hero's current hit ([CombatStats.rollHit], incl. crit)
+     * on top of the automatic attacks; the attack timer is untouched. Kills go through the normal
+     * kill/boss logic of the fight loop. Returns the hit, or null if nothing was hit.
+     */
+    fun onEnemyTapped(): Hit? {
+        val hero = stats ?: return null
+        if (!foreground) return null
+        val hit = hero.rollHit()
+        var applied = false
+        _ui.update { st ->
+            val n = applyTapHit(st, hit)
+            applied = n != null
+            n ?: st
+        }
+        if (!applied) return null
+        _events.tryEmit(AdventureEvent.TapHit(hit))
+        wake.trySend(Unit)
+        return hit
+    }
 
     /** Starts the boss fight of the current zone (if the kill requirement is met). */
     fun challengeBoss() {
@@ -423,7 +462,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
             }
             var next = minOf(heroNext, monsterNext, if (pending != null) pendingAt else Long.MAX_VALUE)
             if (deadline != null) next = minOf(next, now + 100)
-            delay((next - now).coerceIn(8L, 100L))
+            withTimeoutOrNull((next - now).coerceIn(8L, 100L)) { wake.receive() }
         }
     }
 

@@ -90,4 +90,5 @@
     <string name="loot_autosold">Inventory full – sold for %1$s gold</string>
     <string name="welcome_back_items">Loot: %1$d items</string>
     <string name="welcome_back_items_sold">of which %1$d sold (+%2$s gold, inventory full)</string>
+    <string name="adventure_tap_description">Tap the enemy for bonus damage</string>
 </resources>
