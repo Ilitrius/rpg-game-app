@@ -41,6 +41,10 @@
     <string name="options_privacy_no_browser">No browser found to open the link.</string>
     <string name="options_privacy_summary">Idle RPG does not collect, transmit or share any personal data.\n\n• Save game and settings (character, equipment, gold, language, sound) are stored only locally on your device; there is no cloud backup.\n• The app requests no permissions and does not open internet connections itself. There are no accounts, ads, analytics or tracking. The only third-party component is Google’s Play library “In-App Updates”: it asks, via Play services, whether an update is available; the app sends no game or personal data.\n• Voluntary donation: the “Donate” button opens an external Stripe payment page in your browser. The app passes no data; the payment is handled solely by Stripe (see Stripe’s privacy policy).\n• Save export and import are manual via file or clipboard. Data leaves your device only if you share it yourself.\n• Uninstalling the app deletes all data. An import overwrites the current save game.\n• The app is not directed at children under 13.\n\nContact: rene.puf@gmail.com\n\nOpen the full policy via “Open privacy policy” (the link opens in your browser).</string>
 
+    <!-- About -->
+    <string name="options_about_title">About Idle RPG</string>
+    <string name="options_about_version">Version %1$s (build %2$d)</string>
+
     <!-- Feedback -->
     <string name="options_export_file_success">Save game saved.</string>
     <string name="options_export_file_error">Save game could not be saved.</string>

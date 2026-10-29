@@ -3,10 +3,11 @@
 Quelle der Ablehnung: Programmrichtlinien + Play-Console-Anforderungen. Genauen Text in der Console unter "Richtlinienstatus" prüfen.
 
 ## Im Code behoben
-- Spenden-Button mit externem Stripe-Link entfernt (Payments-Richtlinie: externe Zahlungslinks in der App).
+- Spenden-Button mit externem Stripe-Link: war entfernt, wurde in rc8 bewusst wieder eingebaut und bleibt (Entscheidung 2026-10-29; in den Datenschutztexten offengelegt). Bei erneuter Ablehnung zuerst die Payments-Richtlinie (externe Zahlungslinks in der App) prüfen.
+- Splash-Screen (AndroidX SplashScreen) und Versionsanzeige (Optionen → „Über Idle RPG“) ab rc10.
 
 - `allowBackup="false"` (Spielstand wird nicht in Google Drive gesichert → "nur lokal" in der Datenschutzerklärung stimmt).
-- versionCode 9 / `0.1.0-rc8` für den Neueinreichungs-Build.
+- versionCode 11 / `0.1.0-rc10` für den Neueinreichungs-Build.
 - Policy-Basis: https://play.google/developer-content-policy/ (das ist die Richtlinie, **keine** Datenschutzerklärungs-URL).
 
 ## Datenschutzerklärung
@@ -32,7 +33,7 @@ Quelle der Ablehnung: Programmrichtlinien + Play-Console-Anforderungen. Genauen 
 - Entwicklerprofil verifizieren (Identität, Adresse, Telefon).
 
 ## Neuer Build
-- versionCode erhöhen (aktuell 9), neues AAB hochladen.
+- versionCode erhöhen (aktuell 11), neues AAB hochladen.
 
 ## Datenschutz in der App
 - Optionen → Karte "Datenschutz": Kurzfassung (Dialog, offline) + Button zur öffentlichen Erklärung `https://ilitrius.github.io/rpg-game-app/` (GitHub Pages aus `docs/`, Quelle `docs/index.html`). Dieselbe URL in der Play Console eintragen.

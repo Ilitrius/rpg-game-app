@@ -69,6 +69,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.core.content.pm.PackageInfoCompat
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.idlerpg.game.IdleRpgApp
@@ -223,6 +224,7 @@ fun OptionsScreen() {
                 },
             )
             FutureSettingsCard()
+            AboutCard()
         }
 
         SnackbarHost(snackbar, modifier = Modifier.align(Alignment.BottomCenter).padding(8.dp))
@@ -435,6 +437,31 @@ private fun FutureSettingsCard() {
             SectionHeader(Icons.Outlined.Tune, stringResource(R.string.options_more_title))
             Text(
                 stringResource(R.string.options_more_description),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+private fun AboutCard() {
+    val context = LocalContext.current
+    // Version kommt aus der Build-Konfiguration (versionName/versionCode), nicht manuell gepflegt.
+    val version = remember {
+        runCatching {
+            val info = context.packageManager.getPackageInfo(context.packageName, 0)
+            context.getString(R.string.options_about_version, info.versionName ?: "?", PackageInfoCompat.getLongVersionCode(info))
+        }.getOrDefault("?")
+    }
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SectionHeader(Icons.Outlined.Info, stringResource(R.string.options_about_title))
+            Text(
+                version,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

@@ -20,8 +20,8 @@ android {
         applicationId = "com.rp.IDLEGAMERP"
         minSdk = 26
         targetSdk = 36
-        versionCode = 9
-        versionName = "0.1.0-rc8"
+        versionCode = 11
+        versionName = "0.1.0-rc10"
     }
 
     signingConfigs {
@@ -57,6 +57,7 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
