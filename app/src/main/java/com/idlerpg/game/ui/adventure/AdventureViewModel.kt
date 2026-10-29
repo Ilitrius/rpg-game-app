@@ -12,7 +12,12 @@ import com.idlerpg.game.data.WorldState
 import com.idlerpg.game.domain.character.CombatStats
 import com.idlerpg.game.domain.character.Hit
 import com.idlerpg.game.domain.character.Progression
+import com.idlerpg.game.domain.character.TapStats
 import com.idlerpg.game.domain.combat.CombatRules
+import com.idlerpg.game.domain.combat.ComboTracker
+import com.idlerpg.game.domain.stats.Stats
+import com.idlerpg.game.domain.world.AutoBossGate
+import com.idlerpg.game.ui.options.GameSettings
 import com.idlerpg.game.domain.world.BossOutcome
 import com.idlerpg.game.domain.world.Loot
 import com.idlerpg.game.domain.world.LootDrop
@@ -37,7 +42,11 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
@@ -71,6 +80,10 @@ data class AdventureUiState(
     val travelingTo: Zone? = null,
     /** Currently equipped weapon (null = fists), drawn in first person. */
     val equippedWeapon: Item? = null,
+    /** Auto-boss mode (device setting, see [AutoBossGate]). */
+    val autoBoss: Boolean = false,
+    /** Daily reward or a goal is ready to claim (HUD hint). */
+    val claimable: Boolean = false,
 ) {
     val killsTowardsBoss: Long get() = WorldProgress.killsTowardsBoss(world, zone)
 
@@ -101,6 +114,8 @@ sealed interface AdventureEvent {
     /** The hero starts a stab; the damage lands [impactDelayMillis] later. */
     data class HeroAttack(val hit: Hit) : AdventureEvent
     data class MonsterHit(val damage: Int) : AdventureEvent
+    /** The player tapped the monster and dealt [hit] immediately (independent of the attack timer). */
+    data class TapHit(val hit: Hit, val combo: Int = 0) : AdventureEvent
     data class Kill(val xp: Long, val gold: Long) : AdventureEvent
     /** The kill reward raised the hero's level (online only, never emitted for offline progress). */
     data object LevelUp : AdventureEvent
@@ -132,6 +147,17 @@ const val WELCOME_BACK_MIN_MILLIS = 30L * 60 * 1000
 fun shouldShowWelcomeBack(reward: OfflineReward?): Boolean =
     reward != null && reward.awayMillis >= WELCOME_BACK_MIN_MILLIS && (reward.kills > 0 || reward.heroTooWeak)
 
+/**
+ * Applies a tap [hit] to the monster on screen. Returns the new state, or null if the tap does
+ * nothing: no monster, monster not in [MonsterPhase.FIGHTING] (walking in, dying, gone), already
+ * dead, hero defeated or travelling. Pure, so a fast second tap after the kill is ignored.
+ */
+fun applyTapHit(state: AdventureUiState, hit: Hit): AdventureUiState? {
+    val m = state.monster ?: return null
+    if (state.phase != MonsterPhase.FIGHTING || m.hp <= 0L || state.defeated || state.travelingTo != null) return null
+    return state.copy(monster = m.copy(hp = (m.hp - hit.damage).coerceAtLeast(0)))
+}
+
 private enum class FightResult { KILL, DEFEAT, TIMEOUT }
 
 /**
@@ -160,12 +186,40 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
     private var hpSaveJob: Job? = null
     private var offlineJob: Deferred<Unit>? = null
     private var foreground = false
+
+    // Statistics gathered in memory; written together with the next reward/background save (no extra writes).
+    private var statHit = 0L
+    private var statTaps = 0L
+    private var statPlaySince = 0L
+
+    /** Takes the pending statistics and returns the state transform that persists them. */
+    private fun takeStats(): (GameState) -> GameState {
+        val now = SystemClock.elapsedRealtime()
+        val play = if (statPlaySince > 0) now - statPlaySince else 0L
+        if (statPlaySince > 0) statPlaySince = now
+        val hit = statHit
+        val taps = statTaps
+        statTaps = 0
+        return { s ->
+            s.copy(stats = Stats.recordTap(Stats.recordHit(Stats.addPlayTime(s.stats, play), hit), taps))
+        }
+    }
+
+    /** Wakes the fight loop right after a tap so a tap kill is processed without the polling delay. */
+    private val settings = GameSettings.get(app)
+    private val autoBossGate = AutoBossGate()
+    private val combo = ComboTracker()
+
+    private val wake = Channel<Unit>(Channel.CONFLATED)
     private var bossRequested = false
 
     /** Zone the hero travels to until the repository confirms it (avoids flicker back). */
     private var pendingZoneId: String? = null
 
     init {
+        viewModelScope.launch {
+            settings.autoBossFlow.collect { on -> _ui.update { it.copy(autoBoss = on) } }
+        }
         viewModelScope.launch {
             repository.state.collect { onGameState(it) }
         }
@@ -182,6 +236,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
             heroHp = (heroHp + (newStats.maxHp - old.maxHp)).coerceIn(1.0, newStats.maxHp.toDouble())
         }
         stats = newStats
+        autoBossGate.observeLevel(s.character.level)
         if (pendingZoneId == s.world.currentZoneId) pendingZoneId = null
         val zone = Zones.byId(pendingZoneId ?: s.world.currentZoneId)
         val stab = minOf(DEFAULT_STAB_MILLIS.toLong(), (newStats.attackIntervalMillis * 0.85).toLong()).toInt()
@@ -196,6 +251,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
                 heroHp = ceil(heroHp).toInt(),
                 attackDurationMillis = stab,
                 world = s.world,
+                claimable = hasClaimable(s, System.currentTimeMillis()),
                 equippedWeapon = s.equipment.equipped[EquipmentSlot.WEAPON],
             )
         }
@@ -206,6 +262,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
     fun onForeground() {
         if (foreground) return
         foreground = true
+        statPlaySince = SystemClock.elapsedRealtime()
         offlineJob = grantOfflineProgress()
         startLoop()
         hpSaveJob = viewModelScope.launch {
@@ -230,14 +287,45 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         val now = System.currentTimeMillis()
         val hp = currentHp()
         lastSavedHp = hp
+        val pendingStats = takeStats()
+        statPlaySince = 0
         idleApp.appScope.launch {
             runCatching {
-                repository.update { it.copy(world = it.world.copy(lastActiveEpochMillis = now, heroHp = hp)) }
+                repository.update { pendingStats(it.copy(world = it.world.copy(lastActiveEpochMillis = now, heroHp = hp))) }
             }
         }
     }
 
     fun dismissWelcomeBack() = _ui.update { it.copy(welcomeBack = null) }
+
+    /**
+     * The player tapped the monster: deals the hero's current hit ([CombatStats.rollHit], incl. crit)
+     * on top of the automatic attacks; the attack timer is untouched. Kills go through the normal
+     * kill/boss logic of the fight loop. Returns the hit, or null if nothing was hit.
+     */
+    fun onEnemyTapped(): Hit? {
+        val hero = stats ?: return null
+        if (!foreground) return null
+        val n = combo.register(SystemClock.elapsedRealtime())
+        val hit = TapStats.tapHit(hero, n)
+        var applied = false
+        _ui.update { st ->
+            val n = applyTapHit(st, hit)
+            applied = n != null
+            n ?: st
+        }
+        if (!applied) return null
+        statTaps++
+        if (hit.damage > statHit) statHit = hit.damage
+        _events.tryEmit(AdventureEvent.TapHit(hit, n))
+        wake.trySend(Unit)
+        return hit
+    }
+
+    /** Switches the auto-boss mode on/off (persisted as device setting). */
+    fun toggleAutoBoss() {
+        settings.autoBoss = !settings.autoBoss
+    }
 
     /** Starts the boss fight of the current zone (if the kill requirement is met). */
     fun challengeBoss() {
@@ -329,11 +417,20 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
                 cur.phase == MonsterPhase.APPROACHING -> _ui.update { it.copy(phase = MonsterPhase.FIGHTING) }
             }
             when (fight(deadline = null)) {
-                FightResult.KILL -> onKill()
+                FightResult.KILL -> { onKill(); maybeAutoBoss() }
                 else -> onDefeat()
             }
         }
     }
+
+    /** Auto-boss mode: after a kill, start the zone boss by itself if [AutoBossGate] allows it. */
+    private fun maybeAutoBoss() {
+        val st = _ui.value
+        if (st.bossFight || st.travelingTo != null || st.defeated) return
+        if (autoBossGate.shouldStart(st.autoBoss, st.world, st.zone, currentHp(), st.heroMaxHp)) bossRequested = true
+    }
+
+    private fun zoneKills(zone: Zone): Long = _ui.value.world.zoneKills[zone.id] ?: 0L
 
     private suspend fun spawnNext() {
         val s = _ui.value
@@ -354,8 +451,9 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         spawn(MonsterScaling.boss(zone))
         val deadline = SystemClock.elapsedRealtime() + WorldProgress.BOSS_TIME_LIMIT_MILLIS
         when (fight(deadline)) {
-            FightResult.KILL -> onBossKill(zone)
+            FightResult.KILL -> { autoBossGate.onVictory(); onBossKill(zone) }
             FightResult.TIMEOUT -> {
+                autoBossGate.onFailure(zoneKills(zone))
                 _events.tryEmit(AdventureEvent.BossFailed(BossOutcome.TIMEOUT))
                 endBossFight()
                 _ui.update { it.copy(phase = MonsterPhase.DYING) }
@@ -363,6 +461,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
                 _ui.update { it.copy(monster = null, phase = MonsterPhase.GONE) }
             }
             FightResult.DEFEAT -> {
+                autoBossGate.onFailure(zoneKills(zone))
                 _events.tryEmit(AdventureEvent.BossFailed(BossOutcome.DEFEAT))
                 endBossFight()
                 onDefeat()
@@ -395,6 +494,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
             val p = pending
             if (p != null && now >= pendingAt) {
                 pending = null
+                if (p.damage > statHit) statHit = p.damage
                 _ui.update { st ->
                     val m = st.monster ?: return@update st
                     st.copy(monster = m.copy(hp = (m.hp - p.damage).coerceAtLeast(0)))
@@ -431,7 +531,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
             }
             var next = minOf(heroNext, monsterNext, if (pending != null) pendingAt else Long.MAX_VALUE)
             if (deadline != null) next = minOf(next, now + 100)
-            delay((next - now).coerceIn(8L, 100L))
+            withTimeoutOrNull((next - now).coerceIn(8L, 100L)) { wake.receive() }
         }
     }
 
@@ -447,6 +547,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         val now = System.currentTimeMillis()
         val hp = currentHp()
         lastSavedHp = hp
+        val pendingStats = takeStats()
         // App scope: the reward must be saved even if the loop is cancelled right now.
         idleApp.appScope.launch {
             var drop: LootDrop? = null
@@ -460,7 +561,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
                         n = withItem
                         drop = d
                     }
-                    n.copy(world = n.world.copy(heroHp = hp))
+                    pendingStats(n.copy(world = n.world.copy(heroHp = hp)))
                 }
             }
             if (leveledUp) _events.tryEmit(AdventureEvent.LevelUp)
@@ -475,13 +576,17 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         val gold = m.stats.rollGold()
         val xp = m.stats.xp
         val item = Loot.bossDrop(m.stats.level)
-        val wasOpen = Zones.next(zone)?.let { WorldProgress.isUnlocked(_ui.value.world, it) } ?: true
+        val next = Zones.next(zone)
+        val wasOpen = next?.let { WorldProgress.isUnlocked(_ui.value.world, it) } ?: true
+        // The victory moves the saved zone forward; keep showing this zone until the travel transition.
+        if (next != null) pendingZoneId = zone.id
         _ui.update { it.copy(phase = MonsterPhase.DYING) }
         _events.tryEmit(AdventureEvent.Kill(xp, gold))
         endBossFight()
         val now = System.currentTimeMillis()
         val hp = currentHp()
         lastSavedHp = hp
+        val pendingStats = takeStats()
         idleApp.appScope.launch {
             var drop: LootDrop? = null
             var leveledUp = false
@@ -491,7 +596,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
                     leveledUp = won.character.level > s.character.level
                     val (withItem, d) = Loot.grant(won, item)
                     drop = d
-                    withItem.copy(world = withItem.world.copy(heroHp = hp))
+                    pendingStats(withItem.copy(world = withItem.world.copy(heroHp = hp)))
                 }
             }
             _events.tryEmit(AdventureEvent.BossVictory(zone, if (wasOpen) null else Zones.next(zone)))
@@ -500,9 +605,10 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         }
         waitWithRegen(CombatRules.DEATH_MILLIS * 2)
         _ui.update { it.copy(monster = null, phase = MonsterPhase.GONE) }
-        // Boss besiegt: automatisch in die nächste Ebene wechseln (letzte Zone: bleiben).
-        // Die Zone ist durch den Sieg freigeschaltet, auch wenn der UI-State noch nachzieht.
-        Zones.next(zone)?.let { startTravel(it) }
+        if (next != null) {
+            travelTo(next.id) // restarts the loop in the next zone
+            currentCoroutineContext().ensureActive()
+        }
     }
 
     private suspend fun onDefeat() {

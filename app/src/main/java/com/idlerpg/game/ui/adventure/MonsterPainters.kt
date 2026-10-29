@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.withTransform
 import com.idlerpg.game.domain.world.MonsterType
+import com.idlerpg.game.domain.world.Zone
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -47,6 +48,7 @@ object MonsterPainters {
         flash: Float,
         alpha: Float,
         squash: Float = 0f,
+        zone: Zone? = null,
     ) {
         if (alpha <= 0.01f) return
         val s = heightPx / UNIT
@@ -56,7 +58,8 @@ object MonsterPainters {
         }) {
             drawGroundShadow(alpha * (1f - 0.5f * squash))
             val bounds = Rect(-90f, -90f, 290f, 215f)
-            drawIntoCanvas { it.saveLayer(bounds, Paint().apply { this.alpha = alpha }) }
+            layerPaint.alpha = alpha
+            drawIntoCanvas { it.saveLayer(bounds, layerPaint) }
             withTransform({
                 scale(1f - 0.025f * breath + 0.12f * squash, 1f + 0.035f * breath - 0.35f * squash, Offset(100f, GROUND))
             }) {
@@ -81,6 +84,8 @@ object MonsterPainters {
                     MonsterType.HYDRA -> HydraPainter.draw(this, time)
                     MonsterType.YETI -> YetiPainter.draw(this, time)
                     MonsterType.DRAGON -> DragonPainter.draw(this, time)
+                    MonsterType.GEN_SWARM, MonsterType.GEN_BEAST, MonsterType.GEN_BRUTE, MonsterType.GEN_BOSS ->
+                        if (zone?.biome != null) ProceduralMonsters.draw(this, zone, type, time)
                 }
                 if (flash > 0f) {
                     drawRect(
@@ -92,6 +97,9 @@ object MonsterPainters {
             drawIntoCanvas { it.restore() }
         }
     }
+
+    /** Reused paint of the per-monster layer (draw runs on the main thread only). */
+    private val layerPaint = Paint()
 
     private val shadowBrush = Brush.radialGradient(
         0f to Color.Black.copy(alpha = 0.55f),

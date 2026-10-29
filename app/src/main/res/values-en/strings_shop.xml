@@ -27,16 +27,28 @@
     <string name="shop_sell_count">%1$d / %2$d</string>
     <string name="shop_sell_empty">Your inventory is empty – defeat monsters to find loot.</string>
     <string name="shop_sell">Sell (%1$s gold)</string>
-    <string name="shop_sell_all_common">Sell common items</string>
-    <plurals name="shop_sell_all_common_detail">
+    <plurals name="shop_sell_detail">
         <item quantity="one">%1$d item for %2$s gold</item>
         <item quantity="other">%1$d items for %2$s gold</item>
     </plurals>
-    <string name="shop_sell_all_common_confirm_title">Sell common items?</string>
-    <plurals name="shop_sell_all_common_confirm">
-        <item quantity="one">%1$d common item from your inventory will be sold for %2$s gold. Equipped gear and upgrades are kept.</item>
-        <item quantity="other">%1$d common items from your inventory will be sold for %2$s gold. Equipped gear and upgrades are kept.</item>
+    <string name="shop_quicksell_hint">Sell whole rarity tiers at once. Equipped gear and upgrades are always kept.</string>
+    <string name="shop_sell_everything">Sell everything</string>
+    <string name="shop_sell_rarity_confirm_title">Sell %1$s items?</string>
+    <plurals name="shop_sell_rarity_confirm">
+        <item quantity="one">%1$d item of this tier will be sold from your inventory for %2$s gold.</item>
+        <item quantity="other">%1$d items of this tier will be sold from your inventory for %2$s gold.</item>
     </plurals>
+    <string name="shop_sell_everything_confirm_title">Sell everything?</string>
+    <plurals name="shop_sell_everything_confirm">
+        <item quantity="one">%1$d item from your inventory will be sold for %2$s gold.</item>
+        <item quantity="other">%1$d items from your inventory will be sold for %2$s gold.</item>
+    </plurals>
+    <string name="shop_sell_keeps_equipped">Equipped gear is kept.</string>
+    <plurals name="shop_sell_keeps_upgrades">
+        <item quantity="one">%1$d upgrade is kept.</item>
+        <item quantity="other">%1$d upgrades are kept.</item>
+    </plurals>
+    <string name="shop_sell_irreversible">This cannot be undone.</string>
     <string name="shop_cancel">Cancel</string>
     <string name="shop_sold_one">%1$s sold for %2$s gold.</string>
     <plurals name="shop_sold_many">

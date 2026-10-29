@@ -4,7 +4,10 @@ import com.idlerpg.game.data.CharacterState
 import com.idlerpg.game.data.EquipmentSlot
 import com.idlerpg.game.data.EquipmentState
 import com.idlerpg.game.data.GameState
+import com.idlerpg.game.data.GoalState
 import com.idlerpg.game.data.Item
+import com.idlerpg.game.data.ProgressState
+import com.idlerpg.game.data.StatsState
 import com.idlerpg.game.data.Rarity
 import com.idlerpg.game.data.ShopState
 import com.idlerpg.game.data.Stats
@@ -17,6 +20,8 @@ import com.idlerpg.game.domain.combat.CombatRules
 import com.idlerpg.game.domain.equipment.Inventory
 import com.idlerpg.game.domain.equipment.ItemBaseTypes
 import com.idlerpg.game.domain.equipment.ItemGenerator
+import com.idlerpg.game.domain.progress.DailyReward
+import com.idlerpg.game.domain.progress.Goals
 import com.idlerpg.game.domain.shop.Shop
 import com.idlerpg.game.domain.world.Loot
 import com.idlerpg.game.domain.world.MonsterScaling
@@ -73,6 +78,17 @@ class SaveTransferValidationTest {
             stockLevel = 6,
             paidRestocks = 2,
         ),
+        progress = ProgressState(
+            dailyLastClaimEpochMillis = 1_759_900_000_000L,
+            dailyStreak = 3,
+            clockHighWaterMillis = 1_760_000_000_000L,
+            goals = listOf(
+                GoalState("kills_25", "kills", 25, baseline = 10, claimed = true),
+                GoalState("bosses_1", "bosses", 1, baseline = 0),
+            ),
+            goalsCompleted = 1,
+        ),
+        stats = StatsState(playTimeMillis = 7_200_000L, highestHit = 1234, goldEarned = 98_765, tapCount = 321),
     )
 
     private val equippedWeapon = SaveLocation.EquippedItem(EquipmentSlot.WEAPON, "Gehärteter Dolch")
@@ -360,12 +376,61 @@ class SaveTransferValidationTest {
             assertEquals(EquipmentSlot.entries.size, save.equipment.equipped.size)
             assertTrue(save.shop.offers.isNotEmpty() && save.shop.paidRestocks > 0)
             assertEquals(4, save.world.defeatedBossIds.size)
+            assertTrue(save.progress.dailyStreak > 0 && save.progress.goals.any { it.claimed } && save.progress.goalsCompleted > 0)
             assertTrue(save.world.lastActiveEpochMillis > 0 && save.character.level > 20)
 
             val valid = accepted(save)
             assertEquals(save, valid.state)
             assertTrue(valid.notes.isEmpty())
         }
+    }
+
+    @Test
+    fun negativeStatsAreRejected() {
+        val loc = SaveLocation.Stats
+        assertEquals(SaveError.NegativeValue(SaveField.STATS_PLAY_TIME, loc), rejected(base.copy(stats = StatsState(playTimeMillis = -1))))
+        assertEquals(SaveError.NegativeValue(SaveField.STATS_HIGHEST_HIT, loc), rejected(base.copy(stats = StatsState(highestHit = -1))))
+        assertEquals(SaveError.NegativeValue(SaveField.STATS_GOLD_EARNED, loc), rejected(base.copy(stats = StatsState(goldEarned = -1))))
+        assertEquals(SaveError.NegativeValue(SaveField.STATS_TAP_COUNT, loc), rejected(base.copy(stats = StatsState(tapCount = -1))))
+        assertEquals(base.stats, accepted(base).state.stats)
+    }
+
+    @Test
+    fun oldSaveWithoutStatsDecodesWithDefaults() {
+        val json = com.idlerpg.game.data.GameJson.encode(base)
+        val obj = kotlinx.serialization.json.Json.parseToJsonElement(json) as kotlinx.serialization.json.JsonObject
+        val old = kotlinx.serialization.json.JsonObject(obj - "stats").toString()
+        assertEquals(StatsState(), com.idlerpg.game.data.GameJson.decode(old).stats)
+    }
+
+    // ------------------------------------------------------------------ progress
+
+    private fun GameState.withProgress(transform: (ProgressState) -> ProgressState) = copy(progress = transform(progress))
+
+    @Test
+    fun negativeProgressCountersAreRejected() {
+        val loc = SaveLocation.Progress
+        assertEquals(SaveError.NegativeValue(SaveField.DAILY_LAST_CLAIM, loc), rejected(base.withProgress { it.copy(dailyLastClaimEpochMillis = -1) }))
+        assertEquals(SaveError.NegativeValue(SaveField.DAILY_STREAK, loc), rejected(base.withProgress { it.copy(dailyStreak = -1) }))
+        assertEquals(SaveError.NegativeValue(SaveField.CLOCK_HIGH_WATER, loc), rejected(base.withProgress { it.copy(clockHighWaterMillis = -1) }))
+        assertEquals(SaveError.NegativeValue(SaveField.GOALS_COMPLETED, loc), rejected(base.withProgress { it.copy(goalsCompleted = -1) }))
+    }
+
+    @Test
+    fun negativeGoalValuesNameTheGoal() {
+        val goals = base.progress.goals
+        val badTarget = base.withProgress { it.copy(goals = listOf(goals[0], goals[1].copy(target = -1))) }
+        assertEquals(SaveError.NegativeValue(SaveField.GOAL_TARGET, SaveLocation.ProgressGoal(2, "bosses_1")), rejected(badTarget))
+        val badBase = base.withProgress { it.copy(goals = listOf(goals[0].copy(baseline = -5), goals[1])) }
+        assertEquals(SaveError.NegativeValue(SaveField.GOAL_BASELINE, SaveLocation.ProgressGoal(1, "kills_25")), rejected(badBase))
+    }
+
+    @Test
+    fun unknownGoalsAreDroppedWithNote() {
+        val goals = base.progress.goals + GoalState("wueste_9", "wueste", 9) + GoalState("kills_50", "bosses", 5)
+        val valid = accepted(base.withProgress { it.copy(goals = goals) })
+        assertEquals(base.progress.goals, valid.state.progress.goals)
+        assertEquals(listOf<ImportNote>(ImportNote.UnknownGoalsDropped(2)), valid.notes)
     }
 
     @Test
@@ -393,6 +458,7 @@ class SaveTransferValidationTest {
         val valid = SaveTransfer.parse(legacy) as ImportResult.Valid
         assertEquals(WorldState(), valid.state.world)
         assertEquals(ShopState(), valid.state.shop)
+        assertEquals(ProgressState(), valid.state.progress)
         assertEquals(1, valid.state.equipment.equipped.getValue(EquipmentSlot.WEAPON).itemLevel)
         assertTrue(valid.notes.isEmpty())
     }
@@ -476,6 +542,10 @@ class SaveTransferValidationTest {
 
         now += 3 * 60 * 60 * 1000L
         s = OfflineProgress.apply(s, OfflineProgress.calculate(s, now, random), now)
+        // Like a player: daily reward claimed, first goals set up and one claimed.
+        s = DailyReward.claim(DailyReward.observe(s, now), now)
+        s = Goals.ensureActive(s)
+        s = Goals.claim(s.copy(world = s.world.copy(totalKills = s.world.totalKills + 1_000)), "kills_25")
         return s.copy(world = s.world.copy(heroHp = 0))
     }
 }

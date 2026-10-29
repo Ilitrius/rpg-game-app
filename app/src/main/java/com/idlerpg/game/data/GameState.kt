@@ -18,6 +18,10 @@ data class GameState(
     val world: WorldState = WorldState(),
     /** Merchant assortment and restock timer. Owned by the Shop area (domain/shop). */
     val shop: ShopState = ShopState(),
+    /** Daily reward and goals. Owned by the Ziele area (domain/progress). */
+    val progress: ProgressState = ProgressState(),
+    /** Lifetime statistics (playtime, best hit, ...). Written by the adventure loop, shown in the Charakter tab. */
+    val stats: StatsState = StatsState(),
 ) {
     companion object {
         const val SCHEMA_VERSION = 1
@@ -127,4 +131,49 @@ data class ShopState(
     val restockedAtEpochMillis: Long = 0,
     val stockLevel: Int = 0,
     val paidRestocks: Int = 0,
+)
+
+/**
+ * Daily reward and goals (domain/progress). Goal types are plain strings on purpose: an unknown
+ * enum value in a save would fail decoding and reset the whole game.
+ *
+ * @property dailyLastClaimEpochMillis time of the last claimed daily reward (0 = never)
+ * @property dailyStreak consecutive days claimed
+ * @property clockHighWaterMillis highest wall-clock time ever seen (limits clock-rewind abuse)
+ * @property goals currently active goals
+ * @property goalsCompleted goals ever claimed
+ */
+@Serializable
+data class ProgressState(
+    val dailyLastClaimEpochMillis: Long = 0,
+    val dailyStreak: Int = 0,
+    val clockHighWaterMillis: Long = 0,
+    val goals: List<GoalState> = emptyList(),
+    val goalsCompleted: Long = 0,
+)
+
+/** One goal: [type] names the counter, progress = counter - [baseline], done at [target]. */
+@Serializable
+data class GoalState(
+    val id: String,
+    val type: String,
+    val target: Long,
+    val baseline: Long = 0,
+    val claimed: Boolean = false,
+)
+
+/**
+ * Lifetime statistics.
+ *
+ * @property playTimeMillis time the adventure loop has been running in the foreground
+ * @property highestHit biggest single hit the hero ever dealt
+ * @property goldEarned gold earned from kills, bosses and rewards (not spent/sold)
+ * @property tapCount enemy taps ever made
+ */
+@Serializable
+data class StatsState(
+    val playTimeMillis: Long = 0,
+    val highestHit: Long = 0,
+    val goldEarned: Long = 0,
+    val tapCount: Long = 0,
 )

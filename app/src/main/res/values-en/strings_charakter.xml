@@ -54,4 +54,10 @@
     <string name="character_rarity_rare">Rare</string>
     <string name="character_rarity_epic">Epic</string>
     <string name="character_rarity_legendary">Legendary</string>
+
+    <string name="character_tap_title">Tapping</string>
+    <string name="character_tap_damage">Tap damage</string>
+    <string name="character_tap_damage_value">%1$d–%2$d</string>
+    <string name="character_tap_multiplier">Click multiplier</string>
+    <string name="character_tap_combo">Max combo (taps in a row)</string>
 </resources>

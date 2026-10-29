@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="goals_title">Tagesbelohnung &amp; Ziele</string>
+    <string name="goals_daily_title">Tagesbelohnung</string>
+    <string name="goals_daily_streak">Serie: %1$s</string>
+    <plurals name="goals_days">
+        <item quantity="one">%1$d Tag</item>
+        <item quantity="other">%1$d Tage</item>
+    </plurals>
+    <string name="goals_daily_reward">+%1$s Gold</string>
+    <string name="goals_daily_claim">Abholen</string>
+    <string name="goals_daily_next_in">Nächste Belohnung in %1$s</string>
+    <string name="goals_daily_clock_rewound">Die Systemuhr geht nach. Die Belohnung ist gesperrt, bis die Zeit wieder stimmt.</string>
+    <string name="goals_daily_week_bonus">Wochenbonus aktiv</string>
+    <string name="goals_goals_title">Ziele</string>
+    <string name="goals_none_left">Alle Ziele erledigt. Neue folgen mit einem Update.</string>
+    <string name="goals_claim">Abholen</string>
+    <string name="goals_reward">+%1$s Gold</string>
+    <string name="goals_progress">%1$s / %2$s</string>
+    <plurals name="goals_kills">
+        <item quantity="one">Besiege %1$d Monster</item>
+        <item quantity="other">Besiege %1$d Monster</item>
+    </plurals>
+    <plurals name="goals_bosses">
+        <item quantity="one">Besiege %1$d Boss</item>
+        <item quantity="other">Besiege %1$d Bosse</item>
+    </plurals>
+    <plurals name="goals_level">
+        <item quantity="one">Steige %1$d Stufe auf</item>
+        <item quantity="other">Steige %1$d Stufen auf</item>
+    </plurals>
+    <plurals name="goals_zones">
+        <item quantity="one">Schalte %1$d neues Gebiet frei</item>
+        <item quantity="other">Schalte %1$d neue Gebiete frei</item>
+    </plurals>
+    <!-- Import (Optionen) -->
+    <string name="options_field_daily_last_claim">Zeit der letzten Tagesbelohnung</string>
+    <string name="options_field_daily_streak">Tagesbelohnungs-Serie</string>
+    <string name="options_field_clock_high_water">Uhr-Höchststand</string>
+    <string name="options_field_goals_completed">erledigte Ziele</string>
+    <string name="options_field_goal_target">Zielwert</string>
+    <string name="options_field_goal_baseline">Ausgangswert</string>
+    <string name="options_location_progress">Tagesbelohnung &amp; Ziele</string>
+    <string name="options_location_progress_goal">Ziel %1$d: %2$s</string>
+    <string name="options_note_unknown_goals">Unbekannte Ziele werden entfernt: %1$d</string>
+</resources>

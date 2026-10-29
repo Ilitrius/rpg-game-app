@@ -31,16 +31,28 @@
     <string name="shop_sell_count">%1$d / %2$d</string>
     <string name="shop_sell_empty">Dein Inventar ist leer – besiege Monster, um Beute zu finden.</string>
     <string name="shop_sell">Verkaufen (%1$s Gold)</string>
-    <string name="shop_sell_all_common">Gewöhnliche Gegenstände verkaufen</string>
-    <plurals name="shop_sell_all_common_detail">
+    <plurals name="shop_sell_detail">
         <item quantity="one">%1$d Gegenstand für %2$s Gold</item>
         <item quantity="other">%1$d Gegenstände für %2$s Gold</item>
     </plurals>
-    <string name="shop_sell_all_common_confirm_title">Gewöhnliche Gegenstände verkaufen?</string>
-    <plurals name="shop_sell_all_common_confirm">
-        <item quantity="one">%1$d gewöhnlicher Gegenstand aus dem Inventar wird für %2$s Gold verkauft. Angelegte Ausrüstung und Verbesserungen bleiben erhalten.</item>
-        <item quantity="other">%1$d gewöhnliche Gegenstände aus dem Inventar werden für %2$s Gold verkauft. Angelegte Ausrüstung und Verbesserungen bleiben erhalten.</item>
+    <string name="shop_quicksell_hint">Verkaufe ganze Seltenheitsstufen auf einmal. Angelegte Ausrüstung und Verbesserungen bleiben immer erhalten.</string>
+    <string name="shop_sell_everything">Alles verkaufen</string>
+    <string name="shop_sell_rarity_confirm_title">%1$s verkaufen?</string>
+    <plurals name="shop_sell_rarity_confirm">
+        <item quantity="one">%1$d Gegenstand dieser Stufe wird aus dem Inventar für %2$s Gold verkauft.</item>
+        <item quantity="other">%1$d Gegenstände dieser Stufe werden aus dem Inventar für %2$s Gold verkauft.</item>
     </plurals>
+    <string name="shop_sell_everything_confirm_title">Alles verkaufen?</string>
+    <plurals name="shop_sell_everything_confirm">
+        <item quantity="one">%1$d Gegenstand aus dem Inventar wird für %2$s Gold verkauft.</item>
+        <item quantity="other">%1$d Gegenstände aus dem Inventar werden für %2$s Gold verkauft.</item>
+    </plurals>
+    <string name="shop_sell_keeps_equipped">Angelegte Ausrüstung bleibt erhalten.</string>
+    <plurals name="shop_sell_keeps_upgrades">
+        <item quantity="one">%1$d Verbesserung bleibt erhalten.</item>
+        <item quantity="other">%1$d Verbesserungen bleiben erhalten.</item>
+    </plurals>
+    <string name="shop_sell_irreversible">Das lässt sich nicht rückgängig machen.</string>
     <string name="shop_cancel">Abbrechen</string>
     <string name="shop_sold_one">%1$s für %2$s Gold verkauft.</string>
     <plurals name="shop_sold_many">

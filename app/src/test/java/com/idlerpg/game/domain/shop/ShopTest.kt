@@ -248,6 +248,64 @@ class ShopTest {
         assertEquals(listOf("b", "s", "r"), r.state.equipment.inventory.map { it.id })
     }
 
+    private fun bulkState(): GameState {
+        val equippedRing = Item(id = "eq", name = "Ring", slot = EquipmentSlot.RING, bonus = Stats(luck = 5), price = 10)
+        val inv = listOf(
+            Item(id = "c1", name = "C1", slot = EquipmentSlot.RING, rarity = Rarity.COMMON, price = 4, isNew = true),
+            Item(id = "u1", name = "U1", slot = EquipmentSlot.RING, rarity = Rarity.UNCOMMON, price = 8),
+            Item(id = "u2", name = "U2", slot = EquipmentSlot.RING, rarity = Rarity.UNCOMMON, price = 9),
+            Item(id = "r1", name = "R1", slot = EquipmentSlot.RING, rarity = Rarity.RARE, price = 30),
+            Item(id = "e1", name = "E1", slot = EquipmentSlot.RING, rarity = Rarity.EPIC, price = 70),
+            // upgrade: empty slot with bonus
+            Item(id = "up", name = "Up", slot = EquipmentSlot.BOOTS, rarity = Rarity.RARE, bonus = Stats(dexterity = 3), price = 50),
+        )
+        return GameState(gold = 5, equipment = EquipmentState(equipped = mapOf(EquipmentSlot.RING to equippedRing), inventory = inv))
+    }
+
+    @Test
+    fun bulkSellByRaritySumsGoldAndKeepsRest() {
+        val s = bulkState()
+        val r = Shop.bulkSell(s, setOf(Rarity.UNCOMMON, Rarity.COMMON))
+        assertEquals(3, r.count)
+        assertEquals(21L, r.gold)
+        assertEquals(s.gold + 21, r.state.gold)
+        assertEquals(listOf("r1", "e1", "up"), r.state.equipment.inventory.map { it.id })
+    }
+
+    @Test
+    fun sellEverythingKeepsEquippedAndUpgrades() {
+        val s = bulkState()
+        val r = Shop.sellEverything(s)
+        assertEquals(listOf("up"), r.state.equipment.inventory.map { it.id })
+        assertEquals(s.equipment.equipped, r.state.equipment.equipped)
+        assertEquals(4 + 8 + 9 + 30 + 70L, r.gold)
+        assertEquals(1, Shop.keptUpgradeCount(s, Rarity.entries.toSet()))
+        assertEquals(r.gold, Shop.bulkSellGold(s, Rarity.entries.toSet()))
+        // idempotent
+        assertSame(r.state, Shop.sellEverything(r.state).state)
+    }
+
+    @Test
+    fun emptySelectionOrInventorySellsNothing() {
+        val s = bulkState()
+        val none = Shop.bulkSell(s, emptySet())
+        assertSame(s, none.state)
+        assertEquals(0, none.count)
+        assertEquals(0L, none.gold)
+        val empty = GameState()
+        assertSame(empty, Shop.sellEverything(empty).state)
+    }
+
+    @Test
+    fun sellGroupsListOnlyNonEmptyRaritiesAndMatchSellEverything() {
+        val s = bulkState()
+        val groups = Shop.sellGroups(s)
+        assertEquals(listOf(Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC), groups.map { it.rarity })
+        assertEquals(17L, groups.first { it.rarity == Rarity.UNCOMMON }.gold)
+        assertEquals(Shop.sellEverything(s).gold, groups.sumOf { it.gold })
+        assertEquals(Shop.sellEverything(s).count, groups.sumOf { it.count })
+    }
+
     // ------------------------------------------------------------------ persistence
 
     @Test

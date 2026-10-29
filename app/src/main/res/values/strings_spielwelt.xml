@@ -65,7 +65,7 @@
     <!-- Zones / travel -->
     <string name="zone_levels">Stufe %1$d–%2$d</string>
     <string name="zone_sheet_title">Gebiete</string>
-    <string name="zone_sheet_subtitle">Besiege den Boss eines Gebiets, um das nächste freizuschalten.</string>
+    <string name="zone_sheet_subtitle">Besiege den Boss eines Gebiets, um automatisch ins nächste zu ziehen.</string>
     <string name="zone_locked_requirement">Gesperrt – besiege %1$s (%2$s)</string>
     <string name="zone_current">Du bist hier</string>
     <string name="zone_boss_defeated">Boss besiegt</string>
@@ -82,7 +82,7 @@
     <string name="boss_badge">BOSS</string>
     <string name="boss_time_left">%1$d s</string>
     <string name="boss_victory_title">Boss besiegt!</string>
-    <string name="boss_victory_unlocked">Neues Gebiet freigeschaltet: %1$s</string>
+    <string name="boss_victory_unlocked">Weiter zum nächsten Gebiet: %1$s</string>
     <string name="boss_failed_timeout">Zeit abgelaufen!</string>
     <string name="boss_failed_defeat">Der Boss war zu stark</string>
     <string name="boss_failed_hint">Der Boss zieht sich zurück – versuch es erneut.</string>
@@ -92,4 +92,17 @@
     <string name="loot_autosold">Inventar voll – für %1$s Gold verkauft</string>
     <string name="welcome_back_items">Beute: %1$d Gegenstände</string>
     <string name="welcome_back_items_sold">davon %1$d verkauft (+%2$s Gold, Inventar voll)</string>
+    <string name="adventure_tap_description">Gegner antippen für Extra-Schaden</string>
+    <string name="boss_victory_final">Alle Gebiete bezwungen – du bist der Held der Welt!</string>
+    <string name="monster_generic">Unhold</string>
+    <string name="zone_group_home">Heimatlande</string>
+    <string name="zone_group_progress">%1$d/%2$d freigeschaltet</string>
+    <string name="zone_jump_label">Gebiet 1–%1$d</string>
+    <string name="zone_jump_go">Springen</string>
+    <string name="zone_jump_current">Aktuelle Zone</string>
+    <string name="combo_label">Combo ×%1$d</string>
+    <string name="auto_boss_on">Auto-Boss an</string>
+    <string name="auto_boss_off">Auto-Boss aus</string>
+    <string name="auto_boss_cd">Auto-Boss umschalten</string>
+    <string name="claim_hint">Belohnung bereit</string>
 </resources>

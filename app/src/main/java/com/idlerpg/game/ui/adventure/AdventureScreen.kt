@@ -14,6 +14,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -97,6 +98,9 @@ import com.idlerpg.game.ui.adventure.MonsterPainters.drawMonster
 import com.idlerpg.game.ui.character.weapon.FirstPersonWeapon
 import java.util.Locale
 import kotlin.math.PI
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.input.pointer.pointerInput
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -137,6 +141,8 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
     val loot = remember { mutableStateListOf<LootDrop>() }
     var banner by remember { mutableStateOf<BannerMessage?>(null) }
     var showZones by remember { mutableStateOf(false) }
+    // Last tap position as alignment bias (-1..1) for the floating damage number.
+    var tapPoint by remember { mutableStateOf<Offset?>(null) }
 
     val context = LocalContext.current
     val sound = remember { SoundManager.get(context) }
@@ -154,6 +160,19 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
                     pendingHits.addLast(e.hit)
                     while (pendingHits.size > 3) pendingHits.removeFirst()
                     attacks++
+                }
+                is AdventureEvent.TapHit -> {
+                    val pos = tapPoint
+                    floats += FloatText(
+                        nextFloatId++, if (e.hit.critical) FloatKind.CRIT else FloatKind.DAMAGE, e.hit.damage, 0,
+                        pos?.x ?: 0f, pos?.y ?: -0.1f,
+                    )
+                    if (e.combo >= 2) floats += FloatText(nextFloatId++, FloatKind.COMBO, e.combo.toLong(), 0, pos?.x ?: 0f, (pos?.y ?: -0.1f) + 0.09f)
+                    attacks++ // short weapon swing as feedback; no pending hit queued, damage is already applied
+                    scope.launch {
+                        hitFlash.snapTo(1f)
+                        hitFlash.animateTo(0f, tween(if (e.hit.critical) 380 else 260))
+                    }
                 }
                 is AdventureEvent.MonsterHit -> {
                     sound.play(Sfx.HURT)
@@ -208,7 +227,7 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
         if (dying) death.animateTo(1f, tween(CombatRules.DEATH_MILLIS.toInt(), easing = FastOutSlowInEasing))
     }
 
-    val monsterName = monster?.let { stringResource(it.stats.type.nameRes()) } ?: ""
+    val monsterName = monster?.let { stringResource(it.stats.type.nameRes(ui.zone)) } ?: ""
     val sceneDescription = stringResource(R.string.adventure_scene_description, monsterName)
 
     Box(
@@ -227,7 +246,27 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
         )
 
         // Monster.
-        Canvas(Modifier.fillMaxSize()) {
+        val currentScene by rememberUpdatedState(scene)
+        val currentMonster by rememberUpdatedState(monster)
+        val tapDescription = stringResource(R.string.adventure_tap_description)
+        Canvas(
+            Modifier
+                .fillMaxSize()
+                .semantics { contentDescription = tapDescription }
+                .pointerInput(vm) {
+                    detectTapGestures { p ->
+                        val sc = currentScene ?: return@detectTapGestures
+                        val m = currentMonster ?: return@detectTapGestures
+                        val h = min(size.width * 0.66f, size.height * 0.38f) * m.stats.type.sizeFactor()
+                        val inX = abs(p.x - size.width / 2f) <= h * 0.55f
+                        val inY = p.y in (sc.monsterGroundY - h * 1.05f)..(sc.monsterGroundY + h * 0.08f)
+                        if (inX && inY) {
+                            tapPoint = Offset(p.x / size.width * 2f - 1f, p.y / size.height * 2f - 1f - 0.08f)
+                            vm.onEnemyTapped()
+                        }
+                    }
+                },
+        ) {
             val sc = scene ?: return@Canvas
             val m = monster ?: return@Canvas
             val a = approach.value
@@ -247,6 +286,7 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
                 flash = flash,
                 alpha = (a * 2.5f).coerceAtMost(1f) * (1f - d),
                 squash = d * 0.7f,
+                zone = ui.zone,
             )
         }
 
@@ -305,6 +345,7 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
                 sound.play(Sfx.BOSS_START)
                 vm.challengeBoss()
             },
+            onToggleAutoBoss = vm::toggleAutoBoss,
             loot = {
                 // Bottom-left above the hero block: clear of the weapon (right) and the monster (above).
                 loot.firstOrNull()?.let { drop ->
@@ -361,9 +402,20 @@ fun MonsterType.nameRes(): Int = when (this) {
     MonsterType.HYDRA -> R.string.monster_sumpfhydra
     MonsterType.YETI -> R.string.monster_yeti
     MonsterType.DRAGON -> R.string.monster_hoehlendrache
+    MonsterType.GEN_SWARM, MonsterType.GEN_BEAST, MonsterType.GEN_BRUTE, MonsterType.GEN_BOSS -> R.string.monster_generic
 }
 
-fun Zone.nameRes(): Int = when (id) {
+/** Name of this monster type as it appears in [zone] (generated zones name by biome, stage and role). */
+fun MonsterType.nameRes(zone: Zone): Int {
+    val biome = zone.biome ?: return nameRes()
+    return when {
+        !isGenerated -> nameRes()
+        isBoss -> WorldNames.boss[biome.ordinal][zone.stage]
+        else -> WorldNames.monster[biome.ordinal][zone.monsters.indexOf(this).coerceAtLeast(0)]
+    }
+}
+
+fun Zone.nameRes(): Int = if (biome != null) WorldNames.zone[biome.ordinal][stage] else when (id) {
     Zones.WALD_ID -> R.string.zone_wald
     Zones.SUMPF_ID -> R.string.zone_sumpf
     Zones.GEBIRGE_ID -> R.string.zone_gebirge
@@ -388,6 +440,10 @@ internal fun MonsterType.sizeFactor(): Float = when (this) {
     MonsterType.SLIME_KING -> 1.3f
     MonsterType.TREANT, MonsterType.HYDRA, MonsterType.YETI -> 1.38f
     MonsterType.DRAGON -> 1.25f
+    MonsterType.GEN_SWARM -> 0.88f
+    MonsterType.GEN_BEAST -> 1.0f
+    MonsterType.GEN_BRUTE -> 1.15f
+    MonsterType.GEN_BOSS -> 1.38f
 }
 
 // ------------------------------------------------------------------ HUD
@@ -421,6 +477,7 @@ private fun Hud(
     monsterName: String,
     onZoneClick: () -> Unit,
     onChallengeBoss: () -> Unit,
+    onToggleAutoBoss: () -> Unit,
     loot: @Composable () -> Unit,
 ) {
     Box(Modifier.fillMaxSize().padding(HudPadding)) {
@@ -476,6 +533,7 @@ private fun Hud(
         ) {
             BossChallengeButton(onChallengeBoss)
         }
+        AutoBossChip(ui.autoBoss, onToggleAutoBoss, Modifier.align(Alignment.TopEnd).padding(top = if (ui.canChallengeBoss) 52.dp else 0.dp))
 
         // Monster name + level + HP (top center)
         val m = ui.monster
@@ -544,6 +602,16 @@ private fun Hud(
 @Composable
 private fun HeroBlock(ui: AdventureUiState) {
     Column(Modifier.width(HeroBlockWidth)) {
+        if (ui.claimable) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 3.dp)) {
+                Box(Modifier.size(9.dp).clip(CircleShape).background(Color(0xFFFFC94A)))
+                Spacer(Modifier.width(5.dp))
+                Text(
+                    stringResource(R.string.claim_hint),
+                    style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFFE08A), shadow = hudShadow),
+                )
+            }
+        }
         Text(
             stringResource(R.string.hero_label, ui.heroName, ui.heroLevel),
             style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White, shadow = hudShadow),
@@ -621,7 +689,7 @@ private fun HpBar(
 
 // ------------------------------------------------------------------ floating texts
 
-private enum class FloatKind { DAMAGE, CRIT, HERO_DAMAGE, REWARD }
+private enum class FloatKind { DAMAGE, CRIT, HERO_DAMAGE, REWARD, COMBO }
 
 /** [x]/[y] are alignment biases (-1..1) relative to the scene; for [FloatKind.HERO_DAMAGE] [x] is a 0..1 jitter. */
 private data class FloatText(val id: Long, val kind: FloatKind, val a: Long, val b: Long, val x: Float, val y: Float)
@@ -688,6 +756,10 @@ private fun FloatingLabel(f: FloatText, onDone: () -> Unit) {
                 FloatKind.HERO_DAMAGE -> Text(
                     stringResource(R.string.damage_taken, f.a.toInt()),
                     style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Black, color = Color(0xFFFF5A4A), shadow = hudShadow),
+                )
+                FloatKind.COMBO -> Text(
+                    stringResource(R.string.combo_label, f.a.toInt()),
+                    style = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFFFFB74D), shadow = hudShadow),
                 )
                 FloatKind.REWARD -> Text(
                     stringResource(R.string.kill_reward, f.a.toInt(), f.b.toInt()),

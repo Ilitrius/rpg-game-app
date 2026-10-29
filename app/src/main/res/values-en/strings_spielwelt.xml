@@ -65,7 +65,7 @@
     <!-- Zones / travel -->
     <string name="zone_levels">Level %1$d–%2$d</string>
     <string name="zone_sheet_title">Areas</string>
-    <string name="zone_sheet_subtitle">Defeat an area\'s boss to unlock the next one.</string>
+    <string name="zone_sheet_subtitle">Defeat a zone\'s boss to move on to the next zone automatically.</string>
     <string name="zone_locked_requirement">Locked – defeat %1$s (%2$s)</string>
     <string name="zone_current">You are here</string>
     <string name="zone_boss_defeated">Boss defeated</string>
@@ -82,7 +82,7 @@
     <string name="boss_badge">BOSS</string>
     <string name="boss_time_left">%1$d s</string>
     <string name="boss_victory_title">Boss defeated!</string>
-    <string name="boss_victory_unlocked">New area unlocked: %1$s</string>
+    <string name="boss_victory_unlocked">On to the next zone: %1$s</string>
     <string name="boss_failed_timeout">Time is up!</string>
     <string name="boss_failed_defeat">The boss was too strong</string>
     <string name="boss_failed_hint">The boss retreats – try again.</string>
@@ -92,4 +92,17 @@
     <string name="loot_autosold">Inventory full – sold for %1$s gold</string>
     <string name="welcome_back_items">Loot: %1$d items</string>
     <string name="welcome_back_items_sold">of which %1$d sold (+%2$s gold, inventory full)</string>
+    <string name="adventure_tap_description">Tap the enemy for bonus damage</string>
+    <string name="boss_victory_final">All zones conquered - you are the hero of the world!</string>
+    <string name="monster_generic">Fiend</string>
+    <string name="zone_group_home">Homelands</string>
+    <string name="zone_group_progress">%1$d/%2$d unlocked</string>
+    <string name="zone_jump_label">Zone 1–%1$d</string>
+    <string name="zone_jump_go">Go</string>
+    <string name="zone_jump_current">Current zone</string>
+    <string name="combo_label">Combo ×%1$d</string>
+    <string name="auto_boss_on">Auto boss on</string>
+    <string name="auto_boss_off">Auto boss off</string>
+    <string name="auto_boss_cd">Toggle auto boss</string>
+    <string name="claim_hint">Reward ready</string>
 </resources>

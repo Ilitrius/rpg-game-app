@@ -20,6 +20,7 @@ enum class MonsterType(
     val spawnWeight: Int,
     val isBoss: Boolean = false,
 ) {
+
     // ---- Wiese
     SLIME("schleim", baseHp = 20, baseDamageMin = 1, baseDamageMax = 3, baseAttackIntervalMillis = 1700, baseXp = 6, baseGold = 2, spawnWeight = 4),
     GIANT_RAT("riesenratte", baseHp = 26, baseDamageMin = 2, baseDamageMax = 4, baseAttackIntervalMillis = 1300, baseXp = 8, baseGold = 3, spawnWeight = 3),
@@ -45,12 +46,21 @@ enum class MonsterType(
     CAVE_SPIDER("hoehlenspinne", baseHp = 30, baseDamageMin = 3, baseDamageMax = 5, baseAttackIntervalMillis = 1100, baseXp = 11, baseGold = 5, spawnWeight = 3),
     CRYSTAL_GOLEM("kristallgolem", baseHp = 52, baseDamageMin = 4, baseDamageMax = 9, baseAttackIntervalMillis = 2300, baseXp = 16, baseGold = 7, spawnWeight = 2),
 
+    // ---- Generated zones (6..100): one archetype per role; look and name come from biome + stage
+    GEN_SWARM("gen_swarm", baseHp = 24, baseDamageMin = 3, baseDamageMax = 5, baseAttackIntervalMillis = 1150, baseXp = 11, baseGold = 5, spawnWeight = 4),
+    GEN_BEAST("gen_beast", baseHp = 34, baseDamageMin = 3, baseDamageMax = 6, baseAttackIntervalMillis = 1500, baseXp = 13, baseGold = 5, spawnWeight = 3),
+    GEN_BRUTE("gen_brute", baseHp = 52, baseDamageMin = 4, baseDamageMax = 9, baseAttackIntervalMillis = 2300, baseXp = 16, baseGold = 7, spawnWeight = 2),
+    GEN_BOSS("gen_boss", baseHp = 175, baseDamageMin = 3, baseDamageMax = 6, baseAttackIntervalMillis = 1700, baseXp = 170, baseGold = 95, spawnWeight = 0, isBoss = true),
+
     // ---- Bosses (one per zone, see Zone.boss)
     SLIME_KING("schleimkoenig", baseHp = 180, baseDamageMin = 3, baseDamageMax = 6, baseAttackIntervalMillis = 1600, baseXp = 110, baseGold = 60, spawnWeight = 0, isBoss = true),
     TREANT("baumhueter", baseHp = 143, baseDamageMin = 2, baseDamageMax = 5, baseAttackIntervalMillis = 1900, baseXp = 130, baseGold = 70, spawnWeight = 0, isBoss = true),
     HYDRA("sumpfhydra", baseHp = 150, baseDamageMin = 2, baseDamageMax = 4, baseAttackIntervalMillis = 1500, baseXp = 140, baseGold = 75, spawnWeight = 0, isBoss = true),
     YETI("yeti", baseHp = 178, baseDamageMin = 3, baseDamageMax = 6, baseAttackIntervalMillis = 1800, baseXp = 150, baseGold = 80, spawnWeight = 0, isBoss = true),
-    DRAGON("hoehlendrache", baseHp = 173, baseDamageMin = 3, baseDamageMax = 6, baseAttackIntervalMillis = 1700, baseXp = 170, baseGold = 95, spawnWeight = 0, isBoss = true),
+    DRAGON("hoehlendrache", baseHp = 173, baseDamageMin = 3, baseDamageMax = 6, baseAttackIntervalMillis = 1700, baseXp = 170, baseGold = 95, spawnWeight = 0, isBoss = true);
+
+    /** True for the generic archetypes of generated zones (look/name depend on the zone's biome). */
+    val isGenerated: Boolean get() = id.startsWith("gen_")
 }
 
 /** Fully scaled values of one monster at a given zone + level. */
@@ -84,7 +94,7 @@ data class MonsterStats(
  * - Damage: base × (1 + 0.20 × (level − 1)) × zone damage multiplier
  * - Attack interval: base × (1 − 0.02 × (level − 1)), never below 60 % of base
  * - XP: base × (1 + 0.50 × (level − 1)) × zone reward multiplier
- * - Gold: base × (1 + 0.35 × (level − 1)) × zone reward multiplier
+ * - Gold: base × (1 + 0.35 × (level − 1)) × zone gold multiplier
  */
 object MonsterScaling {
     const val HP_PER_LEVEL = 0.30
@@ -103,7 +113,7 @@ object MonsterScaling {
         val interval = (type.baseAttackIntervalMillis *
             (1 - INTERVAL_REDUCTION_PER_LEVEL * l).coerceAtLeast(MIN_INTERVAL_FACTOR)).roundToLong()
         val xp = (type.baseXp * (1 + XP_PER_LEVEL * l) * zone.rewardMultiplier).roundToLong().coerceAtLeast(1)
-        val gold = (type.baseGold * (1 + GOLD_PER_LEVEL * l) * zone.rewardMultiplier).roundToLong().coerceAtLeast(1)
+        val gold = (type.baseGold * (1 + GOLD_PER_LEVEL * l) * zone.goldMultiplier).roundToLong().coerceAtLeast(1)
         return MonsterStats(type, level.coerceAtLeast(1), hp, dMin, dMax, interval, xp, gold)
     }
 

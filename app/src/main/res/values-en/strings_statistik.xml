@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="statistik_title">Statistics</string>
+    <string name="statistik_kills">Total kills</string>
+    <string name="statistik_play_time">Play time</string>
+    <string name="statistik_play_time_value">%1$d h %2$d min</string>
+    <string name="statistik_highest_hit">Highest hit</string>
+    <string name="statistik_gold_earned">Gold earned</string>
+    <string name="statistik_bosses">Bosses defeated</string>
+    <string name="statistik_zones">Zones unlocked</string>
+    <string name="statistik_zones_value">%1$d / %2$d</string>
+    <string name="statistik_taps">Taps</string>
+    <string name="statistik_goals">Goals completed</string>
+    <!-- Import (Optionen) -->
+    <string name="statistik_field_play_time">play time</string>
+    <string name="statistik_field_highest_hit">highest hit</string>
+    <string name="statistik_field_gold_earned">gold earned</string>
+    <string name="statistik_field_taps">taps</string>
+    <string name="statistik_location">Statistics</string>
+</resources>

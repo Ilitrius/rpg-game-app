@@ -22,28 +22,62 @@ import kotlin.random.Random
 class ZoneCatalogTest {
 
     @Test
-    fun fiveZonesInOrderWithContinuousLevels() {
-        assertEquals(listOf("wiese", "wald", "sumpf", "gebirge", "hoehle"), Zones.all.map { it.id })
+    fun hundredZonesInOrderWithContinuousLevels() {
+        assertEquals(100, Zones.all.size)
+        assertEquals(listOf("wiese", "wald", "sumpf", "gebirge", "hoehle"), Zones.all.take(5).map { it.id })
+        assertEquals((1..100).toList(), Zones.all.map { it.order })
+        assertEquals(Zones.all.size, Zones.all.map { it.id }.toSet().size)
         Zones.all.zipWithNext().forEach { (a, b) ->
             assertEquals(a.order + 1, b.order)
             assertEquals(a.maxLevel, b.minLevel)
             assertEquals(b, Zones.next(a))
             assertEquals(a, Zones.previous(b))
         }
-        assertNull(Zones.next(Zones.HOEHLE))
+        assertNull(Zones.next(Zones.all.last()))
         assertNull(Zones.previous(Zones.WIESE))
+        assertEquals("ende_5", Zones.last.id)
+        assertTrue("hero level cap", Zones.last.maxLevel <= com.idlerpg.game.domain.character.Progression.MAX_LEVEL)
     }
 
     @Test
-    fun everyZoneHasThreeOwnMonstersAndABoss() {
+    fun generatedZonesFormBiomesOfFiveStages() {
+        val gen = Zones.all.drop(5)
+        assertEquals(Biome.entries.size * Biome.STAGES, gen.size)
+        gen.forEachIndexed { i, z ->
+            assertEquals(Biome.entries[i / Biome.STAGES], z.biome)
+            assertEquals(i % Biome.STAGES, z.stage)
+            assertEquals("${z.biome!!.id}_${z.stage + 1}", z.id)
+            assertEquals(z, Zones.byId(z.id))
+        }
+        Zones.all.take(5).forEach { assertNull(it.biome) }
+    }
+
+    @Test
+    fun everyZoneHasThreeMonstersAndABoss() {
         val seen = HashSet<MonsterType>()
         Zones.all.forEach { z ->
             assertEquals(3, z.monsters.size)
             assertTrue(z.boss.isBoss)
-            z.monsters.forEach { assertTrue("${it.id} used twice", seen.add(it)) }
-            assertTrue(seen.add(z.boss))
+            if (z.biome == null) {
+                z.monsters.forEach { assertTrue("${it.id} used twice", seen.add(it)) }
+                assertTrue(seen.add(z.boss))
+            } else {
+                assertTrue(z.boss.isGenerated && z.monsters.all { it.isGenerated })
+            }
         }
-        assertEquals(MonsterType.entries.toSet(), seen)
+        assertEquals(MonsterType.entries.filter { !it.isGenerated }.toSet(), seen)
+    }
+
+    @Test
+    fun scalingIsContinuousAcrossAllHundredZones() {
+        Zones.all.zipWithNext().forEach { (a, b) ->
+            assertTrue("${b.id} hp", b.hpMultiplier >= a.hpMultiplier * 0.97 || b.order <= 6)
+            assertTrue("${b.id} xp", b.rewardMultiplier > a.rewardMultiplier * 0.7)
+            assertTrue("${b.id} gold", b.goldMultiplier > a.goldMultiplier * 0.7)
+            val ea = MonsterScaling.average(a, a.maxLevel); val eb = MonsterScaling.average(b, b.minLevel)
+            assertTrue("${b.id} jump hp ${eb.hp / ea.hp}", eb.hp / ea.hp in 0.5..3.0)
+            assertTrue("${b.id} jump gold", eb.gold / ea.gold in 0.5..3.0)
+        }
     }
 
     @Test
@@ -110,9 +144,45 @@ class WorldProgressTest {
 
     @Test
     fun lastBossUnlocksNothingNew() {
-        val won = WorldProgress.applyBossVictory(fresh, Zones.HOEHLE, 1, 1, 1L)
-        assertEquals(fresh.world.unlockedZoneIds, won.world.unlockedZoneIds)
-        assertTrue("hoehle" in won.world.defeatedBossIds)
+        val last = Zones.last
+        val at = fresh.copy(world = fresh.world.copy(currentZoneId = last.id))
+        val won = WorldProgress.applyBossVictory(at, last, 1, 1, 1L)
+        assertEquals(at.world.unlockedZoneIds, won.world.unlockedZoneIds)
+        assertEquals("last zone: nowhere to travel", last.id, won.world.currentZoneId)
+        assertTrue(last.id in won.world.defeatedBossIds)
+    }
+
+    @Test
+    fun bossVictoryTravelsToNextZoneAutomatically() {
+        val won = WorldProgress.applyBossVictory(fresh, Zones.WIESE, 1, 1, 1L)
+        assertEquals("wald", won.world.currentZoneId)
+        val atHoehle = fresh.copy(world = fresh.world.copy(currentZoneId = "hoehle"))
+        val next = WorldProgress.applyBossVictory(atHoehle, Zones.HOEHLE, 1, 1, 1L)
+        assertEquals("heide_1", next.world.currentZoneId)
+        assertTrue("heide_1" in next.world.unlockedZoneIds)
+        // ... and across biome borders inside the generated range
+        val z = Zones.byId("heide_5")
+        assertEquals("wueste_1", WorldProgress.applyBossVictory(fresh, z, 1, 1, 1L).world.currentZoneId)
+    }
+
+    @Test
+    fun oldSaveWithFiveZonesStillLoadsAndContinues() {
+        val old = """{"world":{"currentZoneId":"hoehle","unlockedZoneIds":["wald","sumpf","gebirge","hoehle"],"defeatedBossIds":["wiese","wald","sumpf","gebirge"],"zoneKills":{"hoehle":12}}}"""
+        val s = GameJson.decode(old)
+        assertEquals("hoehle", Zones.byId(s.world.currentZoneId).id)
+        assertTrue(WorldProgress.isUnlocked(s.world, Zones.HOEHLE))
+        assertFalse("heide_1 still locked", WorldProgress.isUnlocked(s.world, Zones.byId("heide_1")))
+        val won = WorldProgress.applyBossVictory(s, Zones.HOEHLE, 1, 1, 1L)
+        assertTrue(WorldProgress.isUnlocked(won.world, Zones.byId("heide_1")))
+        assertEquals("heide_1", won.world.currentZoneId)
+    }
+
+    @Test
+    fun onlyReachedZonesAreUnlocked() {
+        val w = WorldState(defeatedBossIds = Zones.all.take(30).map { it.id })
+        assertTrue(WorldProgress.isUnlocked(w, Zones.all[30]))
+        assertFalse(WorldProgress.isUnlocked(w, Zones.all[31]))
+        assertEquals("travel to locked zone is ignored", fresh, WorldProgress.travel(fresh, "ende_5"))
     }
 
     @Test
@@ -339,5 +409,25 @@ class NewWorldStateCompatTest {
         val s = GameJson.decode("""{"world":{"currentZoneId":"vulkan"}}""")
         assertEquals(Zones.WIESE, Zones.byId(s.world.currentZoneId))
         assertNotNull(s)
+    }
+}
+
+class GeneratedZoneSaveTest {
+    @Test
+    fun importKnowsGeneratedZoneIdsAndNormalizesUnknownOnes() {
+        val ok = GameState(world = WorldState(currentZoneId = "ende_5", unlockedZoneIds = listOf("heide_1"), defeatedBossIds = listOf("wiese")))
+        val (kept, notes) = com.idlerpg.game.ui.options.SaveTransfer.normalize(ok)
+        assertEquals("ende_5", kept.world.currentZoneId)
+        assertTrue(notes.isEmpty())
+        val bad = ok.copy(world = ok.world.copy(currentZoneId = "ende_6"))
+        val (fixed, n2) = com.idlerpg.game.ui.options.SaveTransfer.normalize(bad)
+        assertEquals("wiese", fixed.world.currentZoneId)
+        assertEquals(1, n2.size)
+    }
+
+    @Test
+    fun savedGameWithGeneratedZoneRoundTrips() {
+        val s = GameState(world = WorldState(currentZoneId = "gruft_3", zoneKills = mapOf("gruft_3" to 7L)))
+        assertEquals(s, GameJson.decode(GameJson.encode(s)))
     }
 }

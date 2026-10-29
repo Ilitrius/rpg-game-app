@@ -115,4 +115,15 @@
     <string name="options_note_unknown_zone">Unknown zone “%1$s” – your hero starts in zone “%2$s”.</string>
     <string name="options_note_unknown_zones">Progress in unknown zones is ignored: %1$s</string>
     <string name="options_note_unknown_zones_more">Progress in unknown zones is ignored: %1$s and %2$d more</string>
+    <string name="options_autoboss_title">Boss</string>
+    <string name="options_autoboss_label">Challenge boss automatically</string>
+    <string name="options_autoboss_description">Starts the boss fight by itself as soon as possible. After a defeat there is a short pause.</string>
+    <string name="options_backup_title">Backup</string>
+    <string name="options_backup_never">Never backed up.</string>
+    <string name="options_backup_last">Last backup: %1$s</string>
+    <string name="options_backup_warning">Your hero has come far. Export your save so nothing is lost, for example when switching devices.</string>
+    <string name="options_backup_reminders">Reminders</string>
+    <string name="options_backup_dialog_title">Back up your save?</string>
+    <string name="options_backup_dialog_text">Your last backup was a while ago. Export your save under Options so it is not lost.</string>
+    <string name="options_backup_dialog_ok">Got it</string>
 </resources>

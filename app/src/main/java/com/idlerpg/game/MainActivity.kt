@@ -16,6 +16,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.idlerpg.game.audio.SoundManager
 import com.idlerpg.game.ui.MainScreen
 import com.idlerpg.game.update.InAppUpdater
+import com.idlerpg.game.ui.options.BackupReminderDialog
 import com.idlerpg.game.ui.theme.IdleRPGTheme
 
 class MainActivity : ComponentActivity() {
@@ -55,6 +56,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             IdleRPGTheme {
                 MainScreen(updater = updater)
+                BackupReminderDialog()
             }
         }
     }

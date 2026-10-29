@@ -5,6 +5,7 @@ import com.idlerpg.game.domain.character.CombatStats
 import com.idlerpg.game.domain.character.Progression
 import com.idlerpg.game.domain.world.MonsterStats
 import kotlin.math.ceil
+import com.idlerpg.game.domain.stats.Stats
 
 /** Pure combat helpers used by the adventure loop and offline progress. */
 object CombatRules {
@@ -72,6 +73,7 @@ object CombatRules {
         val w = state.world
         return leveled.copy(
             gold = state.gold + gold.coerceAtLeast(0),
+            stats = Stats.addGold(state.stats, gold),
             world = w.copy(
                 totalKills = w.totalKills + kills,
                 zoneKills = w.zoneKills + (zoneId to (w.zoneKills[zoneId] ?: 0L) + kills),

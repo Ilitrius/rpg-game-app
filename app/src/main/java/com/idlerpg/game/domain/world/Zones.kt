@@ -20,7 +20,16 @@ data class Zone(
     val hpMultiplier: Double = 1.0,
     val damageMultiplier: Double = 1.0,
     val rewardMultiplier: Double = 1.0,
+    /** Gold multiplier; defaults to [rewardMultiplier] (the handmade zones), generated zones scale gold steeper than XP. */
+    val goldMultiplier: Double = rewardMultiplier,
+    /** Biome of generated zones (6..100); null for the five handmade zones. */
+    val biome: Biome? = null,
+    /** Escalation inside the biome, 0..[Biome.STAGES]-1 (0 for the handmade zones). */
+    val stage: Int = 0,
 ) {
+    /** 0 (first zone) .. 1 (last zone): how fearsome this zone looks; drives monster/scene detail. */
+    val threat: Float get() = ((order - 1) / (Zones.COUNT - 1).toFloat()).coerceIn(0f, 1f)
+
     init {
         require(monsters.isNotEmpty()) { "zone $id needs monsters" }
         require(monsters.none { it.isBoss }) { "zone $id: bosses can't spawn as regular monsters" }
@@ -78,14 +87,43 @@ object Zones {
         hpMultiplier = 4.55, damageMultiplier = 0.75, rewardMultiplier = 2.2,
     )
 
-    val all: List<Zone> = listOf(WIESE, WALD, SUMPF, GEBIRGE, HOEHLE)
+    /** Total number of zones. */
+    const val COUNT = 100
+
+    private val HANDMADE = listOf(WIESE, WALD, SUMPF, GEBIRGE, HOEHLE)
+
+    /** Level span of every generated zone; zone 100 ends at level 990 (hero cap is 999). */
+    const val GENERATED_LEVEL_SPAN = 10
+
+    private val GENERATED_ROLES = listOf(MonsterType.GEN_SWARM, MonsterType.GEN_BEAST, MonsterType.GEN_BRUTE)
+
+    /** Builds generated zone number [order] (6..[COUNT]) from biome template + stage. */
+    internal fun generated(order: Int): Zone {
+        val idx = order - HANDMADE.size - 1
+        val biome = Biome.entries[idx / Biome.STAGES]
+        val stage = idx % Biome.STAGES
+        val min = HOEHLE.maxLevel + idx * GENERATED_LEVEL_SPAN
+        return Zone(
+            id = "${biome.id}_${stage + 1}", order = order, minLevel = min, maxLevel = min + GENERATED_LEVEL_SPAN,
+            monsters = GENERATED_ROLES, boss = MonsterType.GEN_BOSS,
+            hpMultiplier = ZoneScaling.hp(order), damageMultiplier = ZoneScaling.damage(order),
+            rewardMultiplier = ZoneScaling.reward(order), goldMultiplier = ZoneScaling.gold(order),
+            biome = biome, stage = stage,
+        )
+    }
+
+    val all: List<Zone> = HANDMADE + (HANDMADE.size + 1..COUNT).map { generated(it) }
+
+    val last: Zone get() = all.last()
+
+    private val byIdMap: Map<String, Zone> = all.associateBy { it.id }
 
     /** Zone with [id], falling back to the first zone for unknown ids (e.g. old/edited saves). */
-    fun byId(id: String?): Zone = all.firstOrNull { it.id == id } ?: all.first()
+    fun byId(id: String?): Zone = byIdMap[id] ?: all.first()
 
     /** The zone after [zone] in progression order, or null for the last zone. */
-    fun next(zone: Zone): Zone? = all.firstOrNull { it.order == zone.order + 1 }
+    fun next(zone: Zone): Zone? = all.getOrNull(zone.order)
 
     /** The zone before [zone], or null for the first zone. */
-    fun previous(zone: Zone): Zone? = all.firstOrNull { it.order == zone.order - 1 }
+    fun previous(zone: Zone): Zone? = all.getOrNull(zone.order - 2)
 }

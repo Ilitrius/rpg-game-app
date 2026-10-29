@@ -80,6 +80,7 @@ import com.idlerpg.game.ui.adventure.nameRes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.map
 import java.text.NumberFormat
 import java.util.Locale
 import kotlin.math.roundToInt
@@ -124,6 +125,7 @@ fun OptionsScreen() {
                 val json = SaveTransfer.encode(repository.current())
                 writeText(context, uri, json)
             }.isSuccess
+            if (ok) GameSettings.get(context).lastExportEpochMillis = System.currentTimeMillis()
             notify(context.getString(if (ok) R.string.options_export_file_success else R.string.options_export_file_error))
         }
     }
@@ -160,6 +162,7 @@ fun OptionsScreen() {
                 onExportClipboard = {
                     scope.launch {
                         clipboard.setText(AnnotatedString(SaveTransfer.encode(repository.current())))
+                        GameSettings.get(context).lastExportEpochMillis = System.currentTimeMillis()
                         notify(context.getString(R.string.options_export_clipboard_success))
                     }
                 },
@@ -181,6 +184,16 @@ fun OptionsScreen() {
             )
 
             val settings = remember { GameSettings.get(context) }
+            val lastExport by settings.lastExportFlow.collectAsStateWithLifecycle()
+            val reminders by settings.remindersEnabledFlow.collectAsStateWithLifecycle()
+            val heroLevel by remember { repository.state.map { it.character.level } }.collectAsStateWithLifecycle(initialValue = 1)
+            BackupCard(
+                lastExport = lastExport,
+                warn = reminders && BackupReminder.needsBackup(heroLevel, lastExport, System.currentTimeMillis()),
+                remindersOn = reminders,
+                onRemindersChange = { settings.remindersEnabled = it },
+            )
+
             val soundOn by settings.soundEnabledFlow.collectAsStateWithLifecycle()
             val volume by settings.soundVolumeFlow.collectAsStateWithLifecycle()
             SoundCard(
@@ -190,6 +203,9 @@ fun OptionsScreen() {
                 onVolumeChange = { settings.soundVolume = it },
                 onVolumeFinished = { SoundManager.get(context).play(Sfx.COIN) },
             )
+
+            val autoBoss by settings.autoBossFlow.collectAsStateWithLifecycle()
+            AutoBossCard(autoBoss = autoBoss, onChange = { settings.autoBoss = it })
 
             val language by settings.languageFlow.collectAsStateWithLifecycle()
             LanguageCard(selected = language, onSelect = {
@@ -341,6 +357,44 @@ private fun SaveGameCard(
 }
 
 @Composable
+private fun BackupCard(lastExport: Long, warn: Boolean, remindersOn: Boolean, onRemindersChange: (Boolean) -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SectionHeader(Icons.Outlined.Save, stringResource(R.string.options_backup_title))
+            Text(
+                if (lastExport <= 0L) {
+                    stringResource(R.string.options_backup_never)
+                } else {
+                    stringResource(
+                        R.string.options_backup_last,
+                        java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM).format(java.util.Date(lastExport)),
+                    )
+                },
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            if (warn) {
+                Text(
+                    stringResource(R.string.options_backup_warning),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    stringResource(R.string.options_backup_reminders),
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.weight(1f),
+                )
+                Switch(checked = remindersOn, onCheckedChange = onRemindersChange)
+            }
+        }
+    }
+}
+
+@Composable
 private fun SoundCard(
     soundOn: Boolean,
     volume: Int,
@@ -385,6 +439,31 @@ private fun SoundCard(
                     enabled = soundOn,
                     modifier = Modifier.weight(1f),
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AutoBossCard(autoBoss: Boolean, onChange: (Boolean) -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SectionHeader(Icons.Outlined.Tune, stringResource(R.string.options_autoboss_title))
+            Text(
+                stringResource(R.string.options_autoboss_description),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    stringResource(R.string.options_autoboss_label),
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.weight(1f),
+                )
+                Switch(checked = autoBoss, onCheckedChange = onChange)
             }
         }
     }
@@ -614,6 +693,10 @@ private fun locationText(context: Context, location: SaveLocation): String? = wh
     SaveLocation.World -> context.getString(R.string.options_location_world)
     is SaveLocation.WorldZone -> context.getString(R.string.options_location_world_zone, location.zoneId)
     SaveLocation.Shop -> context.getString(R.string.options_location_shop)
+    SaveLocation.Progress -> context.getString(R.string.options_location_progress)
+    SaveLocation.Stats -> context.getString(R.string.statistik_location)
+    is SaveLocation.ProgressGoal ->
+        context.getString(R.string.options_location_progress_goal, location.position, location.goalId)
 }
 
 private fun itemNameText(context: Context, item: Item?, fallback: String): String {
@@ -645,6 +728,16 @@ private fun fieldLabel(context: Context, field: SaveField): String = context.get
         SaveField.RESTOCKED_AT -> R.string.options_field_restocked_at
         SaveField.STOCK_LEVEL -> R.string.options_field_stock_level
         SaveField.PAID_RESTOCKS -> R.string.options_field_paid_restocks
+        SaveField.DAILY_LAST_CLAIM -> R.string.options_field_daily_last_claim
+        SaveField.DAILY_STREAK -> R.string.options_field_daily_streak
+        SaveField.CLOCK_HIGH_WATER -> R.string.options_field_clock_high_water
+        SaveField.GOALS_COMPLETED -> R.string.options_field_goals_completed
+        SaveField.GOAL_TARGET -> R.string.options_field_goal_target
+        SaveField.GOAL_BASELINE -> R.string.options_field_goal_baseline
+        SaveField.STATS_PLAY_TIME -> R.string.statistik_field_play_time
+        SaveField.STATS_HIGHEST_HIT -> R.string.statistik_field_highest_hit
+        SaveField.STATS_GOLD_EARNED -> R.string.statistik_field_gold_earned
+        SaveField.STATS_TAP_COUNT -> R.string.statistik_field_taps
     },
 )
 
@@ -673,6 +766,7 @@ private fun noteMessage(context: Context, note: ImportNote): String = when (note
         SaveTransfer.shortName(note.zoneId),
         context.getString(Zones.byId(note.fallbackZoneId).nameRes()),
     )
+    is ImportNote.UnknownGoalsDropped -> context.getString(R.string.options_note_unknown_goals, note.count)
     is ImportNote.UnknownZonesIgnored -> {
         val shown = note.zoneIds.take(MAX_LISTED_ZONES)
             .joinToString(", ") { context.getString(R.string.options_quoted, SaveTransfer.shortName(it)) }
