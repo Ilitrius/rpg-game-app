@@ -273,16 +273,44 @@ class ShopTest {
     }
 
     @Test
-    fun sellEverythingKeepsEquippedAndUpgrades() {
+    fun sellEverythingSellsWholeInventoryButNotEquipped() {
         val s = bulkState()
         val r = Shop.sellEverything(s)
-        assertEquals(listOf("up"), r.state.equipment.inventory.map { it.id })
+        assertEquals(emptyList<Item>(), r.state.equipment.inventory)
+        assertEquals(6, r.count)
         assertEquals(s.equipment.equipped, r.state.equipment.equipped)
-        assertEquals(4 + 8 + 9 + 30 + 70L, r.gold)
+        assertEquals(4 + 8 + 9 + 30 + 70 + 50L, r.gold)
+        assertEquals(s.gold + r.gold, r.state.gold)
+        assertEquals(r.gold, Shop.sellEverythingGold(s))
+        assertEquals(1, Shop.upgradeCount(s))
+        // rarity bulk sale still keeps upgrades
         assertEquals(1, Shop.keptUpgradeCount(s, Rarity.entries.toSet()))
-        assertEquals(r.gold, Shop.bulkSellGold(s, Rarity.entries.toSet()))
         // idempotent
         assertSame(r.state, Shop.sellEverything(r.state).state)
+    }
+
+    @Test
+    fun sellEverythingRealisticInventoryLeavesNothing() {
+        val items = (1..40).map {
+            Item(id = "i$it", name = "I$it", slot = EquipmentSlot.entries[it % EquipmentSlot.entries.size],
+                rarity = Rarity.entries[it % Rarity.entries.size], bonus = Stats(strength = it), price = 10L * it)
+        }
+        val s = GameState(equipment = EquipmentState(inventory = items))
+        assertEquals(40, Shop.upgradeCount(s)) // empty slots: everything counts as an upgrade
+        val r = Shop.sellEverything(s)
+        assertEquals(0, r.state.equipment.inventory.size)
+        assertEquals(items.sumOf { it.price }, r.gold)
+    }
+
+    @Test
+    fun sellEverythingRecomputedInsideUpdateSellsLateLoot() {
+        val s = bulkState()
+        val preview = Shop.sellEverythingGold(s)
+        val late = s.copy(equipment = s.equipment.copy(inventory = s.equipment.inventory +
+            Item(id = "late", name = "Late", slot = EquipmentSlot.HELMET, price = 7)))
+        val r = Shop.sellEverything(late) // evaluated on the latest state, not on a frozen list
+        assertEquals(0, r.state.equipment.inventory.size)
+        assertEquals(preview + 7, r.gold)
     }
 
     @Test
@@ -302,8 +330,8 @@ class ShopTest {
         val groups = Shop.sellGroups(s)
         assertEquals(listOf(Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC), groups.map { it.rarity })
         assertEquals(17L, groups.first { it.rarity == Rarity.UNCOMMON }.gold)
-        assertEquals(Shop.sellEverything(s).gold, groups.sumOf { it.gold })
-        assertEquals(Shop.sellEverything(s).count, groups.sumOf { it.count })
+        assertEquals(Shop.bulkSell(s, Rarity.entries.toSet()).gold, groups.sumOf { it.gold })
+        assertEquals(Shop.bulkSell(s, Rarity.entries.toSet()).count, groups.sumOf { it.count })
     }
 
     // ------------------------------------------------------------------ persistence

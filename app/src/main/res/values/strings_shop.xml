@@ -35,7 +35,7 @@
         <item quantity="one">%1$d Gegenstand für %2$s Gold</item>
         <item quantity="other">%1$d Gegenstände für %2$s Gold</item>
     </plurals>
-    <string name="shop_quicksell_hint">Verkaufe ganze Seltenheitsstufen auf einmal. Angelegte Ausrüstung und Verbesserungen bleiben immer erhalten.</string>
+    <string name="shop_quicksell_hint">Verkaufe ganze Seltenheitsstufen auf einmal (Verbesserungen bleiben erhalten). „Alles verkaufen“ leert das ganze Inventar; Angelegtes bleibt.</string>
     <string name="shop_sell_everything">Alles verkaufen</string>
     <string name="shop_sell_rarity_confirm_title">%1$s verkaufen?</string>
     <plurals name="shop_sell_rarity_confirm">
@@ -51,6 +51,10 @@
     <plurals name="shop_sell_keeps_upgrades">
         <item quantity="one">%1$d Verbesserung bleibt erhalten.</item>
         <item quantity="other">%1$d Verbesserungen bleiben erhalten.</item>
+    </plurals>
+    <plurals name="shop_sell_warn_upgrades">
+        <item quantity="one">Achtung: davon ist %1$d besser als deine aktuelle Ausrüstung!</item>
+        <item quantity="other">Achtung: davon sind %1$d besser als deine aktuelle Ausrüstung!</item>
     </plurals>
     <string name="shop_sell_irreversible">Das lässt sich nicht rückgängig machen.</string>
     <string name="shop_cancel">Abbrechen</string>

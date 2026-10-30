@@ -236,8 +236,19 @@ object Shop {
         return sellWhere(state) { it.id in ids }
     }
 
-    /** "Alles verkaufen": every rarity, upgrades and equipped items stay. */
-    fun sellEverything(state: GameState): SellResult = bulkSell(state, Rarity.entries.toSet())
+    /** Inventory items that would improve the hero ([isUpgrade]); [sellEverything] sells them too. */
+    fun upgradeCount(state: GameState): Int = state.equipment.inventory.count { isUpgrade(state, it) }
+
+    /** Gold [sellEverything] would earn: the whole inventory. */
+    fun sellEverythingGold(state: GameState): Long = state.equipment.inventory.sumOf { it.price.coerceAtLeast(0) }
+
+    /**
+     * "Alles verkaufen": the WHOLE inventory, upgrades included (users expect everything to go).
+     * Equipped items are not part of the inventory and stay. The UI warns via [upgradeCount].
+     * Compute inside the `repository.update` lambda so loot dropped meanwhile is sold too.
+     */
+    fun sellEverything(state: GameState): SellResult =
+        if (state.equipment.inventory.isEmpty()) SellResult(state, 0, 0) else sellWhere(state) { true }
 
     /** Sells all [bulkSellCandidates]. */
     fun sellCommonJunk(state: GameState): SellResult = bulkSell(state, setOf(Rarity.COMMON))

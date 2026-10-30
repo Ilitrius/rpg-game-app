@@ -31,7 +31,7 @@
         <item quantity="one">%1$d item for %2$s gold</item>
         <item quantity="other">%1$d items for %2$s gold</item>
     </plurals>
-    <string name="shop_quicksell_hint">Sell whole rarity tiers at once. Equipped gear and upgrades are always kept.</string>
+    <string name="shop_quicksell_hint">Sell whole rarity tiers at once (upgrades are kept). "Sell everything" empties the whole inventory; equipped gear stays.</string>
     <string name="shop_sell_everything">Sell everything</string>
     <string name="shop_sell_rarity_confirm_title">Sell %1$s items?</string>
     <plurals name="shop_sell_rarity_confirm">
@@ -47,6 +47,10 @@
     <plurals name="shop_sell_keeps_upgrades">
         <item quantity="one">%1$d upgrade is kept.</item>
         <item quantity="other">%1$d upgrades are kept.</item>
+    </plurals>
+    <plurals name="shop_sell_warn_upgrades">
+        <item quantity="one">Warning: %1$d of them is better than your current gear!</item>
+        <item quantity="other">Warning: %1$d of them are better than your current gear!</item>
     </plurals>
     <string name="shop_sell_irreversible">This cannot be undone.</string>
     <string name="shop_cancel">Cancel</string>

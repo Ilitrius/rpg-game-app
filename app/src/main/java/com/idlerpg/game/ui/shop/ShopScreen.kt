@@ -171,7 +171,10 @@ fun ShopScreen() {
     fun bulkSell(rarities: Set<Rarity>) {
         scope.launch {
             var result: Shop.SellResult? = null
-            repository.update { s -> Shop.bulkSell(s, rarities).also { result = it }.state }
+            repository.update { s ->
+                val r = if (rarities.size == Rarity.entries.size) Shop.sellEverything(s) else Shop.bulkSell(s, rarities)
+                r.also { result = it }.state
+            }
             val r = result ?: return@launch
             if (r.count > 0) toast(res.getQuantityString(R.plurals.shop_sold_many, r.count, r.count, fmt(r.gold)))
         }
@@ -224,10 +227,11 @@ fun ShopScreen() {
 
     if (pendingSell != SELL_NONE) {
         val rarities = sellRarities(pendingSell)
-        val count = Shop.bulkSellCandidates(current, rarities).size
-        val gold = Shop.bulkSellGold(current, rarities)
-        val kept = Shop.keptUpgradeCount(current, rarities)
         val everything = pendingSell == SELL_ALL
+        val count = if (everything) current.equipment.inventory.size else Shop.bulkSellCandidates(current, rarities).size
+        val gold = if (everything) Shop.sellEverythingGold(current) else Shop.bulkSellGold(current, rarities)
+        val kept = if (everything) 0 else Shop.keptUpgradeCount(current, rarities)
+        val upgrades = if (everything) Shop.upgradeCount(current) else 0
         val single = rarities.singleOrNull()
         AlertDialog(
             onDismissRequest = { pendingSell = SELL_NONE },
@@ -247,6 +251,12 @@ fun ShopScreen() {
                     )
                     Text(stringResource(R.string.shop_sell_keeps_equipped))
                     if (kept > 0) Text(pluralStringResource(R.plurals.shop_sell_keeps_upgrades, kept, kept))
+                    if (upgrades > 0) {
+                        Text(
+                            pluralStringResource(R.plurals.shop_sell_warn_upgrades, upgrades, upgrades),
+                            color = BadColor, fontWeight = FontWeight.Bold,
+                        )
+                    }
                     if (everything || (single != null && single >= Rarity.EPIC)) {
                         Text(stringResource(R.string.shop_sell_irreversible), color = BadColor, fontWeight = FontWeight.SemiBold)
                     }
@@ -259,7 +269,7 @@ fun ShopScreen() {
                         pendingSell = SELL_NONE
                         bulkSell(rarities)
                     },
-                ) { Text(stringResource(R.string.shop_tab_sell), color = if (count > 0) BadColor else Color.Unspecified) }
+                ) { Text(stringResource(R.string.shop_tab_sell), color = if (count > 0) BadColor else Color.Unspecified, fontWeight = if (everything) FontWeight.Bold else null) }
             },
             dismissButton = {
                 TextButton(onClick = { pendingSell = SELL_NONE }) { Text(stringResource(R.string.shop_cancel)) }
@@ -503,8 +513,8 @@ private fun SellHeader(state: GameState, onSell: (Int) -> Unit) {
                     color = if (Inventory.isFull(state)) BadColor else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            if (groups.isNotEmpty()) {
-                Text(stringResource(R.string.shop_quicksell_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (state.equipment.inventory.isNotEmpty()) {
+                if (groups.isNotEmpty()) Text(stringResource(R.string.shop_quicksell_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 groups.forEach { g ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(Modifier.size(12.dp).background(rarityColor(g.rarity), CircleShape))
@@ -521,8 +531,8 @@ private fun SellHeader(state: GameState, onSell: (Int) -> Unit) {
                         FilledTonalButton(onClick = { onSell(g.rarity.ordinal) }) { Text(stringResource(R.string.shop_tab_sell), maxLines = 1) }
                     }
                 }
-                val total = groups.sumOf { it.count }
-                val gold = groups.sumOf { it.gold }
+                val total = state.equipment.inventory.size
+                val gold = Shop.sellEverythingGold(state)
                 Button(
                     onClick = { onSell(SELL_ALL) },
                     modifier = Modifier.fillMaxWidth(),
