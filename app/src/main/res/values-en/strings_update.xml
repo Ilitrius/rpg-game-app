@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_available">A new version of Idle RPG is available.</string>
+    <string name="update_action">Update</string>
+    <string name="update_ready">The update has been downloaded.</string>
+    <string name="update_restart">Restart</string>
+</resources>

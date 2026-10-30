@@ -17,6 +17,9 @@
 - [2026-10-11] Testdaten über temporären Code mit Marker `TEMP` einspielen, prüfen, dann restlos entfernen und neu bauen. Geseedete Daten bleiben im Spielstand! Nie ersetzte Items wegwerfen — ins Inventar legen. — **Warum:** Ein Seeding hat eine angelegte Waffe gelöscht.
 - [2026-10-11] Erste Renderings sind oft fehlerhaft: Grafik zu klein (Axt/Streitkolben), Text abgeschnitten (Buttons), Elemente in Statusleiste (Wolken), Overlays zu hoch (Schadenszahlen). Immer Screenshot ansehen und mindestens eine Korrekturrunde einplanen. — **Warum:** passierte bei fast jedem Agenten.
 
+## Umgebung (Cloud-Sandbox)
+- [2026-10-27] In der Cloud-Sandbox ist kein Android-SDK baubar: `dl.google.com` (cmdline-tools) liefert 403 über den Proxy, `maven.google.com` geht. Ohne Build arbeiten: Imports/Signaturen sorgfältig prüfen, Bibliotheksversionen per `curl -I https://maven.google.com/...` verifizieren, Ergebnis klar als "nicht gebaut" berichten und Build-Lauf ins TODO. — **Warum:** spart die Suche nach einer SDK-Installation.
+
 ## Code & Zusammenarbeit
 - [2026-10-11] Strings in eigene Datei `res/values/strings_<agent>.xml`. — **Warum:** parallele Änderungen an `strings.xml` überschreiben sich.
 - [2026-10-11] `GameState` nur mit Default-Werten erweitern und danach Optionen-`SaveTransferTest` + einen Alt-Spielstand-Decode-Test laufen lassen. — **Warum:** Import/Export und alte Saves müssen weiter funktionieren.
@@ -27,6 +30,11 @@
 - [2026-10-12] Sonderwerte von GameState-Feldern im KDoc dokumentieren (z. B. `heroHp` -1 = unbekannt/voll, 0 = nach Niederlage; `stockLevel` 0 = nie bestückt). — **Warum:** Import-Validierung leitet erlaubte Bereiche daraus ab; `heroHp` = 0 stand nur im ViewModel.
 - [2026-10-12] `SaveTransferValidationTest` prüft, dass alle erzeugbaren Items und ein realistisch gespielter Spielstand importierbar bleiben. Schlägt er nach Änderungen an Item-Formeln/Loot/Shop fehl: Optionen-Agent informieren, Test nicht aufweichen. — **Warum:** Validierung und Generatoren gehören verschiedenen Agenten.
 - [2026-10-12] Itemnamen nie in Satzschablonen mit Kasus einsetzen ("Vergleich mit %1$s" → "Vergleich mit Robuste Lederstiefel" ist falsch, Dativ fehlt). Neutral formulieren: "Angelegt: %1$s". Partizip-Meldungen ("%1$s gekauft") sind korrekt (Passiv). — **Warum:** generierte Namen tragen Nominativ-Adjektivendungen.
+
+- [2026-10-27] Itemnamen in der UI immer `itemDisplayName(item)` (Composable) bzw. `item.localizedName(res)` (Toasts/Dialoge), nie `item.name`. `SaveLocation.*Item.item` trägt das Item für lokalisierte Importmeldungen (nicht Teil der Gleichheit). — **Warum:** `name` ist deutscher Fallback.
+- [2026-10-27] Sprache: Ressourcen-Standard (`values/`) ist Deutsch, `values-en/` Englisch. `MainActivity.attachBaseContext` setzt bei "System" `Locale.getDefault()` auf die Gerätesprache zurück. Zahlen/Zeiten nur mit `Locale.getDefault()`, nie `Locale.GERMANY`. — **Warum:** nach Wechsel EN->System blieb das Format englisch.
+- [2026-10-27] Akku: `collectAsStateWithLifecycle` statt `collectAsState`; periodische Ticker in `repeatOnLifecycle(STARTED)`; Activity-Konstruktor hat noch keinen Context (Play-`AppUpdateManagerFactory` lazy in `onStart`). — **Warum:** Coroutines laufen sonst im gestoppten Zustand weiter.
+- [2026-10-27] Sound: `audio/SoundManager.play(Sfx)` nur aus UI/Events, nie aus `OfflineProgress`; Pool wird bei ON_STOP freigegeben. Neue Effekte: in `tools/generate_sounds.py` ergänzen, `Sfx` erweitern, `tools/SOUNDS.md` aktualisieren. Geräte-Einstellungen (`GameSettings`) sind nicht Teil des Spielstands, keine SaveTransfer-Validierung. — **Warum:** Konventionen für Folgearbeit.
 
 ## Balance
 - [2026-10-12] Wirtschaft: Online verdient der Referenz-Held pro Stunde das 2–3,5-fache des kompletten Shop-Sortiments, offline daher `OfflineProgress.EFFICIENCY` = 1/60 (Nacht = 26–46 % des Sortiments). Wer Monster-Gold (`MonsterScaling`), `Shop.markup` oder `ItemGenerator.sellPrice` ändert: `BalanceTest.offlineNightBuysSomeButNotAllShopOffers` laufen lassen, ggf. `EFFICIENCY` nachziehen. — **Warum:** 80.000 Gold nach Offline-Fortschritt, Shop wirkte billig.

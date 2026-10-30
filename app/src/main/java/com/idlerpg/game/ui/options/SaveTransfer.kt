@@ -66,13 +66,31 @@ sealed interface SaveLocation {
     data object Character : SaveLocation
 
     /** Item equipped in [slot]. */
-    data class EquippedItem(val slot: EquipmentSlot, val itemName: String) : SaveLocation
+    data class EquippedItem(val slot: EquipmentSlot, val itemName: String) : SaveLocation {
+        /** The offending item, for a localized name in the UI (not part of equality). */
+        var item: Item? = null
+            private set
+
+        fun withItem(item: Item): EquippedItem = copy().also { it.item = item }
+    }
 
     /** Inventory entry number [position] (1-based, order in the save file). */
-    data class InventoryItem(val position: Int, val itemName: String) : SaveLocation
+    data class InventoryItem(val position: Int, val itemName: String) : SaveLocation {
+        /** The offending item, for a localized name in the UI (not part of equality). */
+        var item: Item? = null
+            private set
+
+        fun withItem(item: Item): InventoryItem = copy().also { it.item = item }
+    }
 
     /** Shop offer number [position] (1-based, order in the save file). */
-    data class ShopOffer(val position: Int, val itemName: String) : SaveLocation
+    data class ShopOffer(val position: Int, val itemName: String) : SaveLocation {
+        /** The offending item, for a localized name in the UI (not part of equality). */
+        var item: Item? = null
+            private set
+
+        fun withItem(item: Item): ShopOffer = copy().also { it.item = item }
+    }
 
     /** World progress (`world`). */
     data object World : SaveLocation
@@ -210,10 +228,10 @@ object SaveTransfer {
         for (slot in EquipmentSlot.entries) {
             val item = equipped[slot] ?: continue
             if (item.slot != slot) return SaveError.SlotMismatch(slot.name, item.slot.name)
-            validateItem(item, SaveLocation.EquippedItem(slot, shortName(item.name)))?.let { return it }
+            validateItem(item, SaveLocation.EquippedItem(slot, shortName(item.name)).withItem(item))?.let { return it }
         }
         state.equipment.inventory.forEachIndexed { i, item ->
-            validateItem(item, SaveLocation.InventoryItem(i + 1, shortName(item.name)))?.let { return it }
+            validateItem(item, SaveLocation.InventoryItem(i + 1, shortName(item.name)).withItem(item))?.let { return it }
         }
 
         validateWorld(state.world)?.let { return it }
@@ -320,7 +338,7 @@ object SaveTransfer {
         if (shop.stockLevel < 0) return SaveError.NegativeValue(SaveField.STOCK_LEVEL, loc)
         if (shop.paidRestocks < 0) return SaveError.NegativeValue(SaveField.PAID_RESTOCKS, loc)
         shop.offers.forEachIndexed { i, item ->
-            validateItem(item, SaveLocation.ShopOffer(i + 1, shortName(item.name)))?.let { return it }
+            validateItem(item, SaveLocation.ShopOffer(i + 1, shortName(item.name)).withItem(item))?.let { return it }
         }
         return null
     }

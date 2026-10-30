@@ -53,7 +53,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -82,7 +85,11 @@ import com.idlerpg.game.domain.character.StatType
 import com.idlerpg.game.domain.character.get
 import com.idlerpg.game.domain.equipment.Inventory
 import com.idlerpg.game.domain.shop.Shop
+import com.idlerpg.game.audio.Sfx
+import com.idlerpg.game.audio.SoundManager
 import com.idlerpg.game.ui.equipment.ItemIcon
+import com.idlerpg.game.ui.equipment.itemDisplayName
+import com.idlerpg.game.ui.equipment.localizedName
 import com.idlerpg.game.ui.equipment.rarityColor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -109,17 +116,21 @@ fun ShopScreen() {
     val context = LocalContext.current
     val repository = remember { (context.applicationContext as IdleRpgApp).repository }
     val scope = rememberCoroutineScope()
-    val state by repository.state.collectAsState(initial = null)
+    val state by repository.state.collectAsStateWithLifecycle(initialValue = null)
     val snackbar = remember { SnackbarHostState() }
     var mode by rememberSaveable { mutableIntStateOf(ShopMode.BUY.ordinal) }
     var selectedId by rememberSaveable { mutableStateOf<String?>(null) }
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     var pendingSell by rememberSaveable { mutableIntStateOf(SELL_NONE) }
 
-    LaunchedEffect(Unit) {
-        while (true) {
-            now = System.currentTimeMillis()
-            delay(1000)
+    // Clock for the restock countdown: only ticks while the screen is visible (battery).
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    LaunchedEffect(lifecycle) {
+        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            while (true) {
+                now = System.currentTimeMillis()
+                delay(1000)
+            }
         }
     }
 
@@ -136,6 +147,7 @@ fun ShopScreen() {
     }
 
     val res = context.resources
+    val sound = remember { SoundManager.get(context) }
     fun toast(text: String) = scope.launch {
         snackbar.currentSnackbarData?.dismiss()
         snackbar.showSnackbar(text)
@@ -147,9 +159,10 @@ fun ShopScreen() {
             var result: Shop.BuyResult? = null
             repository.update { s -> Shop.buy(s, item.id).also { result = it }.state }
             val r = result ?: return@launch
+            if (r.outcome == Shop.BuyOutcome.BOUGHT) sound.play(Sfx.COIN)
             toast(
                 when (r.outcome) {
-                    Shop.BuyOutcome.BOUGHT -> res.getString(R.string.shop_bought, item.name)
+                    Shop.BuyOutcome.BOUGHT -> res.getString(R.string.shop_bought, item.localizedName(res))
                     Shop.BuyOutcome.INVENTORY_FULL -> res.getString(R.string.shop_inventory_full)
                     Shop.BuyOutcome.NOT_ENOUGH_GOLD -> res.getString(R.string.shop_not_enough_gold, fmt(r.price - r.state.gold))
                     Shop.BuyOutcome.SOLD_OUT -> res.getString(R.string.shop_offer_gone)
@@ -163,7 +176,8 @@ fun ShopScreen() {
         scope.launch {
             var gold = 0L
             repository.update { s -> Shop.sell(s, item.id).also { gold = it.gold - s.gold } }
-            if (gold > 0 || item.price == 0L) toast(res.getString(R.string.shop_sold_one, item.name, fmt(gold)))
+            if (gold > 0) sound.play(Sfx.COIN)
+            if (gold > 0 || item.price == 0L) toast(res.getString(R.string.shop_sold_one, item.localizedName(res), fmt(gold)))
         }
     }
 
@@ -176,6 +190,7 @@ fun ShopScreen() {
                 r.also { result = it }.state
             }
             val r = result ?: return@launch
+            if (r.count > 0) sound.play(Sfx.COIN)
             if (r.count > 0) toast(res.getQuantityString(R.plurals.shop_sold_many, r.count, r.count, fmt(r.gold)))
         }
     }
@@ -476,7 +491,7 @@ private fun ItemRowCard(
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
-                    item.name,
+                    itemDisplayName(item),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                     color = rarityColor(item.rarity),
@@ -581,7 +596,7 @@ private fun ItemSheet(state: GameState, item: Item, mode: ShopMode, onDismiss: (
                 ItemIcon(item, Modifier.size(112.dp))
                 Spacer(Modifier.width(16.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(item.name, style = MaterialTheme.typography.titleLarge, color = rarityColor(item.rarity), fontWeight = FontWeight.SemiBold)
+                    Text(itemDisplayName(item), style = MaterialTheme.typography.titleLarge, color = rarityColor(item.rarity), fontWeight = FontWeight.SemiBold)
                     Text(
                         "${rarityLabel(item.rarity)} · ${stringResource(slotLabel(item.slot))}",
                         style = MaterialTheme.typography.bodyMedium,
@@ -646,7 +661,7 @@ private fun ComparisonBlock(state: GameState, item: Item) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     ItemIcon(equipped, Modifier.size(36.dp), contentDescription = null)
                     Spacer(Modifier.width(10.dp))
-                    Text(stringResource(R.string.shop_compare_title, equipped.name), style = MaterialTheme.typography.titleSmall, color = rarityColor(equipped.rarity))
+                    Text(stringResource(R.string.shop_compare_title, itemDisplayName(equipped)), style = MaterialTheme.typography.titleSmall, color = rarityColor(equipped.rarity))
                 }
             } else {
                 Text(stringResource(R.string.shop_compare_empty), style = MaterialTheme.typography.titleSmall)

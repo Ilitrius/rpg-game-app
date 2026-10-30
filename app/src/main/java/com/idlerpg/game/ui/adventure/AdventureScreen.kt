@@ -41,7 +41,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -64,7 +64,11 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import com.idlerpg.game.audio.SoundManager
+import com.idlerpg.game.audio.Sfx
+import com.idlerpg.game.ui.character.weapon.WEAPON_IMPACT_FRACTION
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -84,6 +88,7 @@ import com.idlerpg.game.domain.character.Hit
 import com.idlerpg.game.domain.combat.CombatRules
 import com.idlerpg.game.domain.world.LootDrop
 import com.idlerpg.game.domain.world.MonsterType
+import com.idlerpg.game.domain.world.DurationParts
 import com.idlerpg.game.domain.world.OfflineProgress
 import com.idlerpg.game.domain.world.OfflineReward
 import com.idlerpg.game.domain.world.WorldProgress
@@ -110,7 +115,7 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = viewModel()) {
-    val ui by vm.ui.collectAsState()
+    val ui by vm.ui.collectAsStateWithLifecycle()
 
     // Pause the combat loop in the background; offline progress covers the gap.
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -139,10 +144,19 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
     // Last tap position as alignment bias (-1..1) for the floating damage number.
     var tapPoint by remember { mutableStateOf<Offset?>(null) }
 
+    val context = LocalContext.current
+    val sound = remember { SoundManager.get(context) }
     LaunchedEffect(vm) {
         vm.events.collect { e ->
             when (e) {
                 is AdventureEvent.HeroAttack -> {
+                    // Impact sound in sync with the animation's hit point.
+                    val impactDelay = (ui.attackDurationMillis * WEAPON_IMPACT_FRACTION).toLong()
+                    val crit = e.hit.critical
+                    scope.launch {
+                        kotlinx.coroutines.delay(impactDelay)
+                        sound.play(if (crit) Sfx.CRIT else Sfx.HIT)
+                    }
                     pendingHits.addLast(e.hit)
                     while (pendingHits.size > 3) pendingHits.removeFirst()
                     attacks++
@@ -164,6 +178,7 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
                     attacks++ // no damage (monster dying/gone): only a short weapon swing as feedback
                 }
                 is AdventureEvent.MonsterHit -> {
+                    sound.play(Sfx.HURT)
                     // x = horizontal jitter (0..1) next to the hero HP bar, see FloatingLabel.
                     floats += FloatText(nextFloatId++, FloatKind.HERO_DAMAGE, e.damage.toLong(), 0, Random.nextFloat(), 0f)
                     scope.launch {
@@ -172,12 +187,18 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
                     }
                 }
                 is AdventureEvent.Kill -> {
+                    sound.play(Sfx.MONSTER_DIE)
                     floats += FloatText(nextFloatId++, FloatKind.REWARD, e.xp, e.gold, 0f, -0.30f)
                 }
+                AdventureEvent.LevelUp -> sound.play(Sfx.LEVEL_UP)
                 is AdventureEvent.Loot -> {
+                    sound.play(Sfx.LOOT)
                     if (loot.size < 4) loot += e.drop
                 }
-                is AdventureEvent.BossVictory -> banner = BannerMessage.Victory(e.zone, e.unlocked)
+                is AdventureEvent.BossVictory -> {
+                    sound.play(Sfx.BOSS_VICTORY)
+                    banner = BannerMessage.Victory(e.zone, e.unlocked)
+                }
                 is AdventureEvent.BossFailed -> banner = BannerMessage.Failed(e.outcome)
             }
         }
@@ -334,7 +355,10 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
         Hud(
             ui, monsterName,
             onZoneClick = { showZones = true },
-            onChallengeBoss = vm::challengeBoss,
+            onChallengeBoss = {
+                sound.play(Sfx.BOSS_START)
+                vm.challengeBoss()
+            },
             onToggleAutoBoss = vm::toggleAutoBoss,
             loot = {
                 // Bottom-left above the hero block: clear of the weapon (right) and the monster (above).
@@ -360,6 +384,7 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
             current = ui.zone,
             onSelect = { zone ->
                 showZones = false
+                sound.play(Sfx.CLICK)
                 vm.travelTo(zone.id)
             },
             onDismiss = { showZones = false },
@@ -790,16 +815,16 @@ private fun DefeatOverlay() {
     }
 }
 
-/** "8 Std. 12 Min.", "8 Std." or "45 Min." */
+/** "3 Tg. 2 Std.", "8 Std. 12 Min.", "8 Std." or "45 Min." (days only for long absences). */
 @Composable
 private fun formatDuration(millis: Long): String {
-    val totalMinutes = (millis / 60_000).toInt()
-    val h = totalMinutes / 60
-    val m = totalMinutes % 60
+    val d = DurationParts.of(millis)
     return when {
-        h == 0 -> stringResource(R.string.duration_minutes, m)
-        m == 0 -> stringResource(R.string.duration_hours, h)
-        else -> stringResource(R.string.duration_hours_minutes, h, m)
+        d.days > 0 && d.hours == 0 -> stringResource(R.string.duration_days, d.days)
+        d.days > 0 -> stringResource(R.string.duration_days_hours, d.days, d.hours)
+        d.hours == 0 -> stringResource(R.string.duration_minutes, d.minutes)
+        d.minutes == 0 -> stringResource(R.string.duration_hours, d.hours)
+        else -> stringResource(R.string.duration_hours_minutes, d.hours, d.minutes)
     }
 }
 

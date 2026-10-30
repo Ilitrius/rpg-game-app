@@ -44,7 +44,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
+import com.idlerpg.game.audio.Sfx
+import com.idlerpg.game.audio.SoundManager
 import androidx.compose.material3.RadioButton
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.foundation.selection.selectable
@@ -53,7 +56,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,6 +69,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.core.content.pm.PackageInfoCompat
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.idlerpg.game.IdleRpgApp
@@ -79,6 +83,9 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.map
 import java.text.NumberFormat
 import java.util.Locale
+import kotlin.math.roundToInt
+import com.idlerpg.game.data.Item
+import com.idlerpg.game.ui.equipment.localizedName
 
 /** "Optionen" tab: save-game export/import, room for future settings. */
 @Composable
@@ -177,9 +184,9 @@ fun OptionsScreen() {
             )
 
             val settings = remember { GameSettings.get(context) }
-            val lastExport by settings.lastExportFlow.collectAsState()
-            val reminders by settings.remindersEnabledFlow.collectAsState()
-            val heroLevel by remember { repository.state.map { it.character.level } }.collectAsState(initial = 1)
+            val lastExport by settings.lastExportFlow.collectAsStateWithLifecycle()
+            val reminders by settings.remindersEnabledFlow.collectAsStateWithLifecycle()
+            val heroLevel by remember { repository.state.map { it.character.level } }.collectAsStateWithLifecycle(initialValue = 1)
             BackupCard(
                 lastExport = lastExport,
                 warn = reminders && BackupReminder.needsBackup(heroLevel, lastExport, System.currentTimeMillis()),
@@ -187,13 +194,20 @@ fun OptionsScreen() {
                 onRemindersChange = { settings.remindersEnabled = it },
             )
 
-            val soundOn by settings.soundEnabledFlow.collectAsState()
-            SoundCard(soundOn = soundOn, onChange = { settings.soundEnabled = it })
+            val soundOn by settings.soundEnabledFlow.collectAsStateWithLifecycle()
+            val volume by settings.soundVolumeFlow.collectAsStateWithLifecycle()
+            SoundCard(
+                soundOn = soundOn,
+                volume = volume,
+                onChange = { settings.soundEnabled = it },
+                onVolumeChange = { settings.soundVolume = it },
+                onVolumeFinished = { SoundManager.get(context).play(Sfx.COIN) },
+            )
 
-            val autoBoss by settings.autoBossFlow.collectAsState()
+            val autoBoss by settings.autoBossFlow.collectAsStateWithLifecycle()
             AutoBossCard(autoBoss = autoBoss, onChange = { settings.autoBoss = it })
 
-            val language by settings.languageFlow.collectAsState()
+            val language by settings.languageFlow.collectAsStateWithLifecycle()
             LanguageCard(selected = language, onSelect = {
                 if (it != settings.language) {
                     settings.language = it
@@ -226,6 +240,7 @@ fun OptionsScreen() {
                 },
             )
             FutureSettingsCard()
+            AboutCard()
         }
 
         SnackbarHost(snackbar, modifier = Modifier.align(Alignment.BottomCenter).padding(8.dp))
@@ -380,7 +395,13 @@ private fun BackupCard(lastExport: Long, warn: Boolean, remindersOn: Boolean, on
 }
 
 @Composable
-private fun SoundCard(soundOn: Boolean, onChange: (Boolean) -> Unit) {
+private fun SoundCard(
+    soundOn: Boolean,
+    volume: Int,
+    onChange: (Boolean) -> Unit,
+    onVolumeChange: (Int) -> Unit,
+    onVolumeFinished: () -> Unit,
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
@@ -402,6 +423,22 @@ private fun SoundCard(soundOn: Boolean, onChange: (Boolean) -> Unit) {
                     modifier = Modifier.weight(1f),
                 )
                 Switch(checked = soundOn, onCheckedChange = onChange)
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    stringResource(R.string.options_sound_volume, volume),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = if (soundOn) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(112.dp),
+                )
+                Slider(
+                    value = volume.toFloat(),
+                    onValueChange = { onVolumeChange(it.roundToInt()) },
+                    onValueChangeFinished = onVolumeFinished,
+                    valueRange = 0f..100f,
+                    enabled = soundOn,
+                    modifier = Modifier.weight(1f),
+                )
             }
         }
     }
@@ -487,6 +524,31 @@ private fun FutureSettingsCard() {
 }
 
 @Composable
+private fun AboutCard() {
+    val context = LocalContext.current
+    // Version kommt aus der Build-Konfiguration (versionName/versionCode), nicht manuell gepflegt.
+    val version = remember {
+        runCatching {
+            val info = context.packageManager.getPackageInfo(context.packageName, 0)
+            context.getString(R.string.options_about_version, info.versionName ?: "?", PackageInfoCompat.getLongVersionCode(info))
+        }.getOrDefault("?")
+    }
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SectionHeader(Icons.Outlined.Info, stringResource(R.string.options_about_title))
+            Text(
+                version,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
 private fun SectionHeader(icon: ImageVector, title: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
@@ -517,7 +579,7 @@ private fun ActionButton(icon: ImageVector, label: String, primary: Boolean, onC
 
 @Composable
 private fun ConfirmImportDialog(summary: SaveSummary, notes: List<String>, onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    val gold = NumberFormat.getIntegerInstance(Locale.GERMANY).format(summary.gold)
+    val gold = NumberFormat.getIntegerInstance(Locale.getDefault()).format(summary.gold)
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = { Icon(Icons.Outlined.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
@@ -622,12 +684,12 @@ private fun locationText(context: Context, location: SaveLocation): String? = wh
     is SaveLocation.EquippedItem -> context.getString(
         R.string.options_location_equipped,
         context.getString(slotLabel(location.slot)),
-        itemNameText(context, location.itemName),
+        itemNameText(context, location.item, location.itemName),
     )
     is SaveLocation.InventoryItem ->
-        context.getString(R.string.options_location_inventory, location.position, itemNameText(context, location.itemName))
+        context.getString(R.string.options_location_inventory, location.position, itemNameText(context, location.item, location.itemName))
     is SaveLocation.ShopOffer ->
-        context.getString(R.string.options_location_shop_offer, location.position, itemNameText(context, location.itemName))
+        context.getString(R.string.options_location_shop_offer, location.position, itemNameText(context, location.item, location.itemName))
     SaveLocation.World -> context.getString(R.string.options_location_world)
     is SaveLocation.WorldZone -> context.getString(R.string.options_location_world_zone, location.zoneId)
     SaveLocation.Shop -> context.getString(R.string.options_location_shop)
@@ -635,6 +697,11 @@ private fun locationText(context: Context, location: SaveLocation): String? = wh
     SaveLocation.Stats -> context.getString(R.string.statistik_location)
     is SaveLocation.ProgressGoal ->
         context.getString(R.string.options_location_progress_goal, location.position, location.goalId)
+}
+
+private fun itemNameText(context: Context, item: Item?, fallback: String): String {
+    val name = if (item != null) SaveTransfer.shortName(item.localizedName(context.resources)) else fallback
+    return itemNameText(context, name)
 }
 
 private fun itemNameText(context: Context, name: String): String =

@@ -38,7 +38,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -70,6 +70,7 @@ import com.idlerpg.game.domain.character.StatType
 import com.idlerpg.game.domain.character.WeaponAction
 import com.idlerpg.game.domain.character.get
 import com.idlerpg.game.ui.character.weapon.WeaponImage
+import com.idlerpg.game.ui.equipment.itemDisplayName
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
@@ -80,7 +81,7 @@ fun CharacterScreen() {
     val context = LocalContext.current
     val repository = remember { (context.applicationContext as IdleRpgApp).repository }
     val scope = rememberCoroutineScope()
-    val state by repository.state.collectAsState(initial = null)
+    val state by repository.state.collectAsStateWithLifecycle(initialValue = null)
 
     // Saves imported at runtime may still lack the starter weapon.
     LaunchedEffect(state?.starterWeaponGranted) {
@@ -229,7 +230,7 @@ private fun WeaponCard(weapon: Item?, combat: CombatStats) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        weapon?.name ?: stringResource(R.string.character_weapon_fists),
+                        weapon?.let { itemDisplayName(it) } ?: stringResource(R.string.character_weapon_fists),
                         style = MaterialTheme.typography.titleLarge,
                         color = weapon?.rarity?.let { rarityColor(it) } ?: MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.weight(1f),

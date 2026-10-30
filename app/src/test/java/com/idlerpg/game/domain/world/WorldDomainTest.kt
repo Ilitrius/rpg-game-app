@@ -251,6 +251,31 @@ class OfflineProgressTest {
     }
 
     @Test
+    fun veryLongAbsenceStaysCappedAndIsNotCountedTwice() {
+        val now = 1_000_000L + 40 * 24 * hour
+        val r = OfflineProgress.calculate(base, now)!!
+        assertEquals(40 * 24 * hour, r.awayMillis)
+        assertEquals(OfflineProgress.MAX_OFFLINE_MILLIS, r.countedMillis)
+        assertTrue(r.capped)
+        val after = OfflineProgress.apply(base, r, now)
+        assertEquals(now, after.world.lastActiveEpochMillis)
+        // restarting right away must not grant (or show) the same absence again
+        assertNull(OfflineProgress.calculate(after, now + 5_000L))
+        val again = OfflineProgress.calculate(after, now + 45 * 60_000L)!!
+        assertEquals(45 * 60_000L, again.awayMillis)
+        assertFalse(again.capped)
+    }
+
+    @Test
+    fun durationPartsSplitDaysHoursMinutes() {
+        assertEquals(DurationParts(0, 0, 45), DurationParts.of(45 * 60_000L + 59_000L))
+        assertEquals(DurationParts(0, 8, 0), DurationParts.of(OfflineProgress.MAX_OFFLINE_MILLIS))
+        assertEquals(DurationParts(1, 1, 1), DurationParts.of(((24 + 1) * 60 + 1) * 60_000L))
+        assertEquals(DurationParts(40, 0, 0), DurationParts.of(40 * 24 * hour))
+        assertEquals(DurationParts(0, 0, 0), DurationParts.of(-5L))
+    }
+
+    @Test
     fun tooWeakHeroIsFlagged() {
         val hoehle = base.copy(world = base.world.copy(currentZoneId = "hoehle", unlockedZoneIds = Zones.all.map { it.id }))
         val r = OfflineProgress.calculate(hoehle, 1_000_000L + 8 * hour)!!

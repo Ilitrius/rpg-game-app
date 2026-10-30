@@ -123,6 +123,8 @@ sealed interface AdventureEvent {
     /** Tap without damage (monster dying/gone): only a small visual feedback. */
     data object TapMiss : AdventureEvent
     data class Kill(val xp: Long, val gold: Long) : AdventureEvent
+    /** The kill reward raised the hero's level (online only, never emitted for offline progress). */
+    data object LevelUp : AdventureEvent
     /** An item dropped (already stored in the inventory or auto-sold). */
     data class Loot(val drop: LootDrop) : AdventureEvent
     /** The boss of [zone] was defeated; [unlocked] is the newly opened zone (null if none/already open). */
@@ -289,6 +291,8 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         loopJob = null
         hpSaveJob?.cancel()
         hpSaveJob = null
+        // A zone change interrupted by pausing the loop is completed right away.
+        _ui.update { st -> st.travelingTo?.let { st.copy(zone = it, travelingTo = null, monster = null, phase = MonsterPhase.GONE) } ?: st }
         if (_ui.value.bossFight) endBossFight()
         val now = System.currentTimeMillis()
         val hp = currentHp()
@@ -350,6 +354,10 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         val zone = Zones.all.firstOrNull { it.id == zoneId } ?: return
         if (!WorldProgress.isUnlocked(cur.world, zone) || cur.travelingTo != null) return
         if (zone.id == cur.zone.id && !cur.bossFight) return
+        startTravel(zone)
+    }
+
+    private fun startTravel(zone: Zone) {
         loopJob?.cancel()
         bossRequested = false
         pendingZoneId = zone.id
@@ -568,9 +576,11 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         // App scope: the reward must be saved even if the loop is cancelled right now.
         idleApp.appScope.launch {
             var drop: LootDrop? = null
+            var leveledUp = false
             runCatching {
                 repository.update { s ->
                     var n = CombatRules.applyKillReward(s, xp, gold, zoneId, now)
+                    leveledUp = n.character.level > s.character.level
                     if (item != null) {
                         val (withItem, d) = Loot.grant(n, item)
                         n = withItem
@@ -579,6 +589,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
                     pendingStats(n.copy(world = n.world.copy(heroHp = hp)))
                 }
             }
+            if (leveledUp) _events.tryEmit(AdventureEvent.LevelUp)
             drop?.let { _events.tryEmit(AdventureEvent.Loot(it)) }
         }
         waitWithRegen(CombatRules.DEATH_MILLIS)
@@ -603,15 +614,18 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         val pendingStats = takeStats()
         idleApp.appScope.launch {
             var drop: LootDrop? = null
+            var leveledUp = false
             runCatching {
                 repository.update { s ->
                     val won = WorldProgress.applyBossVictory(s, zone, xp, gold, now)
+                    leveledUp = won.character.level > s.character.level
                     val (withItem, d) = Loot.grant(won, item)
                     drop = d
                     pendingStats(withItem.copy(world = withItem.world.copy(heroHp = hp)))
                 }
             }
             _events.tryEmit(AdventureEvent.BossVictory(zone, if (wasOpen) null else Zones.next(zone)))
+            if (leveledUp) _events.tryEmit(AdventureEvent.LevelUp)
             drop?.let { _events.tryEmit(AdventureEvent.Loot(it)) }
         }
         waitWithRegen(CombatRules.DEATH_MILLIS * 2)

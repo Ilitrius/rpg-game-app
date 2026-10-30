@@ -20,8 +20,8 @@ android {
         applicationId = "com.rp.IDLEGAMERP"
         minSdk = 26
         targetSdk = 36
-        versionCode = 10
-        versionName = "0.1.0-rc9"
+        versionCode = 11
+        versionName = "0.1.0-rc10"
     }
 
     signingConfigs {
@@ -67,8 +67,10 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
@@ -78,6 +80,7 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.play.app.update)
     debugImplementation(libs.androidx.ui.tooling)
     testImplementation(libs.junit)
     testImplementation(libs.robolectric) // offscreen zone previews (ZonePreviewTest)

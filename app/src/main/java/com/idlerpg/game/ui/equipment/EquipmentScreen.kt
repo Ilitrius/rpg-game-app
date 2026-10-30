@@ -38,7 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -93,7 +93,7 @@ fun EquipmentScreen() {
     val context = LocalContext.current
     val repository = remember { (context.applicationContext as IdleRpgApp).repository }
     val scope = rememberCoroutineScope()
-    val state by repository.state.collectAsState(initial = null)
+    val state by repository.state.collectAsStateWithLifecycle(initialValue = null)
     // Selected item id (inventory or equipped).
     var selectedId by rememberSaveable { mutableStateOf<String?>(null) }
     val scrollState = rememberScrollState()

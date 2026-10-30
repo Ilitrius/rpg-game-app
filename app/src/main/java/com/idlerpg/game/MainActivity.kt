@@ -10,14 +10,30 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import com.idlerpg.game.audio.SoundManager
 import com.idlerpg.game.ui.MainScreen
+import com.idlerpg.game.update.InAppUpdater
 import com.idlerpg.game.ui.options.BackupReminderDialog
 import com.idlerpg.game.ui.theme.IdleRPGTheme
 
 class MainActivity : ComponentActivity() {
+    // Created during construction: registers an activity-result launcher (Play in-app update).
+    private val updater = InAppUpdater(this)
+
+    // Sound plays only while the activity is visible (SoundPool is released in the background).
+    private val soundLifecycle = object : DefaultLifecycleObserver {
+        override fun onStart(owner: LifecycleOwner) = SoundManager.get(this@MainActivity).onForeground()
+        override fun onStop(owner: LifecycleOwner) = SoundManager.get(this@MainActivity).onBackground()
+    }
+
     override fun attachBaseContext(newBase: Context) {
         val tag = runCatching { GameSettings.get(newBase).language.tag }.getOrNull()
         if (tag == null) {
+            // "System": restore the device locale (an earlier explicit choice changed Locale.getDefault()).
+            Locale.setDefault(newBase.resources.configuration.locales[0])
             super.attachBaseContext(newBase)
             return
         }
@@ -29,7 +45,9 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
+        lifecycle.addObserver(soundLifecycle)
         // Game is always dark-themed, so force light system bar icons
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
@@ -37,7 +55,7 @@ class MainActivity : ComponentActivity() {
         )
         setContent {
             IdleRPGTheme {
-                MainScreen()
+                MainScreen(updater = updater)
                 BackupReminderDialog()
             }
         }

@@ -36,6 +36,10 @@ Zusätzlich `spielwelt`: Abenteuer-Ansicht (Ich-Perspektive), Gebiete, Monster, 
 - Import-Validierung (`optionen`, `ui/options/SaveTransfer`): prüft alle GameState-Felder über `SaveField`/`SaveLocation`; neue Felder dem Optionen-Agenten melden. Unbekannte Zonen-IDs werden normalisiert statt abgelehnt.
 - `progress: ProgressState` (Ziele, `domain/progress`, UI `ui/character/GoalsCard`, Strings `strings_ziele.xml`): `DailyReward` (pure, Zeit injiziert: 20-h-Fenster, Uhr-Rückstellung über `clockHighWaterMillis` -5 min gesperrt, Streak-Bruch >48 h, Gold ≈ 150 Kills der aktuellen Zone, +10 %/Tag bis Tag 7, ab Tag 7 Wochenbonus; nur lokaler Schutz) und `Goals` (Katalog `Goals.catalog` ~38 Ziele, Typen `kills/bosses/level/zones` als String, Fortschritt = Zähler − `baseline`, immer 3 aktive, geclaimte bleiben als `claimed` in der Liste; unbekannte Typen/IDs werden übersprungen bzw. beim Import mit `ImportNote.UnknownGoalsDropped` entfernt). Abholen immer ein `repository.update`.
 
+## Audio, Updates (Stand)
+- Ton: `audio/SoundManager` (SoundPool), Effekte aus `tools/generate_sounds.py` -> `res/raw/sfx_*.wav` (siehe `tools/SOUNDS.md`); Ein/Aus + Lautstärke in `GameSettings`.
+- Update-Hinweis: `update/InAppUpdater` (Play In-App Updates, flexibel, fail-safe), Snackbar in `MainScreen`, Strings `strings_update.xml`.
+
 ## Stack
 - Kotlin 2.0.21, Jetpack Compose (BOM 2024.12.01), Material3
 - AGP 8.7.3, Gradle 8.11.1 (Wrapper), JDK 17
