@@ -7,7 +7,7 @@ Quelle der Ablehnung: Programmrichtlinien + Play-Console-Anforderungen. Genauen 
 - Splash-Screen (AndroidX SplashScreen) und Versionsanzeige (Optionen → „Über Idle RPG“) ab rc10.
 
 - `allowBackup="false"` (Spielstand wird nicht in Google Drive gesichert → "nur lokal" in der Datenschutzerklärung stimmt).
-- versionCode 11 / `0.1.0-rc10` für den Neueinreichungs-Build.
+- versionCode 12 / `0.1.0-rc11` für den Neueinreichungs-Build.
 - Policy-Basis: https://play.google/developer-content-policy/ (das ist die Richtlinie, **keine** Datenschutzerklärungs-URL).
 
 ## Datenschutzerklärung
@@ -33,7 +33,7 @@ Quelle der Ablehnung: Programmrichtlinien + Play-Console-Anforderungen. Genauen 
 - Entwicklerprofil verifizieren (Identität, Adresse, Telefon).
 
 ## Neuer Build
-- versionCode erhöhen (aktuell 11), neues AAB hochladen.
+- versionCode erhöhen (aktuell 12), neues AAB hochladen.
 
 ## Datenschutz in der App
 - Optionen → Karte "Datenschutz": Kurzfassung (Dialog, offline) + Button zur öffentlichen Erklärung `https://ilitrius.github.io/rpg-game-app/` (GitHub Pages aus `docs/`, Quelle `docs/index.html`). Dieselbe URL in der Play Console eintragen.
