@@ -508,7 +508,7 @@ private fun Hud(
         ) {
             BossChallengeButton(onChallengeBoss)
         }
-        AutoBossChip(ui.autoBoss, onToggleAutoBoss, Modifier.align(Alignment.TopEnd).padding(top = if (ui.canChallengeBoss) 52.dp else 0.dp))
+        AutoBossChip(ui.autoBoss, ui.autoBossDecision, onToggleAutoBoss, Modifier.align(Alignment.TopEnd).padding(top = if (ui.canChallengeBoss) 52.dp else 0.dp))
 
         // Monster name + level + HP (top center)
         val m = ui.monster

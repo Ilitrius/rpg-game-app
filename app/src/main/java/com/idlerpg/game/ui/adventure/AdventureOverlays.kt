@@ -83,6 +83,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.idlerpg.game.R
+import com.idlerpg.game.domain.world.AutoBossDecision
+import com.idlerpg.game.domain.world.AutoBossReason
+import androidx.compose.foundation.layout.heightIn
 import com.idlerpg.game.data.WorldState
 import com.idlerpg.game.domain.world.BossOutcome
 import com.idlerpg.game.domain.world.LootDrop
@@ -104,23 +107,46 @@ private val goldGradient = listOf(Color(0xFFFFE69A), Color(0xFFE0A82E), Color(0x
 
 // ------------------------------------------------------------------ boss HUD
 
-/** Small toggle for the auto-boss mode, shown below (or instead of) the boss button. */
+/** Short reason line under the auto-boss chip ("" = nothing to say). */
 @Composable
-internal fun AutoBossChip(enabled: Boolean, onToggle: () -> Unit, modifier: Modifier = Modifier) {
+internal fun autoBossHint(d: AutoBossDecision): String = when (d.reason) {
+    AutoBossReason.KILLS -> stringResource(R.string.auto_boss_wait_kills, d.remaining.toInt())
+    AutoBossReason.LOW_HP -> stringResource(R.string.auto_boss_wait_hp)
+    AutoBossReason.COOLDOWN -> stringResource(R.string.auto_boss_wait_cooldown, d.remaining.toInt())
+    AutoBossReason.BOSS_DEFEATED -> stringResource(R.string.auto_boss_wait_defeated)
+    AutoBossReason.LAST_ZONE -> stringResource(R.string.auto_boss_wait_last)
+    AutoBossReason.START -> stringResource(R.string.auto_boss_starting)
+    AutoBossReason.OFF -> ""
+}
+
+/** Small toggle for the auto-boss mode with a one-line reason why the boss has not started yet. */
+@Composable
+internal fun AutoBossChip(enabled: Boolean, decision: AutoBossDecision, onToggle: () -> Unit, modifier: Modifier = Modifier) {
     val label = stringResource(if (enabled) R.string.auto_boss_on else R.string.auto_boss_off)
     val color = if (enabled) Color(0xFFFFD54F) else Color(0xFFB9B3A2)
-    Row(
-        modifier
-            .clip(RoundedCornerShape(14.dp))
-            .background(Color(0xCC1B1F1A))
-            .border(1.dp, color.copy(alpha = if (enabled) 0.9f else 0.4f), RoundedCornerShape(14.dp))
-            .clickable(onClickLabel = stringResource(R.string.auto_boss_cd), onClick = onToggle)
-            .padding(horizontal = 10.dp, vertical = 5.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(Icons.Filled.Whatshot, contentDescription = null, tint = color, modifier = Modifier.size(14.dp))
-        Spacer(Modifier.width(4.dp))
-        Text(label, style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Bold, color = color))
+    val hint = if (enabled) autoBossHint(decision) else ""
+    Column(horizontalAlignment = Alignment.End, modifier = modifier) {
+        Row(
+            Modifier
+                .heightIn(min = 40.dp) // comfortable touch target; the old 24 dp chip was easy to miss
+                .clip(RoundedCornerShape(14.dp))
+                .background(Color(0xCC1B1F1A))
+                .border(1.dp, color.copy(alpha = if (enabled) 0.9f else 0.4f), RoundedCornerShape(14.dp))
+                .clickable(onClickLabel = stringResource(R.string.auto_boss_cd), onClick = onToggle)
+                .padding(horizontal = 10.dp, vertical = 5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(Icons.Filled.Whatshot, contentDescription = null, tint = color, modifier = Modifier.size(14.dp))
+            Spacer(Modifier.width(4.dp))
+            Text(label, style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Bold, color = color))
+        }
+        if (hint.isNotEmpty()) {
+            Text(
+                hint,
+                modifier = Modifier.padding(top = 2.dp, end = 4.dp),
+                style = TextStyle(fontSize = 11.sp, color = Color(0xFFD8D2C0)),
+            )
+        }
     }
 }
 

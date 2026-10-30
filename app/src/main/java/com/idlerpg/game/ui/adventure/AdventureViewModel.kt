@@ -16,7 +16,9 @@ import com.idlerpg.game.domain.character.TapStats
 import com.idlerpg.game.domain.combat.CombatRules
 import com.idlerpg.game.domain.combat.ComboTracker
 import com.idlerpg.game.domain.stats.Stats
+import com.idlerpg.game.domain.world.AutoBossDecision
 import com.idlerpg.game.domain.world.AutoBossGate
+import com.idlerpg.game.domain.world.AutoBossReason
 import com.idlerpg.game.ui.options.GameSettings
 import com.idlerpg.game.domain.world.BossOutcome
 import com.idlerpg.game.domain.world.Loot
@@ -82,6 +84,8 @@ data class AdventureUiState(
     val equippedWeapon: Item? = null,
     /** Auto-boss mode (device setting, see [AutoBossGate]). */
     val autoBoss: Boolean = false,
+    /** Why the auto-boss is waiting (HUD hint); OFF while the mode is off. */
+    val autoBossDecision: AutoBossDecision = AutoBossDecision(AutoBossReason.OFF),
     /** Daily reward or a goal is ready to claim (HUD hint). */
     val claimable: Boolean = false,
 ) {
@@ -216,7 +220,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
 
     init {
         viewModelScope.launch {
-            settings.autoBossFlow.collect { on -> _ui.update { it.copy(autoBoss = on) } }
+            settings.autoBossFlow.collect { on -> _ui.update { withAutoBoss(it.copy(autoBoss = on)) } }
         }
         viewModelScope.launch {
             repository.state.collect { onGameState(it) }
@@ -251,7 +255,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
                 world = s.world,
                 claimable = hasClaimable(s, System.currentTimeMillis()),
                 equippedWeapon = s.equipment.equipped[EquipmentSlot.WEAPON],
-            )
+            ).let(::withAutoBoss)
         }
         statsReady.complete(Unit)
     }
@@ -409,7 +413,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
                 cur.phase == MonsterPhase.APPROACHING -> _ui.update { it.copy(phase = MonsterPhase.FIGHTING) }
             }
             when (fight(deadline = null)) {
-                FightResult.KILL -> { onKill(); maybeAutoBoss() }
+                FightResult.KILL -> { onKill(); maybeAutoBoss(); if (!bossRequested) restForAutoBoss() }
                 else -> onDefeat()
             }
         }
@@ -420,6 +424,18 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         val st = _ui.value
         if (st.bossFight || st.travelingTo != null || st.defeated) return
         if (autoBossGate.shouldStart(st.autoBoss, st.world, st.zone, currentHp(), st.heroMaxHp)) bossRequested = true
+    }
+
+    /**
+     * Auto-boss is ready except for the hero's HP: rest (regenerating, no new monster) instead of
+     * waiting for the next kill to re-check, which in practice rarely lands above 70 % HP.
+     */
+    private suspend fun restForAutoBoss() {
+        while (_ui.value.autoBossDecision.reason == AutoBossReason.LOW_HP && !_ui.value.defeated) {
+            waitWithRegen(250)
+            maybeAutoBoss()
+            if (bossRequested) return
+        }
     }
 
     private fun zoneKills(zone: Zone): Long = _ui.value.world.zoneKills[zone.id] ?: 0L
@@ -631,6 +647,12 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     private fun publishHeroHp() {
-        _ui.update { it.copy(heroHp = currentHp()) }
+        _ui.update { withAutoBoss(it.copy(heroHp = currentHp())) }
+    }
+
+    /** Refreshes the auto-boss hint from the current state (pure read of the gate). */
+    private fun withAutoBoss(st: AdventureUiState): AdventureUiState {
+        val d = autoBossGate.evaluate(st.autoBoss, st.world, st.zone, st.heroHp, st.heroMaxHp)
+        return if (d == st.autoBossDecision) st else st.copy(autoBossDecision = d)
     }
 }

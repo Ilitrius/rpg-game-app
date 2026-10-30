@@ -56,4 +56,34 @@ class AutoBossGateTest {
         assertEquals(0, g.failCount)
         assertTrue(g.shouldStart(true, world(25), zone, 100, 100))
     }
+
+    @Test
+    fun evaluateNamesTheBlockingReason() {
+        val g = AutoBossGate()
+        assertEquals(AutoBossReason.OFF, g.evaluate(false, world(25), zone, 100, 100).reason)
+        val kills = g.evaluate(true, world(20), zone, 100, 100)
+        assertEquals(AutoBossReason.KILLS, kills.reason)
+        assertEquals(5L, kills.remaining)
+        assertEquals(AutoBossReason.LOW_HP, g.evaluate(true, world(25), zone, 50, 100).reason)
+        assertEquals(AutoBossReason.BOSS_DEFEATED, g.evaluate(true, world(60, listOf(zone.id)), zone, 100, 100).reason)
+        g.onFailure(30)
+        val cd = g.evaluate(true, world(35), zone, 100, 100)
+        assertEquals(AutoBossReason.COOLDOWN, cd.reason)
+        assertEquals(5L, cd.remaining)
+        assertEquals(AutoBossReason.START, g.evaluate(true, world(40), zone, 100, 100).reason)
+    }
+
+    /** Regression: a hero below 70 % HP is only blocked by HP; resting (regen) must lead to START. */
+    @Test
+    fun lowHpOnlyBlocksUntilRegenerated() {
+        val g = AutoBossGate()
+        val w = world(25)
+        var hp = 40.0
+        var ticks = 0
+        while (g.evaluate(true, w, zone, Math.ceil(hp).toInt(), 100).reason == AutoBossReason.LOW_HP) {
+            hp += com.idlerpg.game.domain.combat.CombatRules.regen(100, 250); ticks++
+            assertTrue(ticks < 400)
+        }
+        assertEquals(AutoBossReason.START, g.evaluate(true, w, zone, Math.ceil(hp).toInt(), 100).reason)
+    }
 }

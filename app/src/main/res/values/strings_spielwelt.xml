@@ -102,5 +102,11 @@
     <string name="auto_boss_on">Auto-Boss an</string>
     <string name="auto_boss_off">Auto-Boss aus</string>
     <string name="auto_boss_cd">Auto-Boss umschalten</string>
+    <string name="auto_boss_wait_kills">noch %1$d Kills</string>
+    <string name="auto_boss_wait_hp">wartet: Heilung</string>
+    <string name="auto_boss_wait_cooldown">Sperre: %1$d Kills</string>
+    <string name="auto_boss_wait_defeated">Boss schon besiegt</string>
+    <string name="auto_boss_wait_last">letzte Zone</string>
+    <string name="auto_boss_starting">startet…</string>
     <string name="claim_hint">Belohnung bereit</string>
 </resources>
