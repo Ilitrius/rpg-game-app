@@ -17,6 +17,10 @@ class ComboTracker(private val windowMillis: Long = TapStats.COMBO_WINDOW_MILLIS
         return count
     }
 
+    /** The count [register] would return now, without counting the tap (for discarded taps). */
+    fun peekNext(nowMillis: Long): Int =
+        if (lastTap != Long.MIN_VALUE && nowMillis - lastTap <= windowMillis) count + 1 else 0
+
     /** Current combo as shown in the HUD: 0 if the window has already passed. */
     fun current(nowMillis: Long): Int =
         if (lastTap != Long.MIN_VALUE && nowMillis - lastTap <= windowMillis) count else 0

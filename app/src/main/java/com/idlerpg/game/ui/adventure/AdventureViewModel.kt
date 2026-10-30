@@ -120,6 +120,8 @@ sealed interface AdventureEvent {
     data class MonsterHit(val damage: Int) : AdventureEvent
     /** The player tapped the monster and dealt [hit] immediately (independent of the attack timer). */
     data class TapHit(val hit: Hit, val combo: Int = 0) : AdventureEvent
+    /** Tap without damage (monster dying/gone): only a small visual feedback. */
+    data object TapMiss : AdventureEvent
     data class Kill(val xp: Long, val gold: Long) : AdventureEvent
     /** An item dropped (already stored in the inventory or auto-sold). */
     data class Loot(val drop: LootDrop) : AdventureEvent
@@ -151,12 +153,16 @@ fun shouldShowWelcomeBack(reward: OfflineReward?): Boolean =
 
 /**
  * Applies a tap [hit] to the monster on screen. Returns the new state, or null if the tap does
- * nothing: no monster, monster not in [MonsterPhase.FIGHTING] (walking in, dying, gone), already
- * dead, hero defeated or travelling. Pure, so a fast second tap after the kill is ignored.
+ * no damage: no monster, monster dying/gone, already dead, hero defeated or travelling.
+ * While the monster is still [MonsterPhase.APPROACHING] the tap hits too and may kill it: [spawn]
+ * ends the approach as soon as the HP is 0, hands over to FIGHTING and [fight] returns KILL on its
+ * first pass, so there is still exactly one kill/boss-victory path (reward once, no double spawn).
+ * Pure, so a fast second tap after the kill is ignored.
  */
 fun applyTapHit(state: AdventureUiState, hit: Hit): AdventureUiState? {
     val m = state.monster ?: return null
-    if (state.phase != MonsterPhase.FIGHTING || m.hp <= 0L || state.defeated || state.travelingTo != null) return null
+    if (m.hp <= 0L || state.defeated || state.travelingTo != null) return null
+    if (state.phase != MonsterPhase.FIGHTING && state.phase != MonsterPhase.APPROACHING) return null
     return state.copy(monster = m.copy(hp = (m.hp - hit.damage).coerceAtLeast(0)))
 }
 
@@ -306,15 +312,18 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
     fun onEnemyTapped(): Hit? {
         val hero = stats ?: return null
         if (!foreground) return null
-        val n = combo.register(SystemClock.elapsedRealtime())
-        val hit = TapStats.tapHit(hero, n)
+        val hit = TapStats.tapHit(hero, combo.peekNext(SystemClock.elapsedRealtime()))
         var applied = false
         _ui.update { st ->
             val n = applyTapHit(st, hit)
             applied = n != null
             n ?: st
         }
-        if (!applied) return null
+        if (!applied) {
+            _events.tryEmit(AdventureEvent.TapMiss)
+            return null
+        }
+        val n = combo.register(SystemClock.elapsedRealtime())
         statTaps++
         if (hit.damage > statHit) statHit = hit.damage
         _events.tryEmit(AdventureEvent.TapHit(hit, n))
@@ -449,7 +458,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         _ui.update {
             it.copy(monster = MonsterUi(++spawnCounter, monster, monster.maxHp), phase = MonsterPhase.APPROACHING)
         }
-        waitWithRegen(CombatRules.APPROACH_MILLIS)
+        waitWithRegen(CombatRules.APPROACH_MILLIS) { (_ui.value.monster?.hp ?: 0L) <= 0L }
         _ui.update { it.copy(phase = MonsterPhase.FIGHTING) }
     }
 
@@ -627,15 +636,15 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         _ui.update { it.copy(defeated = false, phase = MonsterPhase.GONE, monster = null) }
     }
 
-    private suspend fun waitWithRegen(millis: Long) {
+    private suspend fun waitWithRegen(millis: Long, stopWhen: () -> Boolean = { false }) {
         val end = SystemClock.elapsedRealtime() + millis
         var last = SystemClock.elapsedRealtime()
         while (true) {
             val now = SystemClock.elapsedRealtime()
             stats?.let { regen(it, now - last) }
             last = now
-            if (now >= end) return
-            delay((end - now).coerceAtMost(100L))
+            if (now >= end || stopWhen()) return
+            withTimeoutOrNull((end - now).coerceIn(1L, 100L)) { wake.receive() }
         }
     }
 

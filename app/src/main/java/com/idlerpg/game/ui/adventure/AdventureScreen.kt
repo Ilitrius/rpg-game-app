@@ -93,7 +93,7 @@ import com.idlerpg.game.ui.adventure.MonsterPainters.drawMonster
 import com.idlerpg.game.ui.character.weapon.FirstPersonWeapon
 import java.util.Locale
 import kotlin.math.PI
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.changedToDown
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.input.pointer.pointerInput
 import kotlin.math.abs
@@ -159,6 +159,9 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
                         hitFlash.snapTo(1f)
                         hitFlash.animateTo(0f, tween(if (e.hit.critical) 380 else 260))
                     }
+                }
+                is AdventureEvent.TapMiss -> {
+                    attacks++ // no damage (monster dying/gone): only a short weapon swing as feedback
                 }
                 is AdventureEvent.MonsterHit -> {
                     // x = horizontal jitter (0..1) next to the hero HP bar, see FloatingLabel.
@@ -233,15 +236,26 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
                 .fillMaxSize()
                 .semantics { contentDescription = tapDescription }
                 .pointerInput(vm) {
-                    detectTapGestures { p ->
-                        val sc = currentScene ?: return@detectTapGestures
-                        val m = currentMonster ?: return@detectTapGestures
-                        val h = min(size.width * 0.66f, size.height * 0.38f) * m.stats.type.sizeFactor()
-                        val inX = abs(p.x - size.width / 2f) <= h * 0.55f
-                        val inY = p.y in (sc.monsterGroundY - h * 1.05f)..(sc.monsterGroundY + h * 0.08f)
-                        if (inX && inY) {
-                            tapPoint = Offset(p.x / size.width * 2f - 1f, p.y / size.height * 2f - 1f - 0.08f)
-                            vm.onEnemyTapped()
+                    // Fires on touch-down (every finger), so slight slides or holds never swallow a tap.
+                    val minRadius = MonsterHitBox.MIN_RADIUS_DP * density
+                    awaitPointerEventScope {
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            for (change in event.changes) {
+                                if (!change.changedToDown()) continue
+                                val sc = currentScene ?: continue
+                                val m = currentMonster ?: continue
+                                val p = change.position
+                                val inside = MonsterHitBox.contains(
+                                    p.x, p.y, size.width.toFloat(), size.height.toFloat(),
+                                    sc.horizonY, sc.monsterGroundY, m.stats.type.sizeFactor(),
+                                    approach.value, minRadius,
+                                )
+                                if (inside) {
+                                    tapPoint = Offset(p.x / size.width * 2f - 1f, p.y / size.height * 2f - 1f - 0.08f)
+                                    vm.onEnemyTapped()
+                                }
+                            }
                         }
                     }
                 },
