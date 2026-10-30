@@ -63,6 +63,7 @@ import com.idlerpg.game.data.GameState
 import com.idlerpg.game.data.Item
 import com.idlerpg.game.data.Rarity
 import com.idlerpg.game.domain.character.CombatStats
+import com.idlerpg.game.domain.character.TapStats
 import com.idlerpg.game.domain.character.Progression
 import com.idlerpg.game.domain.character.StarterItems
 import com.idlerpg.game.domain.character.StatType
@@ -363,6 +364,14 @@ private fun DerivedCard(combat: CombatStats) {
             DerivedRow(
                 stringResource(R.string.character_derived_damage),
                 stringResource(R.string.character_derived_damage_value, combat.damageMin, combat.damageMax),
+            )
+            DerivedRow(
+                stringResource(R.string.character_derived_click_damage),
+                stringResource(
+                    R.string.character_derived_damage_value,
+                    TapStats.minTapDamage(combat),
+                    TapStats.maxTapDamage(combat),
+                ),
             )
             DerivedRow(stringResource(R.string.character_derived_aps), format("%.2f", combat.attacksPerSecond))
             DerivedRow(stringResource(R.string.character_derived_hp), numberFormat.format(combat.maxHp))

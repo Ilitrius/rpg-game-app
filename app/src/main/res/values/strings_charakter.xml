@@ -41,6 +41,7 @@
 
     <string name="character_derived_title">Kampfwerte</string>
     <string name="character_derived_damage">Schaden</string>
+    <string name="character_derived_click_damage">Klickschaden</string>
     <string name="character_derived_damage_value">%1$d–%2$d</string>
     <string name="character_derived_aps">Angriffe/Sek.</string>
     <string name="character_derived_hp">Leben</string>

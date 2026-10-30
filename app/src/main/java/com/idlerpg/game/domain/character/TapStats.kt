@@ -1,7 +1,6 @@
 package com.idlerpg.game.domain.character
 
 import com.idlerpg.game.data.Stats
-import kotlin.math.floor
 import kotlin.math.min
 import kotlin.random.Random
 
@@ -21,20 +20,23 @@ object TapStats {
     const val COMBO_WINDOW_MILLIS = 600L
 
     const val CLICK_BASE = 1.0
-    const val CLICK_PER_STRENGTH = 0.01
-    const val CLICK_PER_DEXTERITY = 0.005
-    const val MAX_CLICK_MULTIPLIER = 2.5
+    const val CLICK_PER_STRENGTH = 0.02
+    const val CLICK_PER_DEXTERITY = 0.01
+    const val MAX_CLICK_MULTIPLIER = 4.0
 
     const val COMBO_PER_TAP = 0.02
     const val MAX_COMBO_MULTIPLIER = 1.5
 
     /** Share of a normal hit that one tap deals before the multipliers. */
-    const val TAP_DAMAGE_FACTOR = 0.2
+    const val TAP_DAMAGE_FACTOR = 0.27
+
+    /** Lowest damage of any tap, so tapping is never a no-op. */
+    const val MIN_TAP_DAMAGE = 2L
 
     /** Balance assumption for a fast tapper (used for the max-DPS estimate and tests). */
-    const val ASSUMED_TAPS_PER_SECOND = 6.0
+    const val ASSUMED_TAPS_PER_SECOND = 4.0
 
-    /** 1 + 0.01 x STR + 0.005 x DEX (total stats incl. gear), capped at [MAX_CLICK_MULTIPLIER]. */
+    /** 1 + 0.02 x STR + 0.01 x DEX (total stats incl. gear), capped at [MAX_CLICK_MULTIPLIER]. */
     fun clickMultiplier(total: Stats): Double =
         min(
             CLICK_BASE + total.strength.coerceAtLeast(0) * CLICK_PER_STRENGTH +
@@ -51,9 +53,9 @@ object TapStats {
     private fun scale(combat: CombatStats, combo: Int) =
         TAP_DAMAGE_FACTOR * clickMultiplier(combat.totalStats) * comboMultiplier(combo)
 
-    /** Damage of a tap with the given roll [base] damage, min 1. */
+    /** Damage of a tap with the given roll [base] damage, min [MIN_TAP_DAMAGE]. */
     fun tapDamage(combat: CombatStats, base: Long, combo: Int): Long =
-        floor(base * scale(combat, combo)).toLong().coerceAtLeast(1L)
+        Math.round(base * scale(combat, combo)).coerceAtLeast(MIN_TAP_DAMAGE)
 
     /** Min damage of a non-crit tap at [combo]. */
     fun minTapDamage(combat: CombatStats, combo: Int = 0): Long = tapDamage(combat, combat.damageMin.toLong(), combo)
