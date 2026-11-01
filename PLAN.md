@@ -1,6 +1,6 @@
 # App-Plan: Idle RPG
 
-Stand: 2026-10-30 · Entwurf auf Basis des Ist-Zustands im Repo (aktueller Build: 0.1.0-rc11, versionCode 12) (Annahmen sind markiert). Rechtliches = Orientierung, keine Rechtsberatung.
+Stand: 2026-10-30 · Entwurf auf Basis des Ist-Zustands im Repo (aktueller Build: 0.1.0-rc12, versionCode 13) (Annahmen sind markiert). Rechtliches = Orientierung, keine Rechtsberatung.
 
 ## 1. Vision & Ziele
 - **App-Name:** Idle RPG (applicationId `com.rp.IDLEGAMERP`)
@@ -21,7 +21,10 @@ Stand: 2026-10-30 · Entwurf auf Basis des Ist-Zustands im Repo (aktueller Build
 | Must | Splash-Screen mit Logo | umgesetzt (AndroidX SplashScreen, Launcher-Icon auf `#232C24`) |
 | Must | Versionsnummer + Build in Optionen sichtbar | umgesetzt (Karte „Über Idle RPG“, aus `PackageInfo`) |
 | Should | Crash-Reporting (opt-in) | fehlt |
-| Could | Google Play Games Anmeldung | offen |
+| Could | Google Play Games Anmeldung (Punkte, Erfolge, Cloud-Spielstand) | geplant, siehe Roadmap |
+| Could | Charakter-Reset / Wiedergeburt mit permanenten Boni und Eigenschaften | geplant, siehe Roadmap |
+| Could | Buff-System (Elixiere, Tagesbelohnung, Boss-Buffs) | geplant, siehe Roadmap |
+| Could | Weitere Gold-Senken (Verzaubern, Inventar-Erweiterung, Reroll) | geplant, siehe Roadmap |
 | Could | Hintergrundmusik pro Zone | bewusst nicht umgesetzt |
 | Must (Entscheidung) | Spenden-Button mit Stripe-Link **bleibt drin** | Entscheidung des Entwicklers 2026-10-29; siehe Risiken |
 
@@ -54,7 +57,7 @@ flowchart LR
 - Review-Protokoll (vor jedem Release auszufüllen):
   | Release | Modell A | Modell B | Abweichungen | Freigabe |
   |---|---|---|---|---|
-  | 0.1.0-rc11 | – | – | – | offen |
+  | 0.1.0-rc12 | – | – | – | offen |
 
 ## 9. Rechtliches & Altersfreigabe
 - Inhalte: Fantasy-Gewalt gegen Monster, keine Lootbox-Käufe mit Echtgeld, keine Werbung, kein Chat, keine Standortdaten, keine In-App-Käufe.
@@ -63,7 +66,7 @@ flowchart LR
 - **Entwurf Textbaustein Crash-Reporting (nur falls eingeführt):** „Mit deiner Einwilligung (Art. 6 Abs. 1 lit. a DSGVO) übermittelt die App bei Abstürzen anonymisierte Fehlerberichte (Stacktrace, Gerätemodell, Android-/App-Version) an <Anbieter, EU>. Speicherdauer: <90 Tage>. Widerruf jederzeit unter Optionen → Datenschutz.“
 
 ## 10. Risiken & Annahmen
-- **Hoch: Spenden-Button.** `DonateLink` (Stripe Payment Link) und `DonateCard` sind noch im Code ([GameSettings.kt](app/src/main/java/com/idlerpg/game/ui/options/GameSettings.kt), [OptionsScreen.kt](app/src/main/java/com/idlerpg/game/ui/options/OptionsScreen.kt)), obwohl `docs/play-console-checkliste.md` ihn noch als entfernt führt (veraltet). Er wurde in Commit `f0862cc` (rc8) bewusst wieder eingebaut und in den Datenschutztexten offengelegt. Externe Zahlungslinks in der App können gegen die Play-Payments-Richtlinie verstoßen und waren ein Verdachtsgrund der Ablehnung (Grund von Google nie genannt). rc11 enthält ihn. **Entscheidung des Entwicklers (2026-10-29): Der Spendenbutton bleibt drin.** Das Restrisiko bei Play bleibt bewusst bestehen; bei erneuter Ablehnung wegen Zahlungen zuerst hier ansetzen. Checkliste ist entsprechend zu korrigieren (siehe Offene Punkte).
+- **Hoch: Spenden-Button.** `DonateLink` (Stripe Payment Link) und `DonateCard` sind noch im Code ([GameSettings.kt](app/src/main/java/com/idlerpg/game/ui/options/GameSettings.kt), [OptionsScreen.kt](app/src/main/java/com/idlerpg/game/ui/options/OptionsScreen.kt)), obwohl `docs/play-console-checkliste.md` ihn noch als entfernt führt (veraltet). Er wurde in Commit `f0862cc` (rc8) bewusst wieder eingebaut und in den Datenschutztexten offengelegt. Externe Zahlungslinks in der App können gegen die Play-Payments-Richtlinie verstoßen und waren ein Verdachtsgrund der Ablehnung (Grund von Google nie genannt). rc12 enthält ihn. **Entscheidung des Entwicklers (2026-10-29): Der Spendenbutton bleibt drin.** Das Restrisiko bei Play bleibt bewusst bestehen; bei erneuter Ablehnung wegen Zahlungen zuerst hier ansetzen. Checkliste ist entsprechend zu korrigieren (siehe Offene Punkte).
 - Alles seit dem Sound-/Update-Stand wurde ohne baubares SDK umgesetzt (TODO.md) – Regressionsrisiko.
 - Annahmen: Zielgruppe 13+, reiner Dunkel-Look ok, kein Backend.
 
@@ -73,10 +76,16 @@ flowchart LR
 3. Closed Test (12 Tester, 14 Tage), Produktionszugang.
 4. Danach: Crash-Reporting + Consent-Dialog (Should), Spenden-Platzhalter ohne Funktion, ggf. Play Games.
 
+### Spätere Ausbaustufen (Planung, Stand 2026-11-01)
+- **A. Wiedergeburt/Prestige:** Reset von Level, Zonen, Gold, Inventar gegen Währung „Seelen“ und permanente Boni (+% XP/Gold/Schaden, Start-Level) plus freischaltbare Eigenschaften (Talentbaum). Braucht Balance-Konzept, Save-Migration (`GameState` nur abwärtskompatibel), Anpassung der Import-Validierung und Backup-Hinweis vor dem Reset.
+- **B. Buff-System:** zeitlich/kampfgebundene Buffs (Schaden, XP, Gold, Drop, Regeneration, Klick) aus Shop-Elixieren, Tagesbelohnung, Zielen, Bosssiegen; HUD-Leiste mit Restzeit; Laufzeit nur in aktiver Spielzeit; Stapelregeln.
+- **C. Gold-Senken:** Buff-Elixiere, Verzaubern/Aufwerten, Inventar-Erweiterung über 40 Plätze, Reroll von Item-Werten, Rast/Heilung, Zonen-Schnellreise, kosmetische Skins.
+- **D. Google Play Games:** optionale Anmeldung mit Kontoauswahl, Bestenliste (Level/Zone/Kills), Erfolge aus den Zielen, Cloud-Spielstand (Saved Games). Folgen: INTERNET + Play-Games-SDK, Konsolen-Setup, Änderung von Datenschutzerklärung, Datensicherheitsformular und Consent-Dialog (Pflichtanforderung 15); Spiel bleibt ohne Anmeldung voll nutzbar. Reihenfolge-Empfehlung: C/B vor A (A ändert das Save-Modell am stärksten), D unabhängig, aber erst nach Datenschutz-Review.
+
 ## 12. Offene Punkte
 - **Google Play Games Anmeldung mit Kontoauswahl prüfen** (Machbarkeit, Nutzen, Datenschutz; würde INTERNET/Datenerhebung ändern → Datenschutz-/Datensicherheitsformular anpassen).
 - Spenden-Button bleibt mit Stripe-Link (Entscheidung 2026-10-29). Abweichung von Pflichtanforderung 6 (Platzhalter ohne Funktion) bewusst akzeptiert. `docs/play-console-checkliste.md` nennt ihn noch fälschlich als entfernt – korrigieren.
-- Splash-Screen und Versionsanzeige auf Emulator/Gerät prüfen (Build + Unit-Tests grün, kein Gerät verfügbar); Bundle rc11 (versionCode 12) ist gebaut und signiert, aber nicht auf Gerät geprüft.
+- Splash-Screen und Versionsanzeige auf Emulator/Gerät prüfen (Build + Unit-Tests grün, kein Gerät verfügbar); Bundle rc12 (versionCode 13) ist gebaut und signiert, aber nicht auf Gerät geprüft.
 - Hell-Theme/Dark-Mode-Umschaltung nötig?
 - Lernspeicher per PR + Review-Agent einführen? (Empfehlung: finale Freigabe beim Entwickler.)
 - Crash-Reporting-Anbieter (Sentry EU vs. Crashlytics) – würde INTERNET-Berechtigung und Consent erfordern.
@@ -88,6 +97,7 @@ flowchart LR
 - 2026-10-29: Splash-Screen und Versionsanzeige umgesetzt; Entscheidung „Spendenbutton bleibt drin“ dokumentiert (Abschnitte 3, 10, 11, 12, Anhang).
 - 2026-10-29: Version auf rc10 / versionCode 11 angehoben, Release-Bundle signiert (`release/com.rp.IDLEGAMERP-0.1.0-rc10.aab` + Mapping); `docs/play-console-checkliste.md` korrigiert (Spenden-Button bleibt); Plan auf rc10 aktualisiert.
 - 2026-10-30: Version auf rc11 / versionCode 12 angehoben, Bundle neu gebaut und signiert (`release/…-rc11.*`).
+- 2026-11-01: dann-46ungl (Shop „Alles verkaufen“, Tap-Hit-Test/Balance, Auto-Boss-Rast) in master gemergt; Klickschaden in Cyan; Version rc12 / versionCode 13, Bundle neu gebaut und signiert.
 
 ## Anhang: Abgleich mit Pflichtanforderungen (2026-10-29)
 | # | Anforderung | Ergebnis |
@@ -104,6 +114,6 @@ flowchart LR
 | 10 | Altersfreigabe | ⚠️ Entwurf (13+), IARC/USK noch zu bestätigen |
 | 11 | Offline | ✅ |
 | 12 | Crash-Reporting (Should) | ❌ nicht vorhanden |
-| 13 | Versionsanzeige | ✅ Optionen → „Über Idle RPG“: „Version 0.1.0-rc11 (Build 12)“, automatisch aus Build |
+| 13 | Versionsanzeige | ✅ Optionen → „Über Idle RPG“: „Version 0.1.0-rc12 (Build 13)“, automatisch aus Build |
 | 14 | Agenten-Lernschleife | ⚠️ vorhanden, aber ohne PR-Freigabe/Review-Agent/Metriken |
 | 15 | Consent | ➖ aktuell nicht nötig (keine optionale Datenverarbeitung); Pflicht, sobald 12 kommt |
