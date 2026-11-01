@@ -27,6 +27,14 @@ class GameSettingsTest {
     }
 
     @Test
+    fun donationHintShowsByDefaultAndCanBeHiddenForGood() {
+        val store = FakeStore()
+        assertFalse(GameSettings(store).donationHintHidden)
+        GameSettings(store).donationHintHidden = true
+        assertTrue(GameSettings(store).donationHintHidden)
+    }
+
+    @Test
     fun unknownLanguageCodeFallsBackToSystem() {
         val store = FakeStore().apply { strings[GameSettings.KEY_LANGUAGE] = "klingon" }
         assertEquals(AppLanguage.SYSTEM, GameSettings(store).language)

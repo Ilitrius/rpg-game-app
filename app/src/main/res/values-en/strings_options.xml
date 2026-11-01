@@ -31,6 +31,10 @@
     <string name="options_donate_title">Support</string>
     <string name="options_donate_description">Enjoying the game? A voluntary donation helps with further development. The donation is handled externally via Stripe in your browser and unlocks nothing in the game.</string>
     <string name="options_donate_button">Donate</string>
+    <string name="options_donation_hint_title">A small request</string>
+    <string name="options_donation_hint_text">Idle RPG is free and has no ads. If you enjoy the game, I would be glad about a small voluntary donation – no obligation at all.\n\nYou can find the donate button under Options → Support. The donation unlocks nothing in the game.</string>
+    <string name="options_donation_hint_ok">Continue</string>
+    <string name="options_donation_hint_never">Don’t show again</string>
     <string name="options_donate_no_browser">No browser app found.</string>
 
     <!-- Privacy -->

@@ -98,6 +98,7 @@ flowchart LR
 - 2026-10-29: Version auf rc10 / versionCode 11 angehoben, Release-Bundle signiert (`release/com.rp.IDLEGAMERP-0.1.0-rc10.aab` + Mapping); `docs/play-console-checkliste.md` korrigiert (Spenden-Button bleibt); Plan auf rc10 aktualisiert.
 - 2026-10-30: Version auf rc11 / versionCode 12 angehoben, Bundle neu gebaut und signiert (`release/…-rc11.*`).
 - 2026-11-01: dann-46ungl (Shop „Alles verkaufen“, Tap-Hit-Test/Balance, Auto-Boss-Rast) in master gemergt; Klickschaden in Cyan; Version rc12 / versionCode 13, Bundle neu gebaut und signiert.
+- 2026-11-01: Start-Hinweis „Eine kleine Bitte“ (höfliche Spendenbitte mit Verweis auf Optionen → Unterstützen) nach dem System-Splash; „Nicht mehr anzeigen“ möglich (`DonationHintDialog`, `GameSettings.donationHintHidden`). Spenden-Button bleibt unverändert.
 
 ## Anhang: Abgleich mit Pflichtanforderungen (2026-10-29)
 | # | Anforderung | Ergebnis |
