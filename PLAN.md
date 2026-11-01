@@ -1,6 +1,6 @@
 # App-Plan: Idle RPG
 
-Stand: 2026-10-29 · Entwurf auf Basis des Ist-Zustands im Repo (aktueller Build: 0.1.0-rc10, versionCode 11) (Annahmen sind markiert). Rechtliches = Orientierung, keine Rechtsberatung.
+Stand: 2026-10-29 · Entwurf auf Basis des Ist-Zustands im Repo (aktueller Build: 0.1.0-rc11, versionCode 12) (Annahmen sind markiert). Rechtliches = Orientierung, keine Rechtsberatung.
 
 ## 1. Vision & Ziele
 - **App-Name:** Idle RPG (applicationId `com.rp.IDLEGAMERP`)
@@ -54,7 +54,7 @@ flowchart LR
 - Review-Protokoll (vor jedem Release auszufüllen):
   | Release | Modell A | Modell B | Abweichungen | Freigabe |
   |---|---|---|---|---|
-  | 0.1.0-rc10 | – | – | – | offen |
+  | 0.1.0-rc11 | – | – | – | offen |
 
 ## 9. Rechtliches & Altersfreigabe
 - Inhalte: Fantasy-Gewalt gegen Monster, keine Lootbox-Käufe mit Echtgeld, keine Werbung, kein Chat, keine Standortdaten, keine In-App-Käufe.
@@ -63,7 +63,7 @@ flowchart LR
 - **Entwurf Textbaustein Crash-Reporting (nur falls eingeführt):** „Mit deiner Einwilligung (Art. 6 Abs. 1 lit. a DSGVO) übermittelt die App bei Abstürzen anonymisierte Fehlerberichte (Stacktrace, Gerätemodell, Android-/App-Version) an <Anbieter, EU>. Speicherdauer: <90 Tage>. Widerruf jederzeit unter Optionen → Datenschutz.“
 
 ## 10. Risiken & Annahmen
-- **Hoch: Spenden-Button.** `DonateLink` (Stripe Payment Link) und `DonateCard` sind noch im Code ([GameSettings.kt](app/src/main/java/com/idlerpg/game/ui/options/GameSettings.kt), [OptionsScreen.kt](app/src/main/java/com/idlerpg/game/ui/options/OptionsScreen.kt)), obwohl `docs/play-console-checkliste.md` ihn noch als entfernt führt (veraltet). Er wurde in Commit `f0862cc` (rc8) bewusst wieder eingebaut und in den Datenschutztexten offengelegt. Externe Zahlungslinks in der App können gegen die Play-Payments-Richtlinie verstoßen und waren ein Verdachtsgrund der Ablehnung (Grund von Google nie genannt). rc10 enthält ihn. **Entscheidung des Entwicklers (2026-10-29): Der Spendenbutton bleibt drin.** Das Restrisiko bei Play bleibt bewusst bestehen; bei erneuter Ablehnung wegen Zahlungen zuerst hier ansetzen. Checkliste ist entsprechend zu korrigieren (siehe Offene Punkte).
+- **Hoch: Spenden-Button.** `DonateLink` (Stripe Payment Link) und `DonateCard` sind noch im Code ([GameSettings.kt](app/src/main/java/com/idlerpg/game/ui/options/GameSettings.kt), [OptionsScreen.kt](app/src/main/java/com/idlerpg/game/ui/options/OptionsScreen.kt)), obwohl `docs/play-console-checkliste.md` ihn noch als entfernt führt (veraltet). Er wurde in Commit `f0862cc` (rc8) bewusst wieder eingebaut und in den Datenschutztexten offengelegt. Externe Zahlungslinks in der App können gegen die Play-Payments-Richtlinie verstoßen und waren ein Verdachtsgrund der Ablehnung (Grund von Google nie genannt). rc11 enthält ihn. **Entscheidung des Entwicklers (2026-10-29): Der Spendenbutton bleibt drin.** Das Restrisiko bei Play bleibt bewusst bestehen; bei erneuter Ablehnung wegen Zahlungen zuerst hier ansetzen. Checkliste ist entsprechend zu korrigieren (siehe Offene Punkte).
 - Alles seit dem Sound-/Update-Stand wurde ohne baubares SDK umgesetzt (TODO.md) – Regressionsrisiko.
 - Annahmen: Zielgruppe 13+, reiner Dunkel-Look ok, kein Backend.
 
@@ -76,7 +76,7 @@ flowchart LR
 ## 12. Offene Punkte
 - **Google Play Games Anmeldung mit Kontoauswahl prüfen** (Machbarkeit, Nutzen, Datenschutz; würde INTERNET/Datenerhebung ändern → Datenschutz-/Datensicherheitsformular anpassen).
 - Spenden-Button bleibt mit Stripe-Link (Entscheidung 2026-10-29). Abweichung von Pflichtanforderung 6 (Platzhalter ohne Funktion) bewusst akzeptiert. `docs/play-console-checkliste.md` nennt ihn noch fälschlich als entfernt – korrigieren.
-- Splash-Screen und Versionsanzeige auf Emulator/Gerät prüfen (Build + Unit-Tests grün, kein Gerät verfügbar); Bundle rc10 (versionCode 11) ist gebaut und signiert, aber nicht auf Gerät geprüft.
+- Splash-Screen und Versionsanzeige auf Emulator/Gerät prüfen (Build + Unit-Tests grün, kein Gerät verfügbar); Bundle rc11 (versionCode 12) ist gebaut und signiert, aber nicht auf Gerät geprüft.
 - Hell-Theme/Dark-Mode-Umschaltung nötig?
 - Lernspeicher per PR + Review-Agent einführen? (Empfehlung: finale Freigabe beim Entwickler.)
 - Crash-Reporting-Anbieter (Sentry EU vs. Crashlytics) – würde INTERNET-Berechtigung und Consent erfordern.
@@ -87,6 +87,7 @@ flowchart LR
 - 2026-10-29: Plan erstmals angelegt aus Repo-Ist-Stand; Abgleich mit Pflichtanforderungen (siehe unten).
 - 2026-10-29: Splash-Screen und Versionsanzeige umgesetzt; Entscheidung „Spendenbutton bleibt drin“ dokumentiert (Abschnitte 3, 10, 11, 12, Anhang).
 - 2026-10-29: Version auf rc10 / versionCode 11 angehoben, Release-Bundle signiert (`release/com.rp.IDLEGAMERP-0.1.0-rc10.aab` + Mapping); `docs/play-console-checkliste.md` korrigiert (Spenden-Button bleibt); Plan auf rc10 aktualisiert.
+- 2026-10-30: Version auf rc11 / versionCode 12 angehoben, Bundle neu gebaut und signiert (`release/…-rc11.*`).
 
 ## Anhang: Abgleich mit Pflichtanforderungen (2026-10-29)
 | # | Anforderung | Ergebnis |
@@ -103,6 +104,6 @@ flowchart LR
 | 10 | Altersfreigabe | ⚠️ Entwurf (13+), IARC/USK noch zu bestätigen |
 | 11 | Offline | ✅ |
 | 12 | Crash-Reporting (Should) | ❌ nicht vorhanden |
-| 13 | Versionsanzeige | ✅ Optionen → „Über Idle RPG“: „Version 0.1.0-rc10 (Build 11)“, automatisch aus Build |
+| 13 | Versionsanzeige | ✅ Optionen → „Über Idle RPG“: „Version 0.1.0-rc11 (Build 12)“, automatisch aus Build |
 | 14 | Agenten-Lernschleife | ⚠️ vorhanden, aber ohne PR-Freigabe/Review-Agent/Metriken |
 | 15 | Consent | ➖ aktuell nicht nötig (keine optionale Datenverarbeitung); Pflicht, sobald 12 kommt |

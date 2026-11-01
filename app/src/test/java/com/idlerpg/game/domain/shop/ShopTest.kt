@@ -273,14 +273,18 @@ class ShopTest {
     }
 
     @Test
-    fun sellEverythingKeepsEquippedAndUpgrades() {
+    fun sellEverythingSellsUpgradesButKeepsEquipped() {
         val s = bulkState()
+        val upgrades = s.equipment.inventory.filter { Shop.isUpgrade(s, it) }
+        assertEquals(1, upgrades.size)
         val r = Shop.sellEverything(s)
-        assertEquals(listOf("up"), r.state.equipment.inventory.map { it.id })
+        assertEquals(emptyList<String>(), r.state.equipment.inventory.map { it.id })
         assertEquals(s.equipment.equipped, r.state.equipment.equipped)
-        assertEquals(4 + 8 + 9 + 30 + 70L, r.gold)
-        assertEquals(1, Shop.keptUpgradeCount(s, Rarity.entries.toSet()))
-        assertEquals(r.gold, Shop.bulkSellGold(s, Rarity.entries.toSet()))
+        assertEquals(4 + 8 + 9 + 30 + 70L + upgrades.sumOf { it.price }, r.gold)
+        assertEquals(s.equipment.inventory.size, r.count)
+        assertEquals(r.gold, Shop.bulkSellGold(s, Rarity.entries.toSet(), includeUpgrades = true))
+        // the per-rarity sale still protects upgrades
+        assertEquals(listOf("up"), Shop.bulkSell(s, Rarity.entries.toSet()).state.equipment.inventory.map { it.id })
         // idempotent
         assertSame(r.state, Shop.sellEverything(r.state).state)
     }
@@ -297,13 +301,14 @@ class ShopTest {
     }
 
     @Test
-    fun sellGroupsListOnlyNonEmptyRaritiesAndMatchSellEverything() {
+    fun sellGroupsListOnlyNonEmptyRaritiesAndMatchSellEverythingWithoutUpgrades() {
         val s = bulkState()
         val groups = Shop.sellGroups(s)
         assertEquals(listOf(Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC), groups.map { it.rarity })
         assertEquals(17L, groups.first { it.rarity == Rarity.UNCOMMON }.gold)
-        assertEquals(Shop.sellEverything(s).gold, groups.sumOf { it.gold })
-        assertEquals(Shop.sellEverything(s).count, groups.sumOf { it.count })
+        val noUpgrades = Shop.bulkSell(s, Rarity.entries.toSet())
+        assertEquals(noUpgrades.gold, groups.sumOf { it.gold })
+        assertEquals(noUpgrades.count, groups.sumOf { it.count })
     }
 
     // ------------------------------------------------------------------ persistence

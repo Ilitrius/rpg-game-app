@@ -164,7 +164,7 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
                 is AdventureEvent.TapHit -> {
                     val pos = tapPoint
                     floats += FloatText(
-                        nextFloatId++, if (e.hit.critical) FloatKind.CRIT else FloatKind.DAMAGE, e.hit.damage, 0,
+                        nextFloatId++, if (e.hit.critical) FloatKind.TAP_CRIT else FloatKind.TAP, e.hit.damage, 0,
                         pos?.x ?: 0f, pos?.y ?: -0.1f,
                     )
                     if (e.combo >= 2) floats += FloatText(nextFloatId++, FloatKind.COMBO, e.combo.toLong(), 0, pos?.x ?: 0f, (pos?.y ?: -0.1f) + 0.09f)
@@ -689,7 +689,10 @@ private fun HpBar(
 
 // ------------------------------------------------------------------ floating texts
 
-private enum class FloatKind { DAMAGE, CRIT, HERO_DAMAGE, REWARD, COMBO }
+private enum class FloatKind { DAMAGE, CRIT, TAP, TAP_CRIT, HERO_DAMAGE, REWARD, COMBO }
+
+private val TapColor = Color(0xFF4DD0FF)
+private val TapCritColor = Color(0xFF80F0FF)
 
 /** [x]/[y] are alignment biases (-1..1) relative to the scene; for [FloatKind.HERO_DAMAGE] [x] is a 0..1 jitter. */
 private data class FloatText(val id: Long, val kind: FloatKind, val a: Long, val b: Long, val x: Float, val y: Float)
@@ -699,7 +702,7 @@ private fun FloatingLabel(f: FloatText, onDone: () -> Unit) {
     val p = remember { Animatable(0f) }
     val duration = when (f.kind) {
         FloatKind.REWARD -> 1600
-        FloatKind.CRIT -> 1100
+        FloatKind.CRIT, FloatKind.TAP_CRIT -> 1100
         else -> 850
     }
     LaunchedEffect(Unit) {
@@ -750,6 +753,27 @@ private fun FloatingLabel(f: FloatText, onDone: () -> Unit) {
                         style = TextStyle(
                             fontSize = 46.sp, fontWeight = FontWeight.Black, color = Color(0xFFFFD54F),
                             shadow = Shadow(Color(0xFF7A3A00), Offset(0f, 3f), 10f),
+                        ),
+                    )
+                }
+                // Click damage: cyan, clearly apart from the white/orange auto-attack numbers.
+                FloatKind.TAP -> Text(
+                    f.a.toString(),
+                    style = TextStyle(
+                        fontSize = 26.sp, fontWeight = FontWeight.Black, color = TapColor,
+                        shadow = Shadow(Color(0xFF003B4D), Offset(0f, 2f), 8f),
+                    ),
+                )
+                FloatKind.TAP_CRIT -> {
+                    Text(
+                        stringResource(R.string.crit_label),
+                        style = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Black, color = TapCritColor, shadow = hudShadow),
+                    )
+                    Text(
+                        f.a.toString(),
+                        style = TextStyle(
+                            fontSize = 40.sp, fontWeight = FontWeight.Black, color = TapColor,
+                            shadow = Shadow(Color(0xFF003B4D), Offset(0f, 3f), 10f),
                         ),
                     )
                 }

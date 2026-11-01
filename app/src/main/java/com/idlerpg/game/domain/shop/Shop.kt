@@ -205,9 +205,9 @@ object Shop {
      * Inventory items of one of [rarities] that are no upgrade. Equipped items are not part of the
      * inventory and therefore never candidates; an empty set yields an empty list.
      */
-    fun bulkSellCandidates(state: GameState, rarities: Set<Rarity>): List<Item> =
+    fun bulkSellCandidates(state: GameState, rarities: Set<Rarity>, includeUpgrades: Boolean = false): List<Item> =
         if (rarities.isEmpty()) emptyList()
-        else state.equipment.inventory.filter { it.rarity in rarities && !isUpgrade(state, it) }
+        else state.equipment.inventory.filter { it.rarity in rarities && (includeUpgrades || !isUpgrade(state, it)) }
 
     /** Upgrades in the inventory of one of [rarities] that a bulk sale keeps. */
     fun keptUpgradeCount(state: GameState, rarities: Set<Rarity>): Int =
@@ -223,21 +223,22 @@ object Shop {
             .sortedBy { it.rarity }
 
     /** Gold [bulkSell] would earn for [rarities]. */
-    fun bulkSellGold(state: GameState, rarities: Set<Rarity>): Long =
-        bulkSellCandidates(state, rarities).sumOf { it.price.coerceAtLeast(0) }
+    fun bulkSellGold(state: GameState, rarities: Set<Rarity>, includeUpgrades: Boolean = false): Long =
+        bulkSellCandidates(state, rarities, includeUpgrades).sumOf { it.price.coerceAtLeast(0) }
 
     /**
      * Sells all [bulkSellCandidates] of [rarities] in one pass (pure; call inside a single
-     * `repository.update`). Upgrades and equipped items stay. Nothing to sell → same [state] instance.
+     * `repository.update`). Equipped items always stay; upgrades stay unless [includeUpgrades].
+     * Nothing to sell → same [state] instance.
      */
-    fun bulkSell(state: GameState, rarities: Set<Rarity>): SellResult {
-        val ids = bulkSellCandidates(state, rarities).map { it.id }.toSet()
+    fun bulkSell(state: GameState, rarities: Set<Rarity>, includeUpgrades: Boolean = false): SellResult {
+        val ids = bulkSellCandidates(state, rarities, includeUpgrades).map { it.id }.toSet()
         if (ids.isEmpty()) return SellResult(state, 0, 0)
         return sellWhere(state) { it.id in ids }
     }
 
-    /** "Alles verkaufen": every rarity, upgrades and equipped items stay. */
-    fun sellEverything(state: GameState): SellResult = bulkSell(state, Rarity.entries.toSet())
+    /** "Alles verkaufen": the whole inventory including upgrades; only equipped items stay. */
+    fun sellEverything(state: GameState): SellResult = bulkSell(state, Rarity.entries.toSet(), includeUpgrades = true)
 
     /** Sells all [bulkSellCandidates]. */
     fun sellCommonJunk(state: GameState): SellResult = bulkSell(state, setOf(Rarity.COMMON))
