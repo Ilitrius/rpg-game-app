@@ -36,7 +36,7 @@
     <string name="options_donate_description">Gefällt dir das Spiel? Mit einer freiwilligen Spende hilfst du bei der Weiterentwicklung. Die Spende wird extern über Stripe im Browser abgewickelt und schaltet nichts im Spiel frei.</string>
     <string name="options_donate_button">Spenden</string>
     <string name="options_donation_hint_title">Eine kleine Bitte</string>
-    <string name="options_donation_hint_text">Idle RPG ist kostenlos und ohne Werbung. Wenn dir das Spiel gefällt, freue ich mich über eine kleine freiwillige Spende – ganz ohne Verpflichtung.\n\nDen Spenden-Button findest du unter Optionen → Unterstützen. Die Spende schaltet nichts im Spiel frei.</string>
+    <string name="options_donation_hint_text">Idle RPG ist kostenlos und ohne Werbung. Wenn dir das Spiel gefällt, freue ich mich über eine kleine freiwillige Spende – ganz ohne Verpflichtung.\n\nMit „Spenden“ gelangst du direkt zur Spendenseite (Stripe, im Browser). Den Button findest du später auch unter Optionen → Unterstützen. Die Spende schaltet nichts im Spiel frei.</string>
     <string name="options_donation_hint_ok">Weiter</string>
     <string name="options_donation_hint_never">Nicht mehr anzeigen</string>
     <string name="options_donate_no_browser">Keine Browser-App gefunden.</string>

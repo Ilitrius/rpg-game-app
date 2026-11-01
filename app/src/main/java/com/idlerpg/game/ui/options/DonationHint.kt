@@ -1,5 +1,10 @@
 package com.idlerpg.game.ui.options
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -13,9 +18,10 @@ import androidx.compose.ui.res.stringResource
 import com.idlerpg.game.R
 
 /**
- * Small, polite donation request shown once per app start (after the system splash). It says where
- * the donate button is (Optionen → Unterstützen); the button itself stays in the options. "Nicht mehr
- * anzeigen" switches it off for good. Dismissed state survives recreation (e.g. language change).
+ * Small, polite donation request shown once per app start (after the system splash). It contains
+ * the donation link ("Spenden" opens the external payment page in the browser) and says where the
+ * button stays (Optionen -> Unterstuetzen). "Nicht mehr anzeigen" switches the hint off for good.
+ * Dismissed state survives recreation (e.g. language change).
  */
 @Composable
 fun DonationHintDialog() {
@@ -26,13 +32,29 @@ fun DonationHintDialog() {
     AlertDialog(
         onDismissRequest = { show = false },
         title = { Text(stringResource(R.string.options_donation_hint_title)) },
-        text = { Text(stringResource(R.string.options_donation_hint_text)) },
-        confirmButton = { TextButton(onClick = { show = false }) { Text(stringResource(R.string.options_donation_hint_ok)) } },
-        dismissButton = {
-            TextButton(onClick = {
-                settings.donationHintHidden = true
-                show = false
-            }) { Text(stringResource(R.string.options_donation_hint_never)) }
+        text = {
+            Column {
+                Text(stringResource(R.string.options_donation_hint_text))
+                TextButton(onClick = {
+                    settings.donationHintHidden = true
+                    show = false
+                }) { Text(stringResource(R.string.options_donation_hint_never)) }
+            }
         },
+        confirmButton = {
+            TextButton(onClick = {
+                try {
+                    context.startActivity(
+                        Intent(Intent.ACTION_VIEW, Uri.parse(DonateLink.URL)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                    )
+                    show = false
+                } catch (e: ActivityNotFoundException) {
+                    Toast.makeText(context, R.string.options_donate_no_browser, Toast.LENGTH_SHORT).show()
+                } catch (e: SecurityException) {
+                    Toast.makeText(context, R.string.options_donate_no_browser, Toast.LENGTH_SHORT).show()
+                }
+            }) { Text(stringResource(R.string.options_donate_button)) }
+        },
+        dismissButton = { TextButton(onClick = { show = false }) { Text(stringResource(R.string.options_donation_hint_ok)) } },
     )
 }
