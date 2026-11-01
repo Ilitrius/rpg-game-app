@@ -27,11 +27,26 @@ class AdventureTapTest {
     }
 
     @Test
-    fun tapIgnoredUnlessMonsterIsFighting() {
-        for (p in listOf(MonsterPhase.APPROACHING, MonsterPhase.DYING, MonsterPhase.GONE)) {
+    fun approachingTapHitsAndMayKill() {
+        assertEquals(15L, applyTapHit(state(20, MonsterPhase.APPROACHING), Hit(5, false))!!.monster!!.hp)
+        val killed = applyTapHit(state(3, MonsterPhase.APPROACHING), Hit(50, false))!!
+        assertEquals(0L, killed.monster!!.hp)
+        // Rapid extra taps do nothing (no second kill), also for a boss.
+        assertNull(applyTapHit(killed, Hit(50, false)))
+        val boss = MonsterScaling.boss(Zones.WIESE)
+        val bs = AdventureUiState(monster = MonsterUi(2, boss, 4), phase = MonsterPhase.APPROACHING)
+        val bk = applyTapHit(bs, Hit(9, true))!!
+        assertEquals(0L, bk.monster!!.hp)
+        assertNull(applyTapHit(bk, Hit(9, true)))
+    }
+
+    @Test
+    fun tapIgnoredWhenDyingGoneDeadOrDefeated() {
+        for (p in listOf(MonsterPhase.DYING, MonsterPhase.GONE)) {
             assertNull(p.name, applyTapHit(state(phase = p), Hit(5, false)))
         }
         assertNull(applyTapHit(AdventureUiState(), Hit(5, false)))
+        assertNull(applyTapHit(state(0, MonsterPhase.APPROACHING), Hit(5, false)))
         assertNull(applyTapHit(state().copy(defeated = true), Hit(5, false)))
         assertNull(applyTapHit(state().copy(travelingTo = Zones.WALD), Hit(5, false)))
     }

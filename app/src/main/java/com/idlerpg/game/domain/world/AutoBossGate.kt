@@ -43,11 +43,20 @@ class AutoBossGate {
         blockedUntilKills = 0L
     }
 
-    fun shouldStart(enabled: Boolean, world: WorldState, zone: Zone, heroHp: Int, heroMaxHp: Int): Boolean {
-        if (!enabled || Zones.next(zone) == null) return false
-        if (WorldProgress.isBossDefeated(world, zone) || !WorldProgress.canChallengeBoss(world, zone)) return false
-        if (heroMaxHp <= 0 || heroHp < MIN_HP_FRACTION * heroMaxHp) return false
-        return (world.zoneKills[zone.id] ?: 0L) >= blockedUntilKills
+    fun shouldStart(enabled: Boolean, world: WorldState, zone: Zone, heroHp: Int, heroMaxHp: Int): Boolean =
+        evaluate(enabled, world, zone, heroHp, heroMaxHp).reason == AutoBossReason.START
+
+    /** Same rules as [shouldStart] but says why the boss does not start (for the HUD hint and tests). */
+    fun evaluate(enabled: Boolean, world: WorldState, zone: Zone, heroHp: Int, heroMaxHp: Int): AutoBossDecision {
+        if (!enabled) return AutoBossDecision(AutoBossReason.OFF)
+        if (Zones.next(zone) == null) return AutoBossDecision(AutoBossReason.LAST_ZONE)
+        if (WorldProgress.isBossDefeated(world, zone)) return AutoBossDecision(AutoBossReason.BOSS_DEFEATED)
+        val missing = WorldProgress.BOSS_KILLS_REQUIRED - WorldProgress.killsTowardsBoss(world, zone)
+        if (!WorldProgress.canChallengeBoss(world, zone)) return AutoBossDecision(AutoBossReason.KILLS, missing.coerceAtLeast(1L))
+        val kills = world.zoneKills[zone.id] ?: 0L
+        if (kills < blockedUntilKills) return AutoBossDecision(AutoBossReason.COOLDOWN, blockedUntilKills - kills)
+        if (heroMaxHp <= 0 || heroHp < MIN_HP_FRACTION * heroMaxHp) return AutoBossDecision(AutoBossReason.LOW_HP)
+        return AutoBossDecision(AutoBossReason.START)
     }
 
     companion object {
@@ -56,3 +65,8 @@ class AutoBossGate {
         const val PENALTY_MAX = 50L
     }
 }
+
+/** Why the auto-boss does (not) start. [remaining] = missing kills (KILLS) or cooldown kills (COOLDOWN). */
+enum class AutoBossReason { OFF, LAST_ZONE, BOSS_DEFEATED, KILLS, COOLDOWN, LOW_HP, START }
+
+data class AutoBossDecision(val reason: AutoBossReason, val remaining: Long = 0L)

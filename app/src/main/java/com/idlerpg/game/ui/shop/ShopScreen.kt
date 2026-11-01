@@ -182,10 +182,13 @@ fun ShopScreen() {
     }
 
     // Recomputes the candidates inside the update (loot may have dropped since the dialog opened).
-    fun bulkSell(rarities: Set<Rarity>, includeUpgrades: Boolean) {
+    fun bulkSell(rarities: Set<Rarity>) {
         scope.launch {
             var result: Shop.SellResult? = null
-            repository.update { s -> Shop.bulkSell(s, rarities, includeUpgrades).also { result = it }.state }
+            repository.update { s ->
+                val r = if (rarities.size == Rarity.entries.size) Shop.sellEverything(s) else Shop.bulkSell(s, rarities)
+                r.also { result = it }.state
+            }
             val r = result ?: return@launch
             if (r.count > 0) sound.play(Sfx.COIN)
             if (r.count > 0) toast(res.getQuantityString(R.plurals.shop_sold_many, r.count, r.count, fmt(r.gold)))
@@ -240,11 +243,10 @@ fun ShopScreen() {
     if (pendingSell != SELL_NONE) {
         val rarities = sellRarities(pendingSell)
         val everything = pendingSell == SELL_ALL
-        // "Alles verkaufen" takes upgrades along; the per-rarity sale keeps them.
-        val count = Shop.bulkSellCandidates(current, rarities, includeUpgrades = everything).size
-        val gold = Shop.bulkSellGold(current, rarities, includeUpgrades = everything)
+        val count = if (everything) current.equipment.inventory.size else Shop.bulkSellCandidates(current, rarities).size
+        val gold = if (everything) Shop.sellEverythingGold(current) else Shop.bulkSellGold(current, rarities)
         val kept = if (everything) 0 else Shop.keptUpgradeCount(current, rarities)
-        val soldUpgrades = if (everything) Shop.keptUpgradeCount(current, rarities) else 0
+        val upgrades = if (everything) Shop.upgradeCount(current) else 0
         val single = rarities.singleOrNull()
         AlertDialog(
             onDismissRequest = { pendingSell = SELL_NONE },
@@ -264,10 +266,10 @@ fun ShopScreen() {
                     )
                     Text(stringResource(R.string.shop_sell_keeps_equipped))
                     if (kept > 0) Text(pluralStringResource(R.plurals.shop_sell_keeps_upgrades, kept, kept))
-                    if (soldUpgrades > 0) {
+                    if (upgrades > 0) {
                         Text(
-                            pluralStringResource(R.plurals.shop_sell_includes_upgrades, soldUpgrades, soldUpgrades),
-                            color = BadColor,
+                            pluralStringResource(R.plurals.shop_sell_warn_upgrades, upgrades, upgrades),
+                            color = BadColor, fontWeight = FontWeight.Bold,
                         )
                     }
                     if (everything || (single != null && single >= Rarity.EPIC)) {
@@ -280,9 +282,9 @@ fun ShopScreen() {
                     enabled = count > 0,
                     onClick = {
                         pendingSell = SELL_NONE
-                        bulkSell(rarities, includeUpgrades = everything)
+                        bulkSell(rarities)
                     },
-                ) { Text(stringResource(R.string.shop_tab_sell), color = if (count > 0) BadColor else Color.Unspecified) }
+                ) { Text(stringResource(R.string.shop_tab_sell), color = if (count > 0) BadColor else Color.Unspecified, fontWeight = if (everything) FontWeight.Bold else null) }
             },
             dismissButton = {
                 TextButton(onClick = { pendingSell = SELL_NONE }) { Text(stringResource(R.string.shop_cancel)) }
@@ -527,7 +529,7 @@ private fun SellHeader(state: GameState, onSell: (Int) -> Unit) {
                 )
             }
             if (state.equipment.inventory.isNotEmpty()) {
-                Text(stringResource(R.string.shop_quicksell_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (groups.isNotEmpty()) Text(stringResource(R.string.shop_quicksell_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 groups.forEach { g ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(Modifier.size(12.dp).background(rarityColor(g.rarity), CircleShape))
@@ -544,9 +546,8 @@ private fun SellHeader(state: GameState, onSell: (Int) -> Unit) {
                         FilledTonalButton(onClick = { onSell(g.rarity.ordinal) }) { Text(stringResource(R.string.shop_tab_sell), maxLines = 1) }
                     }
                 }
-                val all = Rarity.entries.toSet()
-                val total = Shop.bulkSellCandidates(state, all, includeUpgrades = true).size
-                val gold = Shop.bulkSellGold(state, all, includeUpgrades = true)
+                val total = state.equipment.inventory.size
+                val gold = Shop.sellEverythingGold(state)
                 Button(
                     onClick = { onSell(SELL_ALL) },
                     modifier = Modifier.fillMaxWidth(),

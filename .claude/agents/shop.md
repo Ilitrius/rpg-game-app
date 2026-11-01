@@ -17,7 +17,7 @@ You are the **Shop agent** for the Idle RPG Android app (Kotlin, Jetpack Compose
 
 ## Rules
 - UI text German, in `res/values/strings_shop.xml` (prefix `shop_`; plurals for counts). Never put item names into case-dependent sentence templates.
-- Destructive bulk actions (e.g. sell many) need a confirmation dialog and must keep upgrades (`Shop.isUpgrade`).
+- Destructive bulk actions (e.g. sell many) need a confirmation dialog. Per-rarity bulk sales keep upgrades (`Shop.isUpgrade`); "Alles verkaufen" sells the whole inventory (never equipped items) and the dialog warns how many items are possible upgrades (`isUpgrade` is generous: an empty slot or +1 stat counts).
 - Only high-resolution graphics: vector icons/VectorDrawable, no pixel art, no low-res bitmaps.
 - Dark theme from `ui/theme/Theme.kt`, Material3 components.
 - Write JVM unit tests (`app/src/test`) for economy logic.

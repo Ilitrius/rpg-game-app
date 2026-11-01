@@ -16,7 +16,9 @@ import com.idlerpg.game.domain.character.TapStats
 import com.idlerpg.game.domain.combat.CombatRules
 import com.idlerpg.game.domain.combat.ComboTracker
 import com.idlerpg.game.domain.stats.Stats
+import com.idlerpg.game.domain.world.AutoBossDecision
 import com.idlerpg.game.domain.world.AutoBossGate
+import com.idlerpg.game.domain.world.AutoBossReason
 import com.idlerpg.game.ui.options.GameSettings
 import com.idlerpg.game.domain.world.BossOutcome
 import com.idlerpg.game.domain.world.Loot
@@ -82,6 +84,8 @@ data class AdventureUiState(
     val equippedWeapon: Item? = null,
     /** Auto-boss mode (device setting, see [AutoBossGate]). */
     val autoBoss: Boolean = false,
+    /** Why the auto-boss is waiting (HUD hint); OFF while the mode is off. */
+    val autoBossDecision: AutoBossDecision = AutoBossDecision(AutoBossReason.OFF),
     /** Daily reward or a goal is ready to claim (HUD hint). */
     val claimable: Boolean = false,
 ) {
@@ -116,6 +120,8 @@ sealed interface AdventureEvent {
     data class MonsterHit(val damage: Int) : AdventureEvent
     /** The player tapped the monster and dealt [hit] immediately (independent of the attack timer). */
     data class TapHit(val hit: Hit, val combo: Int = 0) : AdventureEvent
+    /** Tap without damage (monster dying/gone): only a small visual feedback. */
+    data object TapMiss : AdventureEvent
     data class Kill(val xp: Long, val gold: Long) : AdventureEvent
     /** The kill reward raised the hero's level (online only, never emitted for offline progress). */
     data object LevelUp : AdventureEvent
@@ -149,12 +155,16 @@ fun shouldShowWelcomeBack(reward: OfflineReward?): Boolean =
 
 /**
  * Applies a tap [hit] to the monster on screen. Returns the new state, or null if the tap does
- * nothing: no monster, monster not in [MonsterPhase.FIGHTING] (walking in, dying, gone), already
- * dead, hero defeated or travelling. Pure, so a fast second tap after the kill is ignored.
+ * no damage: no monster, monster dying/gone, already dead, hero defeated or travelling.
+ * While the monster is still [MonsterPhase.APPROACHING] the tap hits too and may kill it: [spawn]
+ * ends the approach as soon as the HP is 0, hands over to FIGHTING and [fight] returns KILL on its
+ * first pass, so there is still exactly one kill/boss-victory path (reward once, no double spawn).
+ * Pure, so a fast second tap after the kill is ignored.
  */
 fun applyTapHit(state: AdventureUiState, hit: Hit): AdventureUiState? {
     val m = state.monster ?: return null
-    if (state.phase != MonsterPhase.FIGHTING || m.hp <= 0L || state.defeated || state.travelingTo != null) return null
+    if (m.hp <= 0L || state.defeated || state.travelingTo != null) return null
+    if (state.phase != MonsterPhase.FIGHTING && state.phase != MonsterPhase.APPROACHING) return null
     return state.copy(monster = m.copy(hp = (m.hp - hit.damage).coerceAtLeast(0)))
 }
 
@@ -218,7 +228,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
 
     init {
         viewModelScope.launch {
-            settings.autoBossFlow.collect { on -> _ui.update { it.copy(autoBoss = on) } }
+            settings.autoBossFlow.collect { on -> _ui.update { withAutoBoss(it.copy(autoBoss = on)) } }
         }
         viewModelScope.launch {
             repository.state.collect { onGameState(it) }
@@ -253,7 +263,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
                 world = s.world,
                 claimable = hasClaimable(s, System.currentTimeMillis()),
                 equippedWeapon = s.equipment.equipped[EquipmentSlot.WEAPON],
-            )
+            ).let(::withAutoBoss)
         }
         statsReady.complete(Unit)
     }
@@ -306,15 +316,18 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
     fun onEnemyTapped(): Hit? {
         val hero = stats ?: return null
         if (!foreground) return null
-        val n = combo.register(SystemClock.elapsedRealtime())
-        val hit = TapStats.tapHit(hero, n)
+        val hit = TapStats.tapHit(hero, combo.peekNext(SystemClock.elapsedRealtime()))
         var applied = false
         _ui.update { st ->
             val n = applyTapHit(st, hit)
             applied = n != null
             n ?: st
         }
-        if (!applied) return null
+        if (!applied) {
+            _events.tryEmit(AdventureEvent.TapMiss)
+            return null
+        }
+        val n = combo.register(SystemClock.elapsedRealtime())
         statTaps++
         if (hit.damage > statHit) statHit = hit.damage
         _events.tryEmit(AdventureEvent.TapHit(hit, n))
@@ -417,7 +430,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
                 cur.phase == MonsterPhase.APPROACHING -> _ui.update { it.copy(phase = MonsterPhase.FIGHTING) }
             }
             when (fight(deadline = null)) {
-                FightResult.KILL -> { onKill(); maybeAutoBoss() }
+                FightResult.KILL -> { onKill(); maybeAutoBoss(); if (!bossRequested) restForAutoBoss() }
                 else -> onDefeat()
             }
         }
@@ -428,6 +441,18 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         val st = _ui.value
         if (st.bossFight || st.travelingTo != null || st.defeated) return
         if (autoBossGate.shouldStart(st.autoBoss, st.world, st.zone, currentHp(), st.heroMaxHp)) bossRequested = true
+    }
+
+    /**
+     * Auto-boss is ready except for the hero's HP: rest (regenerating, no new monster) instead of
+     * waiting for the next kill to re-check, which in practice rarely lands above 70 % HP.
+     */
+    private suspend fun restForAutoBoss() {
+        while (_ui.value.autoBossDecision.reason == AutoBossReason.LOW_HP && !_ui.value.defeated) {
+            waitWithRegen(250)
+            maybeAutoBoss()
+            if (bossRequested) return
+        }
     }
 
     private fun zoneKills(zone: Zone): Long = _ui.value.world.zoneKills[zone.id] ?: 0L
@@ -441,7 +466,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         _ui.update {
             it.copy(monster = MonsterUi(++spawnCounter, monster, monster.maxHp), phase = MonsterPhase.APPROACHING)
         }
-        waitWithRegen(CombatRules.APPROACH_MILLIS)
+        waitWithRegen(CombatRules.APPROACH_MILLIS) { (_ui.value.monster?.hp ?: 0L) <= 0L }
         _ui.update { it.copy(phase = MonsterPhase.FIGHTING) }
     }
 
@@ -625,15 +650,15 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         _ui.update { it.copy(defeated = false, phase = MonsterPhase.GONE, monster = null) }
     }
 
-    private suspend fun waitWithRegen(millis: Long) {
+    private suspend fun waitWithRegen(millis: Long, stopWhen: () -> Boolean = { false }) {
         val end = SystemClock.elapsedRealtime() + millis
         var last = SystemClock.elapsedRealtime()
         while (true) {
             val now = SystemClock.elapsedRealtime()
             stats?.let { regen(it, now - last) }
             last = now
-            if (now >= end) return
-            delay((end - now).coerceAtMost(100L))
+            if (now >= end || stopWhen()) return
+            withTimeoutOrNull((end - now).coerceIn(1L, 100L)) { wake.receive() }
         }
     }
 
@@ -645,6 +670,12 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     private fun publishHeroHp() {
-        _ui.update { it.copy(heroHp = currentHp()) }
+        _ui.update { withAutoBoss(it.copy(heroHp = currentHp())) }
+    }
+
+    /** Refreshes the auto-boss hint from the current state (pure read of the gate). */
+    private fun withAutoBoss(st: AdventureUiState): AdventureUiState {
+        val d = autoBossGate.evaluate(st.autoBoss, st.world, st.zone, st.heroHp, st.heroMaxHp)
+        return if (d == st.autoBossDecision) st else st.copy(autoBossDecision = d)
     }
 }
