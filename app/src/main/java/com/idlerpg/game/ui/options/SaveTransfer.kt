@@ -15,7 +15,6 @@ import com.idlerpg.game.domain.buffs.Buffs
 import com.idlerpg.game.domain.equipment.Enchanting
 import com.idlerpg.game.domain.equipment.Inventory
 import com.idlerpg.game.domain.equipment.ItemGenerator
-import com.idlerpg.game.domain.prestige.PrestigeBonuses
 import com.idlerpg.game.domain.prestige.Talents
 import com.idlerpg.game.domain.progress.Goals
 import com.idlerpg.game.domain.character.Progression
@@ -293,8 +292,7 @@ object SaveTransfer {
         }
 
         // Capacity is 40 + bought slots; the game auto-sells instead of overfilling.
-        // Prestige talent "slots" adds more on top (PrestigeBonuses.extraSlots).
-        val capacity = Inventory.capacity(state) + PrestigeBonuses.of(state).extraSlots
+        val capacity = Inventory.capacity(state) // already includes the prestige "slots" talent
         if (state.equipment.inventory.size > capacity) {
             return SaveError.OutOfRange(
                 SaveField.INVENTORY_SIZE, SaveLocation.Root, 0, capacity.toLong(), state.equipment.inventory.size.toLong(),
