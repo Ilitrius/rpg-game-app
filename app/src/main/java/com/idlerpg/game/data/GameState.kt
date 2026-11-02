@@ -26,6 +26,8 @@ data class GameState(
     val buffs: BuffState = BuffState(),
     /** Extra inventory slots bought with gold (0..[MAX_EXTRA_SLOTS]); capacity = 40 + this. */
     val inventoryExtraSlots: Int = 0,
+    /** Rebirth progress; survives a rebirth reset (domain/prestige). */
+    val prestige: PrestigeState = PrestigeState(),
 ) {
     companion object {
         const val SCHEMA_VERSION = 1
@@ -202,4 +204,26 @@ data class ActiveBuff(
     val magnitude: Double,
     val remainingMillis: Long,
     val source: String = "",
+)
+
+/**
+ * Rebirth (prestige) state, kept across resets.
+ *
+ * @property rebirths number of rebirths done
+ * @property souls unspent souls
+ * @property soulsSpentTotal souls ever spent on talents (respec refunds them)
+ * @property talents talent id -> level; plain string keys so unknown ids from newer saves are ignorable
+ * @property goldTalentLevels talent id -> levels of it that were bought with gold (<= 50 % of the level)
+ * @property bestZoneOrder highest zone order ever reached (0..100)
+ * @property bestLevel highest hero level ever reached (0..999)
+ */
+@Serializable
+data class PrestigeState(
+    val rebirths: Int = 0,
+    val souls: Long = 0,
+    val soulsSpentTotal: Long = 0,
+    val talents: Map<String, Int> = emptyMap(),
+    val goldTalentLevels: Map<String, Int> = emptyMap(),
+    val bestZoneOrder: Int = 0,
+    val bestLevel: Int = 0,
 )
