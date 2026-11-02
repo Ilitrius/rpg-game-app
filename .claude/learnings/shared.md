@@ -55,3 +55,7 @@
 
 ## Statistiken
 - [2026-10-28] Zähler ohne Extra-Schreibzugriffe: Gold in den reinen Reward-Funktionen (`applyKillReward`, `claim`) mitzählen, flüchtige Werte (Treffer, Taps, Spielzeit) im ViewModel sammeln und als State-Transform in den nächsten Beute-/Background-`repository.update` einhängen. Neue GameState-Felder brauchen `SaveField`/`SaveLocation` + Zeilen in `OptionsScreen` (`when` ist exhaustiv). Private Composable-Namen in `CharacterScreen` (z. B. `StatsCard`) beachten, sonst Namenskollision.
+
+## Release & Play Store
+- [2026-11-02] Der Closed Test läuft mit bezahltem Testanbieter (Testers Community). Dessen vorformulierte Produktionszugangs-Antworten behaupten Umsetzungen (Tutorial, "App bewerten", "App teilen"), die im Code fehlen. Fragebogen nur wahrheitsgemäß ausfüllen; offene Punkte stehen in `TODO.md` ("Tester-Feedback"). — **Warum:** falsche Angaben gefährden Produktionszugang und Entwicklerkonto.
+- [2026-11-02] Start-Dialoge (Offline-Willkommen, Backup-Erinnerung, Spendenbitte `DonationHint`, künftig Tutorial) nicht übereinanderlegen; Reihenfolge festlegen, Tutorial zuerst. — **Warum:** neue Nutzer sollen nicht mit Dialogen überfahren werden.
