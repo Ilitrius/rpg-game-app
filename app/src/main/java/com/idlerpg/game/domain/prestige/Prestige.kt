@@ -25,7 +25,12 @@ object PrestigeConfig {
     const val GATE_LEVEL = 80
     const val GATE_ZONE_ORDER = 20
 
-    /** souls = floor((level / LEVEL_DIVISOR)^LEVEL_EXPONENT + zoneOrder^ZONE_EXPONENT / ZONE_DIVISOR). */
+    /**
+     * souls = floor(SOUL_SCALE x ((level / LEVEL_DIVISOR)^LEVEL_EXPONENT + zoneOrder^ZONE_EXPONENT / ZONE_DIVISOR)).
+     * SOUL_SCALE 8 calibrated with PrestigeCalibrationTest: the gate payout (level ~115, zone 20) is ~120 souls,
+     * run 2 then needs ~55 % and run 6 ~28 % of the time of run 1.
+     */
+    const val SOUL_SCALE = 8.0
     const val LEVEL_DIVISOR = 50.0
     const val LEVEL_EXPONENT = 1.5
     const val ZONE_EXPONENT = 1.3
@@ -35,7 +40,7 @@ object PrestigeConfig {
     const val COST_EXPONENT = 1.4
 
     /** Gold price = soulCost x GOLD_PER_SOUL x (1 + rebirths). */
-    const val GOLD_PER_SOUL = 5000L
+    const val GOLD_PER_SOUL = 25_000L
 
     /** At most this share of a talent's levels may be bought with gold (goldLevels x 2 <= level). */
     const val MAX_GOLD_SHARE = 0.5
@@ -127,7 +132,7 @@ object Prestige {
         val z = zoneOrder.coerceIn(0, Zones.COUNT).toDouble()
         val v = (l / PrestigeConfig.LEVEL_DIVISOR).pow(PrestigeConfig.LEVEL_EXPONENT) +
             z.pow(PrestigeConfig.ZONE_EXPONENT) / PrestigeConfig.ZONE_DIVISOR
-        return floor(v).toLong()
+        return floor(v * PrestigeConfig.SOUL_SCALE).toLong()
     }
 
     /** Souls the rebirth would pay out right now (0 when locked). Equals the payout of [rebirth]. */
@@ -195,7 +200,7 @@ object Prestige {
     fun soulCost(talent: Talent, level: Int): Long =
         (talent.baseCost * (1.0 + level.coerceAtLeast(0)).pow(PrestigeConfig.COST_EXPONENT)).roundToLong().coerceAtLeast(1L)
 
-    /** Gold price of the next level: soulCost x 5000 x (1 + rebirths). */
+    /** Gold price of the next level: soulCost x GOLD_PER_SOUL x (1 + rebirths). */
     fun goldCost(talent: Talent, level: Int, rebirths: Int): Long {
         val per = soulCost(talent, level) * PrestigeConfig.GOLD_PER_SOUL
         val mult = 1L + rebirths.coerceAtLeast(0)

@@ -4,6 +4,8 @@ import com.idlerpg.game.data.GameState
 import com.idlerpg.game.domain.buffs.Buffs
 import com.idlerpg.game.domain.character.CombatStats
 import com.idlerpg.game.domain.character.Progression
+import com.idlerpg.game.domain.prestige.Prestige
+import com.idlerpg.game.domain.prestige.PrestigeBonuses
 import com.idlerpg.game.domain.world.MonsterStats
 import kotlin.math.ceil
 import com.idlerpg.game.domain.stats.Stats
@@ -59,9 +61,29 @@ object CombatRules {
         expectedSecondsToKill(hero, monster) * monster.dps
 
     /**
+     * Final XP for a base reward of [xp]: base x prestige XP bonus (permanent) x XP buff (temporary, only
+     * with [applyBuffs]), rounded once. Both are independent multipliers (never added twice).
+     */
+    fun rewardXp(state: GameState, xp: Long, applyBuffs: Boolean = false, applyPrestige: Boolean = true): Long =
+        Buffs.scale(xp.coerceAtLeast(0), multiplier(state, Buffs.XP, applyBuffs, applyPrestige, PrestigeBonuses::xp))
+
+    /** Final gold for a base reward of [gold], see [rewardXp]. */
+    fun rewardGold(state: GameState, gold: Long, applyBuffs: Boolean = false, applyPrestige: Boolean = true): Long =
+        Buffs.scale(gold.coerceAtLeast(0), multiplier(state, Buffs.GOLD, applyBuffs, applyPrestige, PrestigeBonuses::gold))
+
+    private fun multiplier(
+        state: GameState, buff: String, applyBuffs: Boolean, applyPrestige: Boolean, prestige: (PrestigeBonuses) -> Double,
+    ): Double {
+        val b = if (applyBuffs) Buffs.bonus(state, buff) else 1.0
+        val p = if (applyPrestige) prestige(PrestigeBonuses.of(state)) else 1.0
+        return b * p
+    }
+
+    /**
      * Grants the reward of [kills] killed monsters in [zoneId]: XP (with level-ups), gold,
-     * kill counters, and sets the last-active time to [nowMillis]. With [applyBuffs] the active XP/gold
-     * buffs multiply the reward (online only; offline progress ignores buffs).
+     * kill counters, and sets the last-active time to [nowMillis]. [xp]/[gold] are BASE values: the
+     * prestige bonus is applied here ([applyPrestige]; offline progress passes its already scaled
+     * numbers with false), active XP/gold buffs only with [applyBuffs] (online only).
      */
     fun applyKillReward(
         state: GameState,
@@ -71,13 +93,14 @@ object CombatRules {
         nowMillis: Long,
         kills: Long = 1,
         applyBuffs: Boolean = false,
+        applyPrestige: Boolean = true,
     ): GameState {
-        val xp = if (applyBuffs) Buffs.scale(xp.coerceAtLeast(0), Buffs.bonus(state, Buffs.XP)) else xp
-        val gold = if (applyBuffs) Buffs.scale(gold.coerceAtLeast(0), Buffs.bonus(state, Buffs.GOLD)) else gold
-        val leveled = Progression.applyXp(state, xp.coerceAtLeast(0))
+        val xp = rewardXp(state, xp, applyBuffs, applyPrestige)
+        val gold = rewardGold(state, gold, applyBuffs, applyPrestige)
+        val leveled = Progression.applyXp(state, xp)
         val w = state.world
-        return leveled.copy(
-            gold = state.gold + gold.coerceAtLeast(0),
+        val rewarded = leveled.copy(
+            gold = state.gold + gold,
             stats = Stats.addGold(state.stats, gold),
             world = w.copy(
                 totalKills = w.totalKills + kills,
@@ -85,5 +108,6 @@ object CombatRules {
                 lastActiveEpochMillis = nowMillis,
             ),
         )
+        return if (leveled.character.level > state.character.level) Prestige.trackBest(rewarded) else rewarded
     }
 }

@@ -7,6 +7,7 @@ import com.idlerpg.game.domain.character.Progression
 import com.idlerpg.game.domain.combat.CombatRules
 import com.idlerpg.game.domain.equipment.Inventory
 import com.idlerpg.game.domain.equipment.ItemGenerator
+import com.idlerpg.game.domain.prestige.PrestigeBonuses
 import kotlin.math.floor
 import kotlin.math.roundToLong
 import kotlin.random.Random
@@ -77,11 +78,12 @@ object OfflineProgress {
         val kills = floor(counted / 1000.0 / secondsPerKill * EFFICIENCY).toLong()
         if (kills <= 0) return OfflineReward(away, counted, 0, 0, 0, 0)
 
-        val xp = (kills * avg.xp).roundToLong()
-        val gold = (kills * avg.gold).roundToLong()
+        // Prestige bonus is part of the reward here (dialog shows the real numbers); apply() must not scale again.
+        val xp = CombatRules.rewardXp(state, (kills * avg.xp).roundToLong())
+        val gold = CombatRules.rewardGold(state, (kills * avg.gold).roundToLong())
         val levels = Progression.applyXp(state.character, xp).levelsGained
 
-        val dropCount = Loot.offlineDropCount(kills, Loot.dropChance(hero.totalStats.luck), random)
+        val dropCount = Loot.offlineDropCount(kills, Loot.dropChance(hero.totalStats.luck, PrestigeBonuses.of(state).drop), random)
         val items = List(dropCount) { ItemGenerator.roll(level, random) }
         val free = (Inventory.capacity(state) - state.equipment.inventory.size).coerceAtLeast(0)
         val sold = items.drop(free)
@@ -103,7 +105,7 @@ object OfflineProgress {
             return healed.copy(world = healed.world.copy(lastActiveEpochMillis = nowMillis))
         }
         var s = CombatRules.applyKillReward(
-            healed, reward.xp, reward.gold, healed.world.currentZoneId, nowMillis, reward.kills,
+            healed, reward.xp, reward.gold, healed.world.currentZoneId, nowMillis, reward.kills, applyPrestige = false,
         )
         reward.items.forEach { s = Inventory.tryAdd(s, it).state }
         return s

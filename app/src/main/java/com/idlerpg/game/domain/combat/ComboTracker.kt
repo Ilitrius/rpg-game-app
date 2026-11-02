@@ -4,10 +4,10 @@ import com.idlerpg.game.domain.character.TapStats
 
 /**
  * Counts taps in a row: a tap within [TapStats.COMBO_WINDOW_MILLIS] of the previous one continues
- * the combo, a longer pause restarts it. [register] returns the combo count to pass to
+ * the combo (window adjustable via [windowMillis], prestige combo talent), a longer pause restarts it. [register] returns the combo count to pass to
  * [TapStats.tapHit] (number of taps before this one, so the first tap has 0).
  */
-class ComboTracker(private val windowMillis: Long = TapStats.COMBO_WINDOW_MILLIS) {
+class ComboTracker(var windowMillis: Long = TapStats.COMBO_WINDOW_MILLIS) {
     private var count = 0
     private var lastTap = Long.MIN_VALUE
 

@@ -3,6 +3,7 @@ package com.idlerpg.game.domain.world
 import com.idlerpg.game.data.GameState
 import com.idlerpg.game.data.WorldState
 import com.idlerpg.game.domain.combat.CombatRules
+import com.idlerpg.game.domain.prestige.Prestige
 
 /** Result of a running boss fight, see [WorldProgress.bossOutcome]. */
 enum class BossOutcome { ONGOING, VICTORY, DEFEAT, TIMEOUT }
@@ -59,7 +60,7 @@ object WorldProgress {
         (limitMillis - elapsedMillis).coerceAtLeast(0L)
 
     /**
-     * Grants a boss victory in [zone]: XP/gold like a kill (counts as one zone kill), marks the boss
+     * Grants a boss victory in [zone]: XP/gold like a kill (with prestige/buff bonus, counts as one zone kill), marks the boss
      * as defeated, resets the boss kill counter, unlocks the next zone and moves the hero there
      * ([WorldState.currentZoneId]). The last zone has no successor: the hero stays, nothing unlocks.
      */
@@ -67,13 +68,13 @@ object WorldProgress {
         val rewarded = CombatRules.applyKillReward(state, xp, gold, zone.id, nowMillis, applyBuffs = applyBuffs)
         val w = rewarded.world
         val next = Zones.next(zone)
-        return rewarded.copy(
+        return Prestige.trackBest(rewarded.copy(
             world = w.copy(
                 currentZoneId = next?.id ?: w.currentZoneId,
                 defeatedBossIds = if (zone.id in w.defeatedBossIds) w.defeatedBossIds else w.defeatedBossIds + zone.id,
                 unlockedZoneIds = if (next == null || next.id in w.unlockedZoneIds) w.unlockedZoneIds else w.unlockedZoneIds + next.id,
                 bossDefeatedAtKills = w.bossDefeatedAtKills + (zone.id to (w.zoneKills[zone.id] ?: 0L)),
             ),
-        )
+        ))
     }
 }

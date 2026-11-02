@@ -13,6 +13,10 @@ object Rest {
     const val COST_IN_KILLS = 5.0
     const val MIN_COST = 5L
 
+    /** Free rest time after a defeat, shortened by the prestige rest talent ([restFactor] 0.5..1.0). */
+    fun freeRestMillis(restFactor: Double = 1.0): Long =
+        Math.round(FREE_REST_MILLIS * restFactor.coerceIn(0.5, 1.0))
+
     fun healCost(zone: Zone, heroLevel: Int): Long =
         (MonsterScaling.average(zone, heroLevel.coerceAtLeast(1)).gold * COST_IN_KILLS).roundToLong().coerceAtLeast(MIN_COST)
 

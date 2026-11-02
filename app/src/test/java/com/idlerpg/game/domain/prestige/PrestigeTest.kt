@@ -126,12 +126,12 @@ class PrestigeTest {
         for (l in 0..2000) { val v = Prestige.souls(l, 50); assertTrue(v >= prev); prev = v }
         prev = -1
         for (z in -5..200) { val v = Prestige.souls(500, z); assertTrue(v >= prev); prev = v }
-        assertTrue(Prestige.souls(Int.MAX_VALUE, Int.MAX_VALUE) in 1..1000)
+        assertTrue(Prestige.souls(Int.MAX_VALUE, Int.MAX_VALUE) in 1..2000)
         assertTrue(Prestige.souls(Int.MIN_VALUE, Int.MIN_VALUE) == 0L)
         val s = veteran(level = 150, zoneIdx = 40)
         val before = s.prestige.souls
         assertEquals(Prestige.soulsPreview(s), Prestige.rebirth(s, 1).prestige.souls - before)
-        assertEquals(14L, Prestige.souls(80, 20))
+        assertEquals(114L, Prestige.souls(80, 20))
     }
 
     @Test fun soulsSaturate() {
@@ -169,7 +169,7 @@ class PrestigeTest {
         s = Prestige.buyTalent(s, Talents.DAMAGE, PayWith.SOULS)               // lvl 1 (0 gold)
         val goldBefore = s.gold
         val price = Prestige.goldCost(t, 1, 1)
-        assertEquals(Prestige.soulCost(t, 1) * 5000 * 2, price)
+        assertEquals(Prestige.soulCost(t, 1) * PrestigeConfig.GOLD_PER_SOUL * 2, price)
         s = Prestige.buyTalent(s, Talents.DAMAGE, PayWith.GOLD)                // lvl 2 (1 gold) = 50 %
         assertEquals(goldBefore - price, s.gold)
         assertEquals(2, Prestige.level(s.prestige, Talents.DAMAGE))

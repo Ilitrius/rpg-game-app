@@ -3,8 +3,10 @@ package com.idlerpg.game.domain.world
 import com.idlerpg.game.data.GameState
 import com.idlerpg.game.data.Item
 import com.idlerpg.game.data.Rarity
+import com.idlerpg.game.domain.buffs.Buffs
 import com.idlerpg.game.domain.equipment.Inventory
 import com.idlerpg.game.domain.equipment.ItemGenerator
+import com.idlerpg.game.domain.prestige.PrestigeBonuses
 import kotlin.math.floor
 import kotlin.random.Random
 
@@ -35,6 +37,9 @@ object Loot {
         val base = (BASE_DROP_CHANCE + luck.coerceAtLeast(0) * DROP_CHANCE_PER_LUCK).coerceAtMost(MAX_DROP_CHANCE)
         return if (multiplier <= 1.0) base else (base * multiplier).coerceAtMost(MAX_DROP_CHANCE * 2)
     }
+
+    /** Drop multiplier for [rollDrop]: permanent prestige bonus x active drop buff (online). */
+    fun dropMultiplier(state: GameState): Double = PrestigeBonuses.of(state).drop * Buffs.bonus(state, Buffs.DROP)
 
     /** Rolls the drop of a regular monster of [monsterLevel]; null = nothing dropped. */
     fun rollDrop(monsterLevel: Int, luck: Int, random: Random = Random.Default, dropMultiplier: Double = 1.0): Item? =

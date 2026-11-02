@@ -111,4 +111,5 @@
     <string name="auto_boss_wait_last">letzte Zone</string>
     <string name="auto_boss_starting">startet…</string>
     <string name="claim_hint">Belohnung bereit</string>
+    <string name="souls_hint">Seelen ausgeben</string>
 </resources>

@@ -111,4 +111,5 @@
     <string name="auto_boss_wait_last">last zone</string>
     <string name="auto_boss_starting">starting…</string>
     <string name="claim_hint">Reward ready</string>
+    <string name="souls_hint">Souls to spend</string>
 </resources>

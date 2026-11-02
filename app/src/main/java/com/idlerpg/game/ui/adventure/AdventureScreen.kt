@@ -633,6 +633,16 @@ private fun HeroBlock(ui: AdventureUiState) {
                 )
             }
         }
+        if (ui.soulsSpendable) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 3.dp)) {
+                Box(Modifier.size(9.dp).clip(CircleShape).background(Color(0xFF7FB8FF)))
+                Spacer(Modifier.width(5.dp))
+                Text(
+                    stringResource(R.string.souls_hint),
+                    style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFFBBDCFF), shadow = hudShadow),
+                )
+            }
+        }
         Text(
             stringResource(R.string.hero_label, ui.heroName, ui.heroLevel),
             style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White, shadow = hudShadow),
