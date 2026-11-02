@@ -1,5 +1,6 @@
 package com.idlerpg.game.ui.adventure
 
+import com.idlerpg.game.ui.SheetBackButton
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -388,7 +389,10 @@ internal fun ZoneSheet(world: WorldState, current: Zone, onSelect: (Zone) -> Uni
                 .padding(horizontal = 16.dp)
                 .navigationBarsPadding(),
         ) {
-            Text(stringResource(R.string.zone_sheet_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.zone_sheet_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                SheetBackButton(onDismiss)
+            }
             Text(
                 stringResource(R.string.zone_sheet_subtitle),
                 style = MaterialTheme.typography.bodySmall,

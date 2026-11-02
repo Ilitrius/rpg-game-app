@@ -1,5 +1,6 @@
 package com.idlerpg.game.ui.equipment
 
+import com.idlerpg.game.ui.SheetBackBar
 import com.idlerpg.game.domain.equipment.effectiveBonus
 import com.idlerpg.game.domain.equipment.effectiveDamageMax
 import com.idlerpg.game.domain.equipment.effectiveDamageMin
@@ -509,6 +510,7 @@ private fun ItemDetailSheet(
                 .navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            SheetBackBar(onDismiss)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 ItemIcon(item, Modifier.size(112.dp))
                 Spacer(Modifier.width(16.dp))

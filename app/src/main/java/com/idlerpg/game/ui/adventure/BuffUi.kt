@@ -1,5 +1,6 @@
 package com.idlerpg.game.ui.adventure
 
+import com.idlerpg.game.ui.SheetBackButton
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -188,7 +189,10 @@ private fun DrawScope.drawBuffGlyph(type: String, s: Float) {
 internal fun BuffSheet(buffs: List<ActiveBuff>, onDismiss: () -> Unit) {
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState()) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp).navigationBarsPadding()) {
-            Text(stringResource(R.string.buff_sheet_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.buff_sheet_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                SheetBackButton(onDismiss)
+            }
             Text(
                 stringResource(R.string.buff_sheet_hint),
                 style = MaterialTheme.typography.bodySmall,

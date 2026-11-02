@@ -1,5 +1,6 @@
 package com.idlerpg.game.ui.character.prestige
 
+import com.idlerpg.game.ui.SheetBackButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -65,6 +66,7 @@ fun TalentTreeSheet(state: GameState, onDismiss: () -> Unit) {
                     Text(stringResource(R.string.prestige_tree_souls, nf.format(state.prestige.souls)), color = SoulBlue, style = MaterialTheme.typography.titleSmall)
                     Text(stringResource(R.string.prestige_tree_gold, nf.format(state.gold)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
+                SheetBackButton(onDismiss)
             }
             for (branch in TalentBranch.entries) {
                 Text(

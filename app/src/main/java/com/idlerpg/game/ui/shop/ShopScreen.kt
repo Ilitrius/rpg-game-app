@@ -1,5 +1,6 @@
 package com.idlerpg.game.ui.shop
 
+import com.idlerpg.game.ui.SheetBackBar
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -634,6 +635,7 @@ private fun ItemSheet(state: GameState, item: Item, mode: ShopMode, onDismiss: (
                 .navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            SheetBackBar(onDismiss)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 ItemIcon(item, Modifier.size(112.dp))
                 Spacer(Modifier.width(16.dp))
