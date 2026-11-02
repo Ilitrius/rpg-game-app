@@ -130,4 +130,12 @@
     <string name="options_backup_dialog_title">Back up your save?</string>
     <string name="options_backup_dialog_text">Your last backup was a while ago. Export your save under Options so it is not lost.</string>
     <string name="options_backup_dialog_ok">Got it</string>
+    <string name="options_rate_title">Rate &amp; share</string>
+    <string name="options_rate_description">Enjoying Idle RPG? A rating on the Play Store and telling your friends helps the game a lot.</string>
+    <string name="options_rate_button">Rate the app</string>
+    <string name="options_rate_unavailable">Play Store and browser not found.</string>
+    <string name="options_share_button">Share the app</string>
+    <string name="options_share_chooser">Share Idle RPG</string>
+    <string name="options_share_text">I\'m playing Idle RPG: your hero roams the land and defeats monsters automatically. Give it a try: %1$s</string>
+    <string name="options_share_unavailable">No app found to share with.</string>
 </resources>

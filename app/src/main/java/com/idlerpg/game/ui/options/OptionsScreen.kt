@@ -30,6 +30,8 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.OpenInBrowser
 import androidx.compose.material.icons.outlined.PrivacyTip
 import androidx.compose.material.icons.outlined.SaveAlt
+import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.Warning
@@ -214,6 +216,10 @@ fun OptionsScreen() {
                     (context as? android.app.Activity)?.recreate()
                 }
             })
+            RateShareCard(
+                onRate = { if (!AppLinks.openRating(context)) notify(context.getString(R.string.options_rate_unavailable)) },
+                onShare = { if (!AppLinks.share(context)) notify(context.getString(R.string.options_share_unavailable)) },
+            )
             DonateCard(
                 onDonate = {
                     try {
@@ -284,6 +290,25 @@ fun OptionsScreen() {
                 TextButton(onClick = { showPrivacySummary = false }) { Text(stringResource(R.string.options_error_ok)) }
             },
         )
+    }
+}
+
+@Composable
+private fun RateShareCard(onRate: () -> Unit, onShare: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            SectionHeader(Icons.Outlined.StarOutline, stringResource(R.string.options_rate_title))
+            Text(
+                stringResource(R.string.options_rate_description),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            ActionButton(Icons.Outlined.StarOutline, stringResource(R.string.options_rate_button), primary = false, onClick = onRate)
+            ActionButton(Icons.Outlined.Share, stringResource(R.string.options_share_button), primary = false, onClick = onShare)
+        }
     }
 }
 

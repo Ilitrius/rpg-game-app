@@ -1,6 +1,6 @@
 # App-Plan: Idle RPG
 
-Stand: 2026-10-30 · Entwurf auf Basis des Ist-Zustands im Repo (aktueller Build: 0.1.0-rc15, versionCode 15) (Annahmen sind markiert). Rechtliches = Orientierung, keine Rechtsberatung.
+Stand: 2026-10-30 · Entwurf auf Basis des Ist-Zustands im Repo (aktueller Build: 0.1.0-rc16, versionCode 16) (Annahmen sind markiert). Rechtliches = Orientierung, keine Rechtsberatung.
 
 ## 1. Vision & Ziele
 - **App-Name:** Idle RPG (applicationId `com.rp.IDLEGAMERP`)

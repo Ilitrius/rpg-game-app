@@ -138,4 +138,12 @@
     <string name="options_backup_dialog_title">Spielstand sichern?</string>
     <string name="options_backup_dialog_text">Deine letzte Sicherung ist lange her. Exportiere deinen Spielstand unter Optionen, damit er nicht verloren geht.</string>
     <string name="options_backup_dialog_ok">Verstanden</string>
+    <string name="options_rate_title">Bewerten &amp; teilen</string>
+    <string name="options_rate_description">Gefällt dir Idle RPG? Eine Bewertung im Play Store und das Weitersagen an Freunde helfen dem Spiel sehr.</string>
+    <string name="options_rate_button">App bewerten</string>
+    <string name="options_rate_unavailable">Play Store und Browser nicht gefunden.</string>
+    <string name="options_share_button">App teilen</string>
+    <string name="options_share_chooser">Idle RPG teilen</string>
+    <string name="options_share_text">Ich spiele Idle RPG: Dein Held zieht automatisch durch die Lande und besiegt Monster. Probier es aus: %1$s</string>
+    <string name="options_share_unavailable">Keine App zum Teilen gefunden.</string>
 </resources>

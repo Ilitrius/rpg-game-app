@@ -4,10 +4,10 @@ Quelle der Ablehnung: Programmrichtlinien + Play-Console-Anforderungen. Genauen 
 
 ## Im Code behoben
 - Spenden-Button mit externem Stripe-Link: war entfernt, wurde in rc8 bewusst wieder eingebaut und bleibt (Entscheidung 2026-10-29; in den Datenschutztexten offengelegt). Bei erneuter Ablehnung zuerst die Payments-Richtlinie (externe Zahlungslinks in der App) prüfen.
-- Splash-Screen (AndroidX SplashScreen) und Versionsanzeige (Optionen → „Über Idle RPG“) ab rc10 (aktuell rc15).
+- Splash-Screen (AndroidX SplashScreen) und Versionsanzeige (Optionen → „Über Idle RPG“) ab rc10 (aktuell rc16).
 
 - `allowBackup="false"` (Spielstand wird nicht in Google Drive gesichert → "nur lokal" in der Datenschutzerklärung stimmt).
-- versionCode 15 / `0.1.0-rc15` für den Neueinreichungs-Build.
+- versionCode 16 / `0.1.0-rc16` (neu: Optionen → „Bewerten & teilen“) für den Neueinreichungs-Build.
 - Policy-Basis: https://play.google/developer-content-policy/ (das ist die Richtlinie, **keine** Datenschutzerklärungs-URL).
 
 ## Datenschutzerklärung
