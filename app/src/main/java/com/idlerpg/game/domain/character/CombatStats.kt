@@ -1,9 +1,13 @@
 package com.idlerpg.game.domain.character
 
+import com.idlerpg.game.domain.equipment.effectiveBonus
+import com.idlerpg.game.domain.equipment.effectiveDamageMax
+import com.idlerpg.game.domain.equipment.effectiveDamageMin
 import com.idlerpg.game.data.EquipmentSlot
 import com.idlerpg.game.data.GameState
 import com.idlerpg.game.data.Item
 import com.idlerpg.game.data.Stats
+import com.idlerpg.game.domain.prestige.PrestigeBonuses
 import kotlin.math.floor
 import kotlin.random.Random
 
@@ -104,17 +108,49 @@ data class CombatStats(
 
         /** Sum of base stats and the bonuses of every equipped item. */
         fun totalStats(base: Stats, equipped: Collection<Item>): Stats =
-            equipped.fold(base) { acc, item -> acc + item.bonus }
+            equipped.fold(base) { acc, item -> acc + item.effectiveBonus }
 
         /** Sum of the bonuses of every equipped item. */
         fun equipmentBonus(equipped: Collection<Item>): Stats = totalStats(Stats(), equipped)
 
-        /** Convenience: combat values for the hero in [state]. */
-        fun of(state: GameState): CombatStats = compute(
-            base = state.character.stats,
-            level = state.character.level,
-            equipped = state.equipment.equipped.values,
+        /**
+         * Like [of], but with the active damage buff applied (live online combat only; shop/equipment
+         * comparisons and offline progress use the buff-free [of]).
+         */
+        fun live(state: GameState): CombatStats {
+            val base = of(state)
+            val m = com.idlerpg.game.domain.buffs.Buffs.bonus(state, com.idlerpg.game.domain.buffs.Buffs.DAMAGE)
+            if (m <= 1.0) return base
+            val min = floor(base.damageMin * m).toInt().coerceAtLeast(1)
+            return base.copy(damageMin = min, damageMax = floor(base.damageMax * m).toInt().coerceAtLeast(min))
+        }
+
+        /** Convenience: combat values for the hero in [state], incl. permanent prestige talents. */
+        fun of(state: GameState): CombatStats = withPrestige(
+            compute(
+                base = state.character.stats,
+                level = state.character.level,
+                equipped = state.equipment.equipped.values,
+            ),
+            PrestigeBonuses.of(state),
         )
+
+        /**
+         * Applies the rebirth talents to [c]: damage, HP, crit multiplier; attack speed (still capped at
+         * [MAX_ATTACKS_PER_SECOND]: the attack animation cannot go faster). Neutral bonuses return [c].
+         */
+        fun withPrestige(c: CombatStats, b: PrestigeBonuses): CombatStats {
+            if (b.isNeutral) return c
+            val min = floor(c.damageMin * b.damage).toInt().coerceAtLeast(c.damageMin)
+            val max = floor(c.damageMax * b.damage).toInt().coerceAtLeast(min)
+            return c.copy(
+                damageMin = min,
+                damageMax = max,
+                attacksPerSecond = (c.attacksPerSecond * b.speed).coerceAtMost(MAX_ATTACKS_PER_SECOND).coerceAtLeast(c.attacksPerSecond),
+                maxHp = floor(c.maxHp * b.hp).toInt().coerceAtLeast(c.maxHp),
+                critMultiplier = (c.critMultiplier + b.critBonus).coerceAtMost(MAX_CRIT_MULTIPLIER + b.critBonus),
+            )
+        }
 
         /**
          * Computes all derived values.
@@ -128,8 +164,8 @@ data class CombatStats(
         fun compute(base: Stats, level: Int, equipped: Collection<Item>): CombatStats {
             val total = totalStats(base, equipped)
             val weapon = equipped.firstOrNull { it.slot == EquipmentSlot.WEAPON && it.damageMax > 0 }
-            val weaponMin = weapon?.damageMin?.coerceAtLeast(0) ?: FIST_DAMAGE_MIN
-            val weaponMax = weapon?.damageMax ?: FIST_DAMAGE_MAX
+            val weaponMin = weapon?.effectiveDamageMin?.coerceAtLeast(0) ?: FIST_DAMAGE_MIN
+            val weaponMax = weapon?.effectiveDamageMax ?: FIST_DAMAGE_MAX
             val strengthBonus = floor(total.strength.coerceAtLeast(0) * DAMAGE_PER_STRENGTH).toInt()
             val min = (weaponMin + strengthBonus).coerceAtLeast(1)
             val max = (weaponMax + strengthBonus).coerceAtLeast(min)

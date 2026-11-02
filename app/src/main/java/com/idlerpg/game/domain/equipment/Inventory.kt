@@ -2,6 +2,7 @@ package com.idlerpg.game.domain.equipment
 
 import com.idlerpg.game.data.EquipmentSlot
 import com.idlerpg.game.data.GameState
+import com.idlerpg.game.domain.prestige.PrestigeBonuses
 import com.idlerpg.game.data.Item
 import com.idlerpg.game.data.Stats
 import com.idlerpg.game.domain.character.CombatStats
@@ -36,8 +37,51 @@ enum class InventoryFill {
  */
 object Inventory {
 
-    /** Maximum number of items in the inventory (equipped items don't count). */
+    /** Base number of inventory slots (equipped items don't count); see [capacity] for the real limit. */
     const val CAPACITY = 40
+
+    /** Slots added per expansion step (40 -> 60 -> 80 -> 100). */
+    const val EXPANSION_STEP = 20
+
+    /**
+     * Real capacity: [CAPACITY] + bought extra slots (clamped to 0..[GameState.MAX_EXTRA_SLOTS])
+     * + prestige talent slots. Talent slots do not count towards the bought limit ([canExpand]).
+     */
+    fun capacity(state: GameState): Int =
+        CAPACITY + state.inventoryExtraSlots.coerceIn(0, GameState.MAX_EXTRA_SLOTS) +
+            PrestigeBonuses.of(state).extraSlots.coerceAtLeast(0)
+
+    /** Whether another expansion step can be bought. */
+    fun canExpand(state: GameState): Boolean = state.inventoryExtraSlots < GameState.MAX_EXTRA_SLOTS
+
+    /**
+     * Gold price of the next expansion step, null when maxed out. `(300 + 60 × heroLevel) × 3^step`,
+     * so it scales with progress (level) and triples per step.
+     */
+    fun expansionCost(state: GameState): Long? {
+        if (!canExpand(state)) return null
+        val step = state.inventoryExtraSlots.coerceAtLeast(0) / EXPANSION_STEP
+        var cost = 300L + 60L * state.character.level.coerceAtLeast(1)
+        repeat(step) { cost *= 3 }
+        return cost
+    }
+
+    enum class ExpandOutcome { OK, MAX, NOT_ENOUGH_GOLD }
+
+    data class ExpandResult(val state: GameState, val outcome: ExpandOutcome)
+
+    /** Buys the next expansion step (+[EXPANSION_STEP] slots) atomically. */
+    fun expand(state: GameState): ExpandResult {
+        val cost = expansionCost(state) ?: return ExpandResult(state, ExpandOutcome.MAX)
+        if (state.gold < cost) return ExpandResult(state, ExpandOutcome.NOT_ENOUGH_GOLD)
+        return ExpandResult(
+            state.copy(
+                gold = state.gold - cost,
+                inventoryExtraSlots = (state.inventoryExtraSlots + EXPANSION_STEP).coerceAtMost(GameState.MAX_EXTRA_SLOTS),
+            ),
+            ExpandOutcome.OK,
+        )
+    }
 
     /**
      * Result of [tryAdd].
@@ -52,10 +96,10 @@ object Inventory {
      */
     const val NEARLY_FULL_FREE_SLOTS = 5
 
-    fun isFull(state: GameState): Boolean = state.equipment.inventory.size >= CAPACITY
+    fun isFull(state: GameState): Boolean = state.equipment.inventory.size >= capacity(state)
 
     /** Free inventory slots (never negative, even for an over-full imported save). */
-    fun freeSlots(state: GameState): Int = (CAPACITY - state.equipment.inventory.size).coerceAtLeast(0)
+    fun freeSlots(state: GameState): Int = (capacity(state) - state.equipment.inventory.size).coerceAtLeast(0)
 
     /** Fill level for the capacity warning; [InventoryFill.FULL] exactly when [isFull]. */
     fun fill(state: GameState): InventoryFill = when {
@@ -66,7 +110,7 @@ object Inventory {
 
     /** Occupied share of the inventory in 0..1 (for the capacity bar). */
     fun fillFraction(state: GameState): Float =
-        (state.equipment.inventory.size.toFloat() / CAPACITY).coerceIn(0f, 1f)
+        (state.equipment.inventory.size.toFloat() / capacity(state)).coerceIn(0f, 1f)
 
     /**
      * Adds [item] to the inventory, marked as new. If the inventory is full, the item is sold
@@ -150,16 +194,17 @@ object Inventory {
 
     /** Differences [item] − [equipped] (an empty slot counts as all zeros). */
     fun compare(item: Item, equipped: Item?): ItemComparison {
-        val other = equipped?.bonus ?: Stats()
+        val other = equipped?.effectiveBonus ?: Stats()
+        val mine = item.effectiveBonus
         return ItemComparison(
             stats = Stats(
-                strength = item.bonus.strength - other.strength,
-                dexterity = item.bonus.dexterity - other.dexterity,
-                vitality = item.bonus.vitality - other.vitality,
-                luck = item.bonus.luck - other.luck,
+                strength = mine.strength - other.strength,
+                dexterity = mine.dexterity - other.dexterity,
+                vitality = mine.vitality - other.vitality,
+                luck = mine.luck - other.luck,
             ),
-            damageMin = item.damageMin - (equipped?.damageMin ?: 0),
-            damageMax = item.damageMax - (equipped?.damageMax ?: 0),
+            damageMin = item.effectiveDamageMin - (equipped?.effectiveDamageMin ?: 0),
+            damageMax = item.effectiveDamageMax - (equipped?.effectiveDamageMax ?: 0),
         )
     }
 

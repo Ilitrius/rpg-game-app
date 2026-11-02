@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="prestige_title">Wiedergeburt</string>
+    <string name="prestige_subtitle">Beginne von vorn und werde mit Seelen dauerhaft stärker.</string>
+    <string name="prestige_locked">Gesperrt bis Level %1$d und Gebiet %2$d</string>
+    <string name="prestige_gate_level">Level %1$d / %2$d</string>
+    <string name="prestige_gate_zone">Gebiet %1$d / %2$d</string>
+    <string name="prestige_souls_have">Seelen: %1$s</string>
+    <string name="prestige_rebirths">Wiedergeburten: %1$s</string>
+    <string name="prestige_preview">Bei Wiedergeburt: +%1$s Seelen</string>
+    <string name="prestige_open_rebirth">Wiedergeburt</string>
+    <string name="prestige_open_talents">Talente</string>
+
+    <string name="prestige_dialog_title">Wiedergeburt</string>
+    <string name="prestige_dialog_souls">Du erhältst %1$s Seelen</string>
+    <string name="prestige_dialog_lose_title">Geht verloren</string>
+    <string name="prestige_dialog_lose">Level, Stat-Punkte, Ausrüstung und Inventar, Gold, Shop-Angebote, Gebiete und Bosse, aktive Verstärkungen</string>
+    <string name="prestige_dialog_keep_title">Bleibt erhalten</string>
+    <string name="prestige_dialog_keep">Seelen und Talente, Statistiken, Tagesbelohnung und Ziele, gekaufte Inventarplätze, Einstellungen</string>
+    <string name="prestige_dialog_start">Du startest mit Level %1$d auf der Wiese und erhältst einen neuen Startdolch.</string>
+    <string name="prestige_dialog_backup">Spielstand sichern</string>
+    <string name="prestige_dialog_backup_done">Gesichert.</string>
+    <string name="prestige_dialog_backup_failed">Sichern fehlgeschlagen.</string>
+    <string name="prestige_dialog_continue">Weiter</string>
+    <string name="prestige_dialog_cancel">Abbrechen</string>
+    <string name="prestige_confirm_title">Wirklich neu beginnen?</string>
+    <string name="prestige_confirm_text">Das lässt sich nicht rückgängig machen. Tippe zur Bestätigung auf den Knopf.</string>
+    <string name="prestige_confirm_go">Jetzt wiedergeboren werden</string>
+    <string name="prestige_done">Wiedergeboren: +%1$s Seelen</string>
+
+    <string name="prestige_tree_title">Talente</string>
+    <string name="prestige_tree_souls">Seelen: %1$s</string>
+    <string name="prestige_tree_gold">Gold: %1$s</string>
+    <string name="prestige_tree_respec">Zurücksetzen (gratis)</string>
+    <string name="prestige_tree_respec_hint">Alle Talente zurücksetzen. Ausgegebene Seelen kommen vollständig zurück, Gold nicht.</string>
+    <string name="prestige_tree_close">Schließen</string>
+    <string name="prestige_tree_level">Stufe %1$d / %2$d</string>
+    <string name="prestige_buy_souls">%1$s Seelen</string>
+    <string name="prestige_buy_gold">%1$s Gold</string>
+    <string name="prestige_buy_max">Maximal</string>
+    <string name="prestige_buy_gold_limit">Höchstens die Hälfte der Stufen per Gold</string>
+
+    <string name="prestige_branch_progress">Fortschritt</string>
+    <string name="prestige_branch_combat">Kampf</string>
+    <string name="prestige_branch_loot">Beute und Klick</string>
+
+    <string name="talent_xp">Erfahrung</string>
+    <string name="talent_xp_desc">+%1$s EP pro Stufe</string>
+    <string name="talent_gold">Wohlstand</string>
+    <string name="talent_gold_desc">+%1$s Gold pro Stufe</string>
+    <string name="talent_start_level">Erbe</string>
+    <string name="talent_start_level_desc">+%1$s Start-Level pro Stufe</string>
+    <string name="talent_rest">Zähigkeit</string>
+    <string name="talent_rest_desc">%1$s kürzere Rast nach Niederlage pro Stufe</string>
+    <string name="talent_damage">Kraft</string>
+    <string name="talent_damage_desc">+%1$s Schaden pro Stufe</string>
+    <string name="talent_speed">Eile</string>
+    <string name="talent_speed_desc">+%1$s Angriffstempo pro Stufe</string>
+    <string name="talent_hp">Härte</string>
+    <string name="talent_hp_desc">+%1$s Lebenspunkte pro Stufe</string>
+    <string name="talent_crit">Präzision</string>
+    <string name="talent_crit_desc">+%1$s Krit-Multiplikator pro Stufe</string>
+    <string name="talent_drop">Fortuna</string>
+    <string name="talent_drop_desc">+%1$s Beutechance pro Stufe</string>
+    <string name="talent_slots">Rucksack</string>
+    <string name="talent_slots_desc">+%1$s Inventarplätze pro Stufe</string>
+    <string name="talent_click">Fingerfertigkeit</string>
+    <string name="talent_click_desc">+%1$s Klick-Schaden pro Stufe</string>
+    <string name="talent_combo">Rhythmus</string>
+    <string name="talent_combo_desc">+%1$s Combo-Zeitfenster pro Stufe</string>
+</resources>

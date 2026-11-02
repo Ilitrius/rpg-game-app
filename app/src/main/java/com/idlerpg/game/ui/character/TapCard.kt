@@ -20,7 +20,7 @@ import java.util.Locale
 
 /** Tap damage overview: damage range, click multiplier, max combo. */
 @Composable
-fun TapCard(combat: CombatStats, modifier: Modifier = Modifier) {
+fun TapCard(combat: CombatStats, modifier: Modifier = Modifier, clickBonus: Double = 1.0) {
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
@@ -35,8 +35,8 @@ fun TapCard(combat: CombatStats, modifier: Modifier = Modifier) {
                 stringResource(R.string.character_tap_damage),
                 stringResource(
                     R.string.character_tap_damage_value,
-                    TapStats.minTapDamage(combat),
-                    TapStats.maxTapDamage(combat),
+                    TapStats.minTapDamage(combat, 0, clickBonus),
+                    TapStats.maxTapDamage(combat, 0, clickBonus),
                 ),
             )
             TapRow(

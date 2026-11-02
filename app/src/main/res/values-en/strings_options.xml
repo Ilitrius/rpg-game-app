@@ -141,4 +141,26 @@
     <string name="options_help_title">Help</string>
     <string name="options_help_description">The short introduction explains combat, zones, stat points, gear and the shop.</string>
     <string name="options_help_replay">Show introduction again</string>
+
+    <string name="options_field_enchant_level">enchant level</string>
+    <string name="options_field_extra_slots">extra inventory slots</string>
+    <string name="options_field_inventory_size">inventory (item count)</string>
+    <string name="options_field_buff_magnitude">buff strength</string>
+    <string name="options_field_buff_remaining">buff remaining time (ms)</string>
+    <string name="options_location_buff">buff %1$d (%2$s)</string>
+    <string name="options_error_out_of_range_decimal">“%1$s” (%2$s) must be between %3$s and %4$s, found: %5$s</string>
+    <string name="options_note_extra_slots">Extra inventory slots (%1$d) are not a multiple of 20 and will be rounded up to %2$d.</string>
+    <string name="options_note_unknown_buffs">Unknown buffs will be removed: %1$d</string>
+    <string name="options_note_buffs_trimmed">Too many buffs: %1$d surplus will be removed (max. %2$d).</string>
+    <string name="options_location_prestige">Rebirth</string>
+    <string name="options_location_prestige_talent">Rebirth, talent “%1$s”</string>
+    <string name="options_field_rebirths">Rebirths</string>
+    <string name="options_field_souls">Souls</string>
+    <string name="options_field_souls_spent">Souls spent (total)</string>
+    <string name="options_field_talent_level">Talent level</string>
+    <string name="options_field_gold_talent_level">Talent levels bought with gold</string>
+    <string name="options_field_best_zone">Best zone number</string>
+    <string name="options_field_best_level">Best hero level</string>
+    <string name="options_note_unknown_talents">Unknown talents will be removed: %1$d</string>
+    <string name="options_note_gold_talents">%1$d talents had more than half of their levels bought with gold; they will be reduced to the allowed share.</string>
 </resources>

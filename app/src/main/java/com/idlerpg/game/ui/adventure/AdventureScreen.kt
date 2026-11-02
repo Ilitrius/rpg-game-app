@@ -141,6 +141,7 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
     val loot = remember { mutableStateListOf<LootDrop>() }
     var banner by remember { mutableStateOf<BannerMessage?>(null) }
     var showZones by remember { mutableStateOf(false) }
+    var showBuffs by remember { mutableStateOf(false) }
     // Last tap position as alignment bias (-1..1) for the floating damage number.
     var tapPoint by remember { mutableStateOf<Offset?>(null) }
 
@@ -355,6 +356,7 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
         Hud(
             ui, monsterName,
             onZoneClick = { showZones = true },
+            onBuffsClick = { showBuffs = true },
             onChallengeBoss = {
                 sound.play(Sfx.BOSS_START)
                 vm.challengeBoss()
@@ -373,11 +375,12 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
         banner?.let { b -> key(b) { BossBanner(b) { if (banner == b) banner = null } } }
 
         AnimatedVisibility(ui.defeated, enter = fadeIn(tween(300)), exit = fadeOut(tween(500))) {
-            DefeatOverlay()
+            DefeatOverlay(ui.healCost, ui.gold >= ui.healCost, vm::healNow)
         }
         TravelOverlay(ui.travelingTo)
     }
 
+    if (showBuffs) BuffSheet(ui.buffs) { showBuffs = false }
     if (showZones) {
         ZoneSheet(
             world = ui.world,
@@ -490,6 +493,7 @@ private fun Hud(
     ui: AdventureUiState,
     monsterName: String,
     onZoneClick: () -> Unit,
+    onBuffsClick: () -> Unit,
     onChallengeBoss: () -> Unit,
     onToggleAutoBoss: () -> Unit,
     loot: @Composable () -> Unit,
@@ -538,6 +542,9 @@ private fun Hud(
                 tint = Color(0xFFD8D2C0), modifier = Modifier.padding(start = 2.dp).size(22.dp),
             )
         }
+
+        // Active buffs (left edge below the zone label; clear of monster and weapon).
+        BuffBar(ui.buffs, onBuffsClick, Modifier.align(Alignment.TopStart).padding(top = 80.dp))
 
         // Boss challenge (top-right).
         AnimatedVisibility(
@@ -623,6 +630,16 @@ private fun HeroBlock(ui: AdventureUiState) {
                 Text(
                     stringResource(R.string.claim_hint),
                     style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFFE08A), shadow = hudShadow),
+                )
+            }
+        }
+        if (ui.soulsSpendable) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 3.dp)) {
+                Box(Modifier.size(9.dp).clip(CircleShape).background(Color(0xFF7FB8FF)))
+                Spacer(Modifier.width(5.dp))
+                Text(
+                    stringResource(R.string.souls_hint),
+                    style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFFBBDCFF), shadow = hudShadow),
                 )
             }
         }
@@ -811,7 +828,7 @@ private fun FloatingLabel(f: FloatText, onDone: () -> Unit) {
 // ------------------------------------------------------------------ overlays
 
 @Composable
-private fun DefeatOverlay() {
+private fun DefeatOverlay(healCost: Long, canAfford: Boolean, onHeal: () -> Unit) {
     Box(
         Modifier
             .fillMaxSize()
@@ -834,6 +851,29 @@ private fun DefeatOverlay() {
             Text(
                 stringResource(R.string.defeated_subtitle),
                 style = TextStyle(fontSize = 16.sp, color = Color(0xFFE8DCCB), shadow = hudShadow),
+            )
+            Spacer(Modifier.height(20.dp))
+            val price = String.format(Locale.getDefault(), "%,d", healCost)
+            if (canAfford) {
+                Text(
+                    stringResource(R.string.rest_heal_button, price),
+                    style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2B1D05)),
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(Brush.verticalGradient(listOf(Color(0xFFFFE69A), Color(0xFFD9962B))))
+                        .clickable(onClick = onHeal)
+                        .padding(horizontal = 22.dp, vertical = 12.dp),
+                )
+            } else {
+                Text(
+                    stringResource(R.string.rest_heal_no_gold, price),
+                    style = TextStyle(fontSize = 14.sp, color = Color(0xFFB9B3A2), shadow = hudShadow),
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(
+                stringResource(R.string.rest_free_hint),
+                style = TextStyle(fontSize = 13.sp, color = Color(0xFFB9B3A2), shadow = hudShadow),
             )
         }
     }

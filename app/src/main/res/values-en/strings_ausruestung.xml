@@ -120,4 +120,15 @@
         <item>of the Stars</item>
         <item>of the Storm King</item>
     </string-array>
+    <string name="equipment_forge_title">Refine</string>
+    <string name="equipment_enchant_level">Enchant +%1$d / %2$d (+4 %% values per level)</string>
+    <string name="equipment_enchant_badge">+%1$d</string>
+    <string name="equipment_action_enchant">Enchant to +%1$d (%2$s gold)</string>
+    <string name="equipment_enchant_max">Fully enchanted</string>
+    <string name="equipment_action_reroll">Reroll bonuses (%1$s gold)</string>
+    <string name="equipment_reroll_hint">Total strength stays the same, only the distribution changes.</string>
+    <string name="equipment_not_enough_gold">Not enough gold.</string>
+    <string name="equipment_expand_title">Expand inventory</string>
+    <string name="equipment_expand_body">+%1$d slots (to %2$d). Each step costs three times as much.</string>
+    <string name="equipment_expand_max">Fully expanded (%1$d slots).</string>
 </resources>

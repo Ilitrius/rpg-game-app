@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="prestige_title">Rebirth</string>
+    <string name="prestige_subtitle">Start over and grow permanently stronger with souls.</string>
+    <string name="prestige_locked">Locked until level %1$d and zone %2$d</string>
+    <string name="prestige_gate_level">Level %1$d / %2$d</string>
+    <string name="prestige_gate_zone">Zone %1$d / %2$d</string>
+    <string name="prestige_souls_have">Souls: %1$s</string>
+    <string name="prestige_rebirths">Rebirths: %1$s</string>
+    <string name="prestige_preview">On rebirth: +%1$s souls</string>
+    <string name="prestige_open_rebirth">Rebirth</string>
+    <string name="prestige_open_talents">Talents</string>
+
+    <string name="prestige_dialog_title">Rebirth</string>
+    <string name="prestige_dialog_souls">You will gain %1$s souls</string>
+    <string name="prestige_dialog_lose_title">Will be lost</string>
+    <string name="prestige_dialog_lose">Level, stat points, equipment and inventory, gold, shop offers, zones and bosses, active boosts</string>
+    <string name="prestige_dialog_keep_title">Is kept</string>
+    <string name="prestige_dialog_keep">Souls and talents, statistics, daily reward and goals, bought inventory slots, settings</string>
+    <string name="prestige_dialog_start">You start at level %1$d in the meadow with a new starter dagger.</string>
+    <string name="prestige_dialog_backup">Back up save</string>
+    <string name="prestige_dialog_backup_done">Backed up.</string>
+    <string name="prestige_dialog_backup_failed">Backup failed.</string>
+    <string name="prestige_dialog_continue">Continue</string>
+    <string name="prestige_dialog_cancel">Cancel</string>
+    <string name="prestige_confirm_title">Really start over?</string>
+    <string name="prestige_confirm_text">This cannot be undone. Tap the button to confirm.</string>
+    <string name="prestige_confirm_go">Be reborn now</string>
+    <string name="prestige_done">Reborn: +%1$s souls</string>
+
+    <string name="prestige_tree_title">Talents</string>
+    <string name="prestige_tree_souls">Souls: %1$s</string>
+    <string name="prestige_tree_gold">Gold: %1$s</string>
+    <string name="prestige_tree_respec">Reset (free)</string>
+    <string name="prestige_tree_respec_hint">Resets all talents. Spent souls are fully refunded, gold is not.</string>
+    <string name="prestige_tree_close">Close</string>
+    <string name="prestige_tree_level">Level %1$d / %2$d</string>
+    <string name="prestige_buy_souls">%1$s souls</string>
+    <string name="prestige_buy_gold">%1$s gold</string>
+    <string name="prestige_buy_max">Maxed</string>
+    <string name="prestige_buy_gold_limit">At most half the levels can be bought with gold</string>
+
+    <string name="prestige_branch_progress">Progress</string>
+    <string name="prestige_branch_combat">Combat</string>
+    <string name="prestige_branch_loot">Loot and tapping</string>
+
+    <string name="talent_xp">Experience</string>
+    <string name="talent_xp_desc">+%1$s XP per level</string>
+    <string name="talent_gold">Wealth</string>
+    <string name="talent_gold_desc">+%1$s gold per level</string>
+    <string name="talent_start_level">Heritage</string>
+    <string name="talent_start_level_desc">+%1$s starting level per level</string>
+    <string name="talent_rest">Resilience</string>
+    <string name="talent_rest_desc">%1$s shorter rest after defeat per level</string>
+    <string name="talent_damage">Might</string>
+    <string name="talent_damage_desc">+%1$s damage per level</string>
+    <string name="talent_speed">Haste</string>
+    <string name="talent_speed_desc">+%1$s attack speed per level</string>
+    <string name="talent_hp">Toughness</string>
+    <string name="talent_hp_desc">+%1$s hit points per level</string>
+    <string name="talent_crit">Precision</string>
+    <string name="talent_crit_desc">+%1$s crit multiplier per level</string>
+    <string name="talent_drop">Fortune</string>
+    <string name="talent_drop_desc">+%1$s loot chance per level</string>
+    <string name="talent_slots">Backpack</string>
+    <string name="talent_slots_desc">+%1$s inventory slots per level</string>
+    <string name="talent_click">Nimble fingers</string>
+    <string name="talent_click_desc">+%1$s tap damage per level</string>
+    <string name="talent_combo">Rhythm</string>
+    <string name="talent_combo_desc">+%1$s combo window per level</string>
+</resources>

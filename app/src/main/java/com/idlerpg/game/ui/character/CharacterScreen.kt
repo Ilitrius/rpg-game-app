@@ -1,5 +1,8 @@
 package com.idlerpg.game.ui.character
 
+import com.idlerpg.game.domain.equipment.effectiveBonus
+import com.idlerpg.game.domain.equipment.effectiveDamageMax
+import com.idlerpg.game.domain.equipment.effectiveDamageMin
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -108,8 +111,9 @@ fun CharacterScreen() {
             scope.launch { repository.update { Progression.spendPoint(it, type) } }
         }
         DerivedCard(combat)
+        com.idlerpg.game.ui.character.prestige.PrestigeCard(current)
         GoalsCard(current)
-        TapCard(combat)
+        TapCard(combat, clickBonus = TapStats.clickBonus(current))
         StatisticsCard(current)
     }
 }
@@ -243,8 +247,8 @@ private fun WeaponCard(weapon: Item?, combat: CombatStats) {
                         )
                     }
                 }
-                val baseMin = weapon?.damageMin?.takeIf { weapon.damageMax > 0 } ?: CombatStats.FIST_DAMAGE_MIN
-                val baseMax = weapon?.damageMax?.takeIf { it > 0 } ?: CombatStats.FIST_DAMAGE_MAX
+                val baseMin = weapon?.effectiveDamageMin?.takeIf { weapon.damageMax > 0 } ?: CombatStats.FIST_DAMAGE_MIN
+                val baseMax = weapon?.effectiveDamageMax?.takeIf { it > 0 } ?: CombatStats.FIST_DAMAGE_MAX
                 Text(
                     stringResource(R.string.character_weapon_damage, baseMin, baseMax),
                     style = MaterialTheme.typography.bodyLarge,
@@ -263,7 +267,7 @@ private fun WeaponCard(weapon: Item?, combat: CombatStats) {
 private fun bonusLine(item: Item): String {
     val parts = buildList {
         StatType.entries.forEach { t ->
-            val v = item.bonus[t]
+            val v = item.effectiveBonus[t]
             if (v != 0) add("${if (v > 0) "+" else ""}$v ${stringResource(statLabel(t))}")
         }
     }

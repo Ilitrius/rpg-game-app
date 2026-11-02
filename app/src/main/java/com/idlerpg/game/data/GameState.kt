@@ -22,9 +22,16 @@ data class GameState(
     val progress: ProgressState = ProgressState(),
     /** Lifetime statistics (playtime, best hit, ...). Written by the adventure loop, shown in the Charakter tab. */
     val stats: StatsState = StatsState(),
+    /** Active timed buffs (domain/buffs). Runtime counts active play time only. */
+    val buffs: BuffState = BuffState(),
+    /** Extra inventory slots bought with gold (0..[MAX_EXTRA_SLOTS]); capacity = 40 + this. */
+    val inventoryExtraSlots: Int = 0,
+    /** Rebirth progress; survives a rebirth reset (domain/prestige). */
+    val prestige: PrestigeState = PrestigeState(),
 ) {
     companion object {
         const val SCHEMA_VERSION = 1
+        const val MAX_EXTRA_SLOTS = 60
     }
 }
 
@@ -85,6 +92,8 @@ data class Item(
      * the German name as fallback.
      */
     val nameSpec: String = "",
+    /** Enchant level 0..10 bought with gold (+4 % item values per level, see domain/equipment). */
+    val enchantLevel: Int = 0,
 )
 
 @Serializable
@@ -176,4 +185,45 @@ data class StatsState(
     val highestHit: Long = 0,
     val goldEarned: Long = 0,
     val tapCount: Long = 0,
+)
+
+/** Active buffs. [ActiveBuff.type] is a plain string ("damage","xp","gold","drop","regen","click"); unknown types are ignored. */
+@Serializable
+data class BuffState(
+    val active: List<ActiveBuff> = emptyList(),
+)
+
+/**
+ * @property magnitude bonus factor, 0.25 = +25 %
+ * @property remainingMillis remaining ACTIVE play time (not wall-clock; offline/background never ticks)
+ * @property source "elixir", "daily", "goal" or "boss"
+ */
+@Serializable
+data class ActiveBuff(
+    val type: String,
+    val magnitude: Double,
+    val remainingMillis: Long,
+    val source: String = "",
+)
+
+/**
+ * Rebirth (prestige) state, kept across resets.
+ *
+ * @property rebirths number of rebirths done
+ * @property souls unspent souls
+ * @property soulsSpentTotal souls ever spent on talents (respec refunds them)
+ * @property talents talent id -> level; plain string keys so unknown ids from newer saves are ignorable
+ * @property goldTalentLevels talent id -> levels of it that were bought with gold (<= 50 % of the level)
+ * @property bestZoneOrder highest zone order ever reached (0..100)
+ * @property bestLevel highest hero level ever reached (0..999)
+ */
+@Serializable
+data class PrestigeState(
+    val rebirths: Int = 0,
+    val souls: Long = 0,
+    val soulsSpentTotal: Long = 0,
+    val talents: Map<String, Int> = emptyMap(),
+    val goldTalentLevels: Map<String, Int> = emptyMap(),
+    val bestZoneOrder: Int = 0,
+    val bestLevel: Int = 0,
 )

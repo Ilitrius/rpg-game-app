@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="buff_damage">damage</string>
+    <string name="buff_xp">XP</string>
+    <string name="buff_gold">gold</string>
+    <string name="buff_drop">loot chance</string>
+    <string name="buff_regen">regeneration</string>
+    <string name="buff_click">tap power</string>
+    <string name="buff_line">+%1$d %% %2$s</string>
+    <string name="buff_source_elixir">Elixir</string>
+    <string name="buff_source_daily">Daily reward</string>
+    <string name="buff_source_goal">Goal</string>
+    <string name="buff_source_boss">Boss victory</string>
+    <string name="buff_bar_desc">Active effects, tap for details</string>
+    <string name="buff_sheet_title">Active effects</string>
+    <string name="buff_sheet_hint">Time only runs while you play. Effects pause offline and in the background.</string>
+    <string name="buff_sheet_empty">No active effects.</string>
+    <string name="rest_heal_button">Heal now (%1$s gold)</string>
+    <string name="rest_heal_no_gold">Not enough gold to heal now (%1$s)</string>
+    <string name="rest_free_hint">or rest a moment – free</string>
+</resources>

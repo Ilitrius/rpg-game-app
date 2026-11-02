@@ -131,4 +131,15 @@
         <item>der Sterne</item>
         <item>des Sturmkönigs</item>
     </string-array>
+    <string name="equipment_forge_title">Veredeln</string>
+    <string name="equipment_enchant_level">Verzauberung +%1$d / %2$d (+4 %% Werte je Stufe)</string>
+    <string name="equipment_enchant_badge">+%1$d</string>
+    <string name="equipment_action_enchant">Verzaubern auf +%1$d (%2$s Gold)</string>
+    <string name="equipment_enchant_max">Maximal verzaubert</string>
+    <string name="equipment_action_reroll">Boni neu würfeln (%1$s Gold)</string>
+    <string name="equipment_reroll_hint">Gesamtstärke bleibt gleich, nur die Verteilung ändert sich.</string>
+    <string name="equipment_not_enough_gold">Nicht genug Gold.</string>
+    <string name="equipment_expand_title">Inventar erweitern</string>
+    <string name="equipment_expand_body">+%1$d Plätze (auf %2$d). Jede Stufe kostet das Dreifache.</string>
+    <string name="equipment_expand_max">Maximal erweitert (%1$d Plätze).</string>
 </resources>
