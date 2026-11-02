@@ -26,7 +26,7 @@ Quelle: bezahlter Testanbieter, Reports `rp_feedback_de.pdf` + `rp_production_de
 - [ ] Visuelle Verbesserungen: laufend, Grafik-Regel aus `CLAUDE.md` gilt.
 
 ## Offen: Lint
-- [ ] `lintDebug` scheitert an 2 älteren Fehlern (nicht aus rc16): `InvalidFragmentVersionForActivityResult` in `update/InAppUpdater.kt:56` (androidx.fragment >= 1.3.0 als Abhängigkeit ergänzen) und `MissingTranslation` für `app_name` (in `values-en` ergänzen oder `translatable="false"`).
+- [x] `lintDebug` grün (rc16): `androidx.fragment:fragment-ktx` 1.8.5 ergänzt (Play app-update zog altes Fragment, `InAppUpdater` braucht >= 1.3.0 für die ActivityResult-API); `app_name` als `translatable="false"` (Markenname, gleich in DE/EN).
 - [x] rc16: Sprach-Split im App Bundle abgeschaltet (`bundle.language.enableSplit = false`), sonst fehlt bei Play-Installationen die zweite Sprache für die Sprachwahl in den Optionen (Lint `AppBundleLocaleChanges`).
 
 ## Später geplant (Ideen, noch nicht umgesetzt)

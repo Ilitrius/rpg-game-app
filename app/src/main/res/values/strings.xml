@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Idle RPG</string>
+    <string name="app_name" translatable="false">Idle RPG</string>
     <string name="tab_character">Charakter</string>
     <string name="tab_equipment">Ausrüstung</string>
     <string name="tab_options">Optionen</string>
