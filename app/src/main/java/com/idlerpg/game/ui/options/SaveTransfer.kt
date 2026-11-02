@@ -1,5 +1,7 @@
 package com.idlerpg.game.ui.options
 
+import com.idlerpg.game.data.ActiveBuff
+import com.idlerpg.game.data.BuffState
 import com.idlerpg.game.data.EquipmentSlot
 import com.idlerpg.game.data.GameJson
 import com.idlerpg.game.data.GameState
@@ -8,6 +10,9 @@ import com.idlerpg.game.data.ProgressState
 import com.idlerpg.game.data.StatsState
 import com.idlerpg.game.data.ShopState
 import com.idlerpg.game.data.WorldState
+import com.idlerpg.game.domain.buffs.Buffs
+import com.idlerpg.game.domain.equipment.Enchanting
+import com.idlerpg.game.domain.equipment.Inventory
 import com.idlerpg.game.domain.equipment.ItemGenerator
 import com.idlerpg.game.domain.progress.Goals
 import com.idlerpg.game.domain.world.Zones
@@ -56,6 +61,11 @@ enum class SaveField(val key: String) {
     STATS_HIGHEST_HIT("highestHit"),
     STATS_GOLD_EARNED("goldEarned"),
     STATS_TAP_COUNT("tapCount"),
+    ENCHANT_LEVEL("enchantLevel"),
+    INVENTORY_EXTRA_SLOTS("inventoryExtraSlots"),
+    INVENTORY_SIZE("inventory"),
+    BUFF_MAGNITUDE("magnitude"),
+    BUFF_REMAINING("remainingMillis"),
 }
 
 /** Where a rejected value sits in the save, so the error message can point the player to it. */
@@ -107,6 +117,9 @@ sealed interface SaveLocation {
     /** Lifetime statistics (`stats`). */
     data object Stats : SaveLocation
 
+    /** Active buff number [position] (1-based) of type [type]. */
+    data class Buff(val position: Int, val type: String) : SaveLocation
+
     /** Goal entry number [position] (1-based) with catalog id [goalId]. */
     data class ProgressGoal(val position: Int, val goalId: String) : SaveLocation
 }
@@ -131,6 +144,9 @@ sealed interface SaveError {
      * Item damage range is reversed (`damageMin` > `damageMax`). Never produced by the game; combat
      * would silently collapse it to the minimum, so the save was edited or is corrupt.
      */
+    /** Decimal [field] (e.g. buff `magnitude`) lies outside [min]..[max] or is not a number. */
+    data class DecimalOutOfRange(val field: SaveField, val location: SaveLocation, val min: Double, val max: Double, val found: Double) : SaveError
+
     data class DamageRangeReversed(val location: SaveLocation, val damageMin: Int, val damageMax: Int) : SaveError
 
     data class SlotMismatch(val slotKey: String, val itemSlot: String) : SaveError
@@ -149,6 +165,15 @@ sealed interface ImportNote {
 
     /** [count] goals of unknown type/id (newer app version or edited file) were removed. */
     data class UnknownGoalsDropped(val count: Int) : ImportNote
+
+    /** `inventoryExtraSlots` was not a multiple of 20; rounded up to [to] (the game only sells steps of 20). */
+    data class ExtraSlotsRounded(val from: Int, val to: Int) : ImportNote
+
+    /** [count] buffs of unknown type were removed. */
+    data class UnknownBuffsDropped(val count: Int) : ImportNote
+
+    /** [count] buffs beyond the maximum of [max] were cut off. */
+    data class BuffsTrimmed(val count: Int, val max: Int) : ImportNote
 }
 
 sealed interface ImportResult {
@@ -222,6 +247,12 @@ object SaveTransfer {
             SaveField.LUCK to c.stats.luck.toLong(),
         ).firstOrNull { it.second < 0 }?.let { return SaveError.NegativeValue(it.first, SaveLocation.Character) }
         if (state.gold < 0) return SaveError.NegativeValue(SaveField.GOLD, SaveLocation.Root)
+        if (state.inventoryExtraSlots !in 0..GameState.MAX_EXTRA_SLOTS) {
+            return SaveError.OutOfRange(
+                SaveField.INVENTORY_EXTRA_SLOTS, SaveLocation.Root, 0, GameState.MAX_EXTRA_SLOTS.toLong(),
+                state.inventoryExtraSlots.toLong(),
+            )
+        }
 
         // Equipped items in slot order (deterministic, independent of the key order in the file).
         val equipped = state.equipment.equipped
@@ -234,10 +265,19 @@ object SaveTransfer {
             validateItem(item, SaveLocation.InventoryItem(i + 1, shortName(item.name)).withItem(item))?.let { return it }
         }
 
+        // Capacity is 40 + bought slots; the game auto-sells instead of overfilling.
+        val capacity = Inventory.capacity(state)
+        if (state.equipment.inventory.size > capacity) {
+            return SaveError.OutOfRange(
+                SaveField.INVENTORY_SIZE, SaveLocation.Root, 0, capacity.toLong(), state.equipment.inventory.size.toLong(),
+            )
+        }
+
         validateWorld(state.world)?.let { return it }
         validateShop(state.shop)?.let { return it }
         validateProgress(state.progress)?.let { return it }
         validateStats(state.stats)?.let { return it }
+        validateBuffs(state.buffs)?.let { return it }
         return null
     }
 
@@ -268,7 +308,34 @@ object SaveTransfer {
             notes += ImportNote.UnknownGoalsDropped(goals.size - known.size)
             result = result.copy(progress = result.progress.copy(goals = known))
         }
+        // Extra slots come in steps of 20; round up so the inventory (checked against the raw value) still fits.
+        val extra = result.inventoryExtraSlots
+        if (extra % Inventory.EXPANSION_STEP != 0) {
+            val to = ((extra / Inventory.EXPANSION_STEP + 1) * Inventory.EXPANSION_STEP).coerceAtMost(GameState.MAX_EXTRA_SLOTS)
+            notes += ImportNote.ExtraSlotsRounded(extra, to)
+            result = result.copy(inventoryExtraSlots = to)
+        }
+        val buffs = result.buffs.active
+        val knownBuffs = buffs.filter { Buffs.isKnown(it.type) }
+        if (knownBuffs.size != buffs.size) notes += ImportNote.UnknownBuffsDropped(buffs.size - knownBuffs.size)
+        val keptBuffs = knownBuffs.take(Buffs.MAX_BUFFS)
+        if (keptBuffs.size != knownBuffs.size) notes += ImportNote.BuffsTrimmed(knownBuffs.size - keptBuffs.size, Buffs.MAX_BUFFS)
+        if (keptBuffs.size != buffs.size) result = result.copy(buffs = BuffState(keptBuffs))
         return result to notes
+    }
+
+    /** Known buffs among the first [Buffs.MAX_BUFFS] (the rest is dropped by [normalize]) must be in range. */
+    private fun validateBuffs(b: BuffState): SaveError? {
+        b.active.filter { Buffs.isKnown(it.type) }.take(Buffs.MAX_BUFFS).forEachIndexed { i, buff: ActiveBuff ->
+            val loc = SaveLocation.Buff(i + 1, shortName(buff.type))
+            if (!(buff.magnitude in 0.0..Buffs.MAX_BONUS)) {
+                return SaveError.DecimalOutOfRange(SaveField.BUFF_MAGNITUDE, loc, 0.0, Buffs.MAX_BONUS, buff.magnitude)
+            }
+            if (buff.remainingMillis !in 0..Buffs.MAX_DURATION_MILLIS) {
+                return SaveError.OutOfRange(SaveField.BUFF_REMAINING, loc, 0, Buffs.MAX_DURATION_MILLIS, buff.remainingMillis)
+            }
+        }
+        return null
     }
 
     /** [name] cut to [MAX_NAME_LENGTH] characters (with "…") for error messages. */
@@ -283,6 +350,9 @@ object SaveTransfer {
         if (item.damageMax < 0) return SaveError.NegativeValue(SaveField.DAMAGE_MAX, location)
         // 0..0 = no weapon damage (legacy items, armor); min == max is a fixed-damage weapon.
         if (item.damageMin > item.damageMax) return SaveError.DamageRangeReversed(location, item.damageMin, item.damageMax)
+        if (item.enchantLevel !in 0..Enchanting.MAX_LEVEL) {
+            return SaveError.OutOfRange(SaveField.ENCHANT_LEVEL, location, 0, Enchanting.MAX_LEVEL.toLong(), item.enchantLevel.toLong())
+        }
         if (item.itemLevel !in 1..ItemGenerator.MAX_ITEM_LEVEL) {
             return SaveError.OutOfRange(
                 SaveField.ITEM_LEVEL, location, 1, ItemGenerator.MAX_ITEM_LEVEL.toLong(), item.itemLevel.toLong(),

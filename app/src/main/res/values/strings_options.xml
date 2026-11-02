@@ -138,4 +138,14 @@
     <string name="options_backup_dialog_title">Spielstand sichern?</string>
     <string name="options_backup_dialog_text">Deine letzte Sicherung ist lange her. Exportiere deinen Spielstand unter Optionen, damit er nicht verloren geht.</string>
     <string name="options_backup_dialog_ok">Verstanden</string>
+    <string name="options_field_enchant_level">Verzauberungsstufe</string>
+    <string name="options_field_extra_slots">Zusatz-Inventarplätze</string>
+    <string name="options_field_inventory_size">Inventar (Anzahl Gegenstände)</string>
+    <string name="options_field_buff_magnitude">Buff-Stärke</string>
+    <string name="options_field_buff_remaining">Buff-Restdauer (ms)</string>
+    <string name="options_location_buff">Buff %1$d (%2$s)</string>
+    <string name="options_error_out_of_range_decimal">“%1$s” (%2$s) muss zwischen %3$s und %4$s liegen, gefunden: %5$s</string>
+    <string name="options_note_extra_slots">Zusatz-Inventarplätze (%1$d) sind kein Vielfaches von 20 und werden auf %2$d aufgerundet.</string>
+    <string name="options_note_unknown_buffs">Unbekannte Buffs werden entfernt: %1$d</string>
+    <string name="options_note_buffs_trimmed">Zu viele Buffs: %1$d überzählige werden entfernt (max. %2$d).</string>
 </resources>

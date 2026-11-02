@@ -664,6 +664,14 @@ private fun errorMessage(context: Context, error: SaveError): String = when (err
             error.field.key, fieldLabel(context, error.field), error.min, error.max, error.found,
         ),
     )
+    is SaveError.DecimalOutOfRange -> invalidAt(
+        context,
+        error.location,
+        context.getString(
+            R.string.options_error_out_of_range_decimal,
+            error.field.key, fieldLabel(context, error.field), error.min.toString(), error.max.toString(), error.found.toString(),
+        ),
+    )
     is SaveError.DamageRangeReversed -> invalidAt(
         context,
         error.location,
@@ -695,6 +703,7 @@ private fun locationText(context: Context, location: SaveLocation): String? = wh
     SaveLocation.Shop -> context.getString(R.string.options_location_shop)
     SaveLocation.Progress -> context.getString(R.string.options_location_progress)
     SaveLocation.Stats -> context.getString(R.string.statistik_location)
+    is SaveLocation.Buff -> context.getString(R.string.options_location_buff, location.position, location.type)
     is SaveLocation.ProgressGoal ->
         context.getString(R.string.options_location_progress_goal, location.position, location.goalId)
 }
@@ -738,6 +747,11 @@ private fun fieldLabel(context: Context, field: SaveField): String = context.get
         SaveField.STATS_HIGHEST_HIT -> R.string.statistik_field_highest_hit
         SaveField.STATS_GOLD_EARNED -> R.string.statistik_field_gold_earned
         SaveField.STATS_TAP_COUNT -> R.string.statistik_field_taps
+        SaveField.ENCHANT_LEVEL -> R.string.options_field_enchant_level
+        SaveField.INVENTORY_EXTRA_SLOTS -> R.string.options_field_extra_slots
+        SaveField.INVENTORY_SIZE -> R.string.options_field_inventory_size
+        SaveField.BUFF_MAGNITUDE -> R.string.options_field_buff_magnitude
+        SaveField.BUFF_REMAINING -> R.string.options_field_buff_remaining
     },
 )
 
@@ -767,6 +781,9 @@ private fun noteMessage(context: Context, note: ImportNote): String = when (note
         context.getString(Zones.byId(note.fallbackZoneId).nameRes()),
     )
     is ImportNote.UnknownGoalsDropped -> context.getString(R.string.options_note_unknown_goals, note.count)
+    is ImportNote.ExtraSlotsRounded -> context.getString(R.string.options_note_extra_slots, note.from, note.to)
+    is ImportNote.UnknownBuffsDropped -> context.getString(R.string.options_note_unknown_buffs, note.count)
+    is ImportNote.BuffsTrimmed -> context.getString(R.string.options_note_buffs_trimmed, note.count, note.max)
     is ImportNote.UnknownZonesIgnored -> {
         val shown = note.zoneIds.take(MAX_LISTED_ZONES)
             .joinToString(", ") { context.getString(R.string.options_quoted, SaveTransfer.shortName(it)) }

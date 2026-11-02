@@ -435,7 +435,7 @@ class SaveTransferValidationTest {
 
     @Test
     fun saveFieldKeysMatchTheJsonKeys() {
-        val json = SaveTransfer.encode(realisticFullSave(1))
+        val json = SaveTransfer.encode(realisticFullSave(1).copy(buffs = com.idlerpg.game.data.BuffState(listOf(buff()))))
         SaveField.entries.forEach { assertTrue("missing key ${it.key}", json.contains("\"${it.key}\":")) }
     }
 
@@ -547,5 +547,109 @@ class SaveTransferValidationTest {
         s = Goals.ensureActive(s)
         s = Goals.claim(s.copy(world = s.world.copy(totalKills = s.world.totalKills + 1_000)), "kills_25")
         return s.copy(world = s.world.copy(heroHp = 0))
+    }
+
+    // ------------------------------------------------------------------ enchanting, extra slots, buffs
+
+    private fun buff(type: String = "damage", magnitude: Double = 0.25, remaining: Long = 60_000) =
+        com.idlerpg.game.data.ActiveBuff(type, magnitude, remaining)
+
+    private fun GameState.withBuffs(vararg b: com.idlerpg.game.data.ActiveBuff) =
+        copy(buffs = com.idlerpg.game.data.BuffState(b.toList()))
+
+    @Test
+    fun enchantLevelRangeIsChecked() {
+        assertEquals(10, accepted(base.withWeapon { it.copy(enchantLevel = 10, price = it.price * 3) }).state.equipment.equipped[EquipmentSlot.WEAPON]!!.enchantLevel)
+        val err = rejected(base.withSecondInventoryItem { it.copy(enchantLevel = 11) })
+        assertEquals(SaveField.ENCHANT_LEVEL, (err as SaveError.OutOfRange).field)
+        assertTrue(err.location is SaveLocation.InventoryItem)
+        val eq = rejected(base.withWeapon { it.copy(enchantLevel = -1) })
+        assertTrue((eq as SaveError.OutOfRange).location is SaveLocation.EquippedItem)
+    }
+
+    @Test
+    fun enchantedPriceIsAccepted() {
+        val enchanted = base.withSecondInventoryItem { it.copy(enchantLevel = 10, price = it.price * 3) }
+        assertEquals(enchanted, accepted(enchanted).state)
+    }
+
+    @Test
+    fun extraSlotsOutOfRangeAreRejected() {
+        for (v in listOf(-1, 61, 1000)) {
+            val e = rejected(base.copy(inventoryExtraSlots = v)) as SaveError.OutOfRange
+            assertEquals(SaveField.INVENTORY_EXTRA_SLOTS, e.field)
+        }
+        for (v in listOf(0, 20, 40, 60)) assertEquals(v, accepted(base.copy(inventoryExtraSlots = v)).state.inventoryExtraSlots)
+    }
+
+    @Test
+    fun extraSlotsNotMultipleOf20AreRoundedUpWithNote() {
+        val r = accepted(base.copy(inventoryExtraSlots = 25))
+        assertEquals(40, r.state.inventoryExtraSlots)
+        assertTrue(r.notes.contains(ImportNote.ExtraSlotsRounded(25, 40)))
+        assertEquals(60, accepted(base.copy(inventoryExtraSlots = 59)).state.inventoryExtraSlots)
+    }
+
+    @Test
+    fun inventorySizeIsCheckedAgainstCapacity() {
+        fun items(n: Int) = List(n) { ring.copy(id = "r$it") }
+        fun withInv(n: Int, extra: Int) = base.copy(equipment = base.equipment.copy(inventory = items(n)), inventoryExtraSlots = extra)
+        assertEquals(40, accepted(withInv(40, 0)).state.equipment.inventory.size)
+        val e = rejected(withInv(41, 0)) as SaveError.OutOfRange
+        assertEquals(SaveField.INVENTORY_SIZE, e.field)
+        assertEquals(40L, e.max)
+        assertEquals(100, accepted(withInv(100, 60)).state.equipment.inventory.size)
+        rejected(withInv(101, 60))
+        // 45 items with 25 extra slots: capacity 65 (raw) fits, rounded to 40 extra stays >= 45
+        assertEquals(45, accepted(withInv(45, 25)).state.equipment.inventory.size)
+    }
+
+    @Test
+    fun validBuffsAreAcceptedUnchanged() {
+        val s = base.withBuffs(buff("damage"), buff("click", 1.0, 14_400_000), buff("regen", 0.0, 0))
+        val r = accepted(s)
+        assertEquals(s.buffs, r.state.buffs)
+        assertTrue(r.notes.isEmpty())
+    }
+
+    @Test
+    fun unknownBuffTypesAreDroppedWithNote() {
+        val r = accepted(base.withBuffs(buff("damage"), buff("mana"), buff("")))
+        assertEquals(listOf("damage"), r.state.buffs.active.map { it.type })
+        assertTrue(r.notes.contains(ImportNote.UnknownBuffsDropped(2)))
+        // an out-of-range value in an unknown buff doesn't reject, it is dropped
+        accepted(base.withBuffs(buff("mana", 50.0, -5)))
+    }
+
+    @Test
+    fun buffValuesOutOfRangeAreRejected() {
+        val m = rejected(base.withBuffs(buff(magnitude = 1.5))) as SaveError.DecimalOutOfRange
+        assertEquals(SaveField.BUFF_MAGNITUDE, m.field)
+        assertEquals(SaveLocation.Buff(1, "damage"), m.location)
+        assertTrue(rejected(base.withBuffs(buff(magnitude = -0.1))) is SaveError.DecimalOutOfRange)
+        val r = rejected(base.withBuffs(buff("xp"), buff(remaining = 14_400_001))) as SaveError.OutOfRange
+        assertEquals(SaveField.BUFF_REMAINING, r.field)
+        assertEquals(SaveLocation.Buff(2, "damage"), r.location)
+        assertTrue(rejected(base.withBuffs(buff(remaining = -1))) is SaveError.OutOfRange)
+    }
+
+    @Test
+    fun tooManyBuffsAreTrimmedWithNote() {
+        val types = listOf("damage", "xp", "gold", "drop", "regen", "click")
+        val many = (types + types).map { buff(it) }.toTypedArray()
+        val r = accepted(base.withBuffs(*many))
+        assertEquals(6, r.state.buffs.active.size)
+        assertTrue(r.notes.contains(ImportNote.BuffsTrimmed(6, 6)))
+    }
+
+    @Test
+    fun oldSaveWithoutNewFieldsStaysImportable() {
+        val json = com.idlerpg.game.data.GameJson.encode(base)
+        var obj = kotlinx.serialization.json.Json.parseToJsonElement(json) as kotlinx.serialization.json.JsonObject
+        obj = kotlinx.serialization.json.JsonObject(obj - "buffs" - "inventoryExtraSlots")
+        val r = SaveTransfer.parse(obj.toString())
+        assertTrue(r is ImportResult.Valid)
+        assertEquals(0, (r as ImportResult.Valid).state.inventoryExtraSlots)
+        assertTrue(r.state.buffs.active.isEmpty())
     }
 }
