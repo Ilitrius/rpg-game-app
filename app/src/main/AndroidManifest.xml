@@ -8,6 +8,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"
         android:theme="@style/Theme.IdleRPG">
+        <!-- Play Games Services: Projekt-ID aus der Play Console (res/values/games_ids.xml). -->
+        <meta-data
+            android:name="com.google.android.gms.games.APP_ID"
+            android:value="@string/game_services_project_id" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

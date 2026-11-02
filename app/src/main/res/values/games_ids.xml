@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Play Console > Spiel > Play Games Services > Konfiguration: numerische Projekt-ID eintragen. -->
+    <string name="game_services_project_id" translatable="false">000000000000</string>
+</resources>
