@@ -60,7 +60,7 @@ Zusätzlich `spielwelt`: Abenteuer-Ansicht (Ich-Perspektive), Gebiete, Monster, 
 - Git-Identität nur repo-lokal gesetzt (Ilitrius / rene.puf@gmail.com)
 
 ## Stand & nächste Schritte (Ende 2026-10-28)
-- Version `0.1.0-rc9` (versionCode 10), Branch `claude/elegant-heisenberg-prestige`, alles gepusht, Vollbuild + Unit-Tests grün (nur in der Cloud-Umgebung, nie auf Gerät/Emulator gesehen).
+- Version `0.1.0-rc17` (versionCode 17), Branch `claude/synchronisierung-9eed30` (Merge aus rc16-Tutorial/Teilen, Play Games, Prestige + Zurück-Pfeil `ui/SheetBackButton` in allen Bottom-Sheets); im Emulator geprüft (Pixel_API35), Debug-Build + Unit-Tests + Lint grün. Play-Games-IDs in `games_ids.xml` noch Platzhalter. Offen: signiertes Bundle baut der Nutzer lokal.
 - Neu seit rc8: 100 Zonen (19 Biome x 5 Stufen, Auto-Wechsel nach Bosssieg, prozedurale Grafik), Clicker + Combo (`TapStats`, `ComboTracker`), Auto-Boss (`AutoBossGate`, Geräteeinstellung `autoBoss`), Zonenliste mit Biom-Köpfen, Schnellverkauf im Shop (nach Seltenheit + "Alles", Verbesserungen bleiben), Tagesbelohnung + Ziele, Statistiken, Backup-Erinnerung, HUD-Hinweispunkt.
 - Offen: Prestige/Wiedergeburt (erst Plan, greift stark in Zonen/Save ein), Release-Skript für signiertes Bundle (`.\gradlew.bat bundleRelease` macht der Nutzer lokal, Key liegt dort), neue Play-Store-Screenshots (Gerät/Emulator nötig).
 - Vor dem Release auf Gerät prüfen: neue Zonengrafik (Uhrwerk-Zahnräder wirken klumpig), Zonenliste, Karten im Charakter-Tab, Hinweispunkt. Auto-Wechsel greift auch bei erneutem Sieg über alten Boss (ggf. nur beim ersten Sieg); Ziele rücken per Katalogreihenfolge nach (nicht gleicher Typ).
