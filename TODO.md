@@ -7,7 +7,7 @@ Legende: `[ ]` offen · `[x]` erledigt
 - [ ] Offline-Anzeige: Ursache der falschen Zeitanzeige nicht eindeutig reproduziert (Berechnung/Kappung/Stempel im Code und per Unit-Test korrekt). Behoben: Dauer ab 24 h wird in Tagen angezeigt statt "960 Std.". Falls auf dem Gerät weiter falsch: Screenshot des Dialogs + Zeit der letzten Sitzung notieren.
 - [ ] Alle Apps: Update-Hinweis, Sprachprüfung, Akkuschonung analog in Kind Words und RPCT umsetzen (hier nur Idle RPG).
 
-## Offen: Tester-Feedback (Testers Community, Closed Test, Stand 2026-11-02)
+## Offen: Tester-Feedback (Testers Community, Closed Test, Stand 2026-11-02; Testende ca. 2026-11-12)
 Quelle: bezahlter Testanbieter, Reports `rp_feedback_de.pdf` + `rp_production_de.pdf`. Ergebnis: keine Abstürze/Fehler auf allen getesteten Geräten. Die vier Punkte unten sind **noch nicht umgesetzt** (Stand rc15); „App bewerten“ und „App teilen“ sind seit rc16 im Code (ungebaut, siehe oben).
 
 **Wichtig:** Die vorformulierten Antworten 3, 8, 10 im Produktionszugangs-Fragebogen behaupten, Tutorial, "App bewerten" und "App teilen" seien schon umgesetzt. Erst absenden, wenn das stimmt, sonst Antworten auf den echten Stand anpassen (falsche Angaben gefährden Produktionszugang/Konto). Antwort 1 darf den bezahlten Testanbieter ehrlich nennen.
