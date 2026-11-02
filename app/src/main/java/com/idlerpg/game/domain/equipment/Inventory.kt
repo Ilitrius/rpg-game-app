@@ -2,6 +2,7 @@ package com.idlerpg.game.domain.equipment
 
 import com.idlerpg.game.data.EquipmentSlot
 import com.idlerpg.game.data.GameState
+import com.idlerpg.game.domain.prestige.PrestigeBonuses
 import com.idlerpg.game.data.Item
 import com.idlerpg.game.data.Stats
 import com.idlerpg.game.domain.character.CombatStats
@@ -42,8 +43,13 @@ object Inventory {
     /** Slots added per expansion step (40 -> 60 -> 80 -> 100). */
     const val EXPANSION_STEP = 20
 
-    /** Real capacity: [CAPACITY] + bought extra slots (clamped to 0..[GameState.MAX_EXTRA_SLOTS]). */
-    fun capacity(state: GameState): Int = CAPACITY + state.inventoryExtraSlots.coerceIn(0, GameState.MAX_EXTRA_SLOTS)
+    /**
+     * Real capacity: [CAPACITY] + bought extra slots (clamped to 0..[GameState.MAX_EXTRA_SLOTS])
+     * + prestige talent slots. Talent slots do not count towards the bought limit ([canExpand]).
+     */
+    fun capacity(state: GameState): Int =
+        CAPACITY + state.inventoryExtraSlots.coerceIn(0, GameState.MAX_EXTRA_SLOTS) +
+            PrestigeBonuses.of(state).extraSlots.coerceAtLeast(0)
 
     /** Whether another expansion step can be bought. */
     fun canExpand(state: GameState): Boolean = state.inventoryExtraSlots < GameState.MAX_EXTRA_SLOTS
