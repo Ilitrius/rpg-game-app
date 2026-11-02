@@ -14,6 +14,7 @@ Legende: `[ ]` offen · `[x]` erledigt
 - [ ] **Google Play Games Anmeldung** (mit Kontoauswahl): Punkte/Bestenliste (Level, höchste Zone, Kills), Erfolge (aus den Zielen ableitbar), **Cloud-Spielstand** über Play Games „Saved Games“ (Konflikt: neuerer Stand/Zeitstempel, vorher manuelles Backup). Folgen: INTERNET-Berechtigung und Play-Games-Services-SDK, Konsolen-Einrichtung (Play Games Services-Projekt, OAuth-Client, Erfolge/Bestenlisten anlegen), Datenschutzerklärung und Datensicherheitsformular ändern (Konto-ID/Spieldaten werden an Google übertragen), Consent-Dialog (Opt-in, Spiel muss ohne Anmeldung voll nutzbar bleiben), `allowBackup=false` bleibt. Anmeldung optional unter Optionen → Konto.
 
 ## Erledigt (Idle RPG)
+- [x] Buff-System (B) und Gold-Senken (C: Inventar-Erweiterung, Verzaubern, Reroll, Rast/Heilung, Elixiere) – umgesetzt 2026-11-02, auf Gerät zu prüfen; Skins bewusst später, Schnellreise gestrichen.
 - [x] Update-Hinweis (Play In-App Updates, flexibler Flow, `update/InAppUpdater`, `app-update` über Version Catalog, `strings_update.xml`, Datenschutz-Seite/In-App-Kurzfassung/Checkliste angepasst).
 - [x] Sprachumschaltung geprüft: Auswahl System/DE/EN in Optionen vorhanden; Lücke behoben: "System" setzte `Locale.getDefault()` nach vorheriger Auswahl nicht zurück; Waffenname im Charakter-Tab war unlokalisiert.
 - [x] Itemnamen lokalisiert (Shop, Beute-Popup, Charakter), Import-Dialog `Locale.getDefault()`, `SaveTransfer`-Meldungen mit lokalisiertem Itemnamen.
