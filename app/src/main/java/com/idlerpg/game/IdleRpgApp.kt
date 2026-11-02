@@ -1,6 +1,7 @@
 package com.idlerpg.game
 
 import android.app.Application
+import com.google.android.gms.games.PlayGamesSdk
 import com.idlerpg.game.data.GameRepository
 import com.idlerpg.game.domain.character.StarterItems
 import kotlinx.coroutines.CoroutineScope
@@ -16,6 +17,8 @@ class IdleRpgApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // Play Games Services initialisieren (fail-safe: ohne Play Services/ID läuft das Spiel normal).
+        runCatching { PlayGamesSdk.initialize(this) }
         // New games and old saves without a weapon receive the starter dagger once.
         appScope.launch { runCatching { repository.update(StarterItems::ensureStarterWeapon) } }
     }

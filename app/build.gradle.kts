@@ -89,6 +89,7 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.play.app.update)
+    implementation(libs.play.games)
     debugImplementation(libs.androidx.ui.tooling)
     testImplementation(libs.junit)
     testImplementation(libs.robolectric) // offscreen zone previews (ZonePreviewTest)
