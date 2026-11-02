@@ -57,8 +57,9 @@ Zusätzlich `spielwelt`: Abenteuer-Ansicht (Ich-Perspektive), Gebiete, Monster, 
 - GitHub (öffentlich): https://github.com/Ilitrius/rpg-game-app, Branch `master`; Datenschutzerklärung via GitHub Pages (`docs/`) unter https://ilitrius.github.io/rpg-game-app/ (in Optionen verlinkt, `options_privacy_url`)
 - Git-Identität nur repo-lokal gesetzt (Ilitrius / rene.puf@gmail.com)
 
-## Stand & nächste Schritte (Ende 2026-10-28)
-- Version `0.1.0-rc9` (versionCode 10), Branch `claude/dann-46ungl`, alles gepusht, Vollbuild + Unit-Tests grün (nur in der Cloud-Umgebung, nie auf Gerät/Emulator gesehen).
+## Stand & nächste Schritte (aktualisiert 2026-11-02)
+- Aktuell: Version `0.1.0-rc15` (versionCode 15), Worktree-Branch `claude/aktuelle-aktivitaet-a62937`. Seit rc9: Splash-Screen + Versionsanzeige (rc10), Tap-Schaden neu abgestimmt + Klickschaden-Zeile, Shop "Alles verkaufen" inkl. Verbesserungen (rc11), Auto-Boss rastet bis 70 % HP, Planung Prestige/Buffs/Gold-Senken/Play Games (rc12), Start-Hinweis mit höflicher Spendenbitte + Spenden-Link (rc14/rc15).
+- Stand rc9 (Ausgangspunkt, Branch `claude/dann-46ungl`): Vollbuild + Unit-Tests grün (nur in der Cloud-Umgebung, nie auf Gerät/Emulator gesehen).
 - Neu seit rc8: 100 Zonen (19 Biome x 5 Stufen, Auto-Wechsel nach Bosssieg, prozedurale Grafik), Clicker + Combo (`TapStats`, `ComboTracker`), Auto-Boss (`AutoBossGate`, Geräteeinstellung `autoBoss`), Zonenliste mit Biom-Köpfen, Schnellverkauf im Shop (nach Seltenheit + "Alles", Verbesserungen bleiben), Tagesbelohnung + Ziele, Statistiken, Backup-Erinnerung, HUD-Hinweispunkt.
 - Offen: Prestige/Wiedergeburt (erst Plan, greift stark in Zonen/Save ein), Release-Skript für signiertes Bundle (`.\gradlew.bat bundleRelease` macht der Nutzer lokal, Key liegt dort), neue Play-Store-Screenshots (Gerät/Emulator nötig).
 - Vor dem Release auf Gerät prüfen: neue Zonengrafik (Uhrwerk-Zahnräder wirken klumpig), Zonenliste, Karten im Charakter-Tab, Hinweispunkt. Auto-Wechsel greift auch bei erneutem Sieg über alten Boss (ggf. nur beim ersten Sieg); Ziele rücken per Katalogreihenfolge nach (nicht gleicher Typ).
