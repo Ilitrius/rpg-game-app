@@ -7,6 +7,13 @@ Legende: `[ ]` offen · `[x]` erledigt
 - [ ] Offline-Anzeige: Ursache der falschen Zeitanzeige nicht eindeutig reproduziert (Berechnung/Kappung/Stempel im Code und per Unit-Test korrekt). Behoben: Dauer ab 24 h wird in Tagen angezeigt statt "960 Std.". Falls auf dem Gerät weiter falsch: Screenshot des Dialogs + Zeit der letzten Sitzung notieren.
 - [ ] Alle Apps: Update-Hinweis, Sprachprüfung, Akkuschonung analog in Kind Words und RPCT umsetzen (hier nur Idle RPG).
 
+## Offen: Neue, realistischere Grafik (Wunsch des Nutzers, Stand 2026-11-02)
+Ziel: Die Grafik soll deutlich authentischer und realistischer aussehen. Noch nicht geplant oder umgesetzt; vor Beginn erst einen Plan zur Freigabe erstellen.
+- [ ] **Items** (Waffen, Rüstungen, Helme, Handschuhe, Stiefel, Amulette, Ringe, Elixiere): `ItemIcon`, `ui/character/weapon` (Faust, Waffen in der Hand) und Paper-Doll wirken authentischer und realistischer.
+- [ ] **Monster**: `ProceduralMonsters` und Boss-Grafiken deutlich realistischer statt Cartoon-/Vektor-Stil.
+- [ ] **Hintergründe**: `BiomeStyles` / `BiomeScene` (100 Zonen, 19 Biome) deutlich realistischer.
+- Offene Fragen für den Plan: Bisherige Grafik-Regel (CLAUDE.md) bevorzugt Vektor und prozedurale Zeichnung; für Realismus sind vermutlich Bitmaps nötig (nur xxxhdpi, WebP, `FilterQuality.High`). Dann Quelle der Bilder klären (Lizenz, KI-generiert, Stil einheitlich), APK-/Bundle-Größe (aktuell ca. 5 MB) und Ladezeit/Speicher prüfen, Reihenfolge festlegen (z. B. erst eine Zone + ein Monster + eine Waffe als Stilprobe).
+
 ## Offen: Tester-Feedback (Testers Community, Closed Test, Stand 2026-11-02; Testende ca. 2026-11-12)
 Quelle: bezahlter Testanbieter, Reports `rp_feedback_de.pdf` + `rp_production_de.pdf`. Ergebnis: keine Abstürze/Fehler auf allen getesteten Geräten. Die vier Punkte unten sind **noch nicht umgesetzt** (Stand rc15); in rc16 umgesetzt: Tutorial, „App bewerten“, „App teilen“, ASO-Text. rc16 in der Cloud gebaut, alle Unit-Tests grün, Release-Bundle baut.
 
