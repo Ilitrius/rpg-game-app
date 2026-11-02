@@ -8,11 +8,11 @@
     <string name="shop_elixir_damage">Elixir of Strength</string>
     <string name="shop_elixir_drop">Elixir of Fortune</string>
     <string name="shop_elixir_regen">Elixir of Recovery</string>
-    <string name="shop_elixir_xp_effect">+25 %% experience · 15 min</string>
-    <string name="shop_elixir_gold_effect">+25 %% gold · 15 min</string>
-    <string name="shop_elixir_damage_effect">+25 %% damage · 15 min</string>
-    <string name="shop_elixir_drop_effect">+25 %% drop chance · 15 min</string>
-    <string name="shop_elixir_regen_effect">+25 %% regeneration · 15 min</string>
+    <string name="shop_elixir_xp_effect" formatted="false">+25 % experience · 15 min</string>
+    <string name="shop_elixir_gold_effect" formatted="false">+25 % gold · 15 min</string>
+    <string name="shop_elixir_damage_effect" formatted="false">+25 % damage · 15 min</string>
+    <string name="shop_elixir_drop_effect" formatted="false">+25 % drop chance · 15 min</string>
+    <string name="shop_elixir_regen_effect" formatted="false">+25 % regeneration · 15 min</string>
     <string name="shop_elixir_buy">%1$s gold</string>
     <string name="shop_elixir_running">Active: %1$s left</string>
     <string name="shop_elixir_bought">Elixir consumed.</string>

@@ -8,11 +8,11 @@
     <string name="shop_elixir_damage">Elixier der Stärke</string>
     <string name="shop_elixir_drop">Elixier des Glücks</string>
     <string name="shop_elixir_regen">Elixier der Erholung</string>
-    <string name="shop_elixir_xp_effect">+25 %% Erfahrung · 15 Min.</string>
-    <string name="shop_elixir_gold_effect">+25 %% Gold · 15 Min.</string>
-    <string name="shop_elixir_damage_effect">+25 %% Schaden · 15 Min.</string>
-    <string name="shop_elixir_drop_effect">+25 %% Beutechance · 15 Min.</string>
-    <string name="shop_elixir_regen_effect">+25 %% Regeneration · 15 Min.</string>
+    <string name="shop_elixir_xp_effect" formatted="false">+25 % Erfahrung · 15 Min.</string>
+    <string name="shop_elixir_gold_effect" formatted="false">+25 % Gold · 15 Min.</string>
+    <string name="shop_elixir_damage_effect" formatted="false">+25 % Schaden · 15 Min.</string>
+    <string name="shop_elixir_drop_effect" formatted="false">+25 % Beutechance · 15 Min.</string>
+    <string name="shop_elixir_regen_effect" formatted="false">+25 % Regeneration · 15 Min.</string>
     <string name="shop_elixir_buy">%1$s Gold</string>
     <string name="shop_elixir_running">Aktiv: noch %1$s</string>
     <string name="shop_elixir_bought">Elixier getrunken.</string>
