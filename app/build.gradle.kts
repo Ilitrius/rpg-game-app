@@ -7,6 +7,11 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+// Release candidate: version + release number, e.g. 0.1.0-rc17. Output files are named "Idle-RPG-<versionName>-<variant>.apk/.aab".
+val appVersionName = "0.1.0-rc17"
+
+base.archivesName.set("Idle-RPG-$appVersionName")
+
 val keystoreProps = Properties().apply {
     val f = rootProject.file("keystore.properties")
     if (f.exists()) f.inputStream().use { load(it) }
@@ -27,7 +32,7 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 17
-        versionName = "0.1.0-rc17"
+        versionName = appVersionName
     }
 
     signingConfigs {

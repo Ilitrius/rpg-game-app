@@ -66,8 +66,11 @@ Zusätzlich `spielwelt`: Abenteuer-Ansicht (Ich-Perspektive), Gebiete, Monster, 
 - Vor dem Release auf Gerät prüfen: neue Zonengrafik (Uhrwerk-Zahnräder wirken klumpig), Zonenliste, Karten im Charakter-Tab, Hinweispunkt. Auto-Wechsel greift auch bei erneutem Sieg über alten Boss (ggf. nur beim ersten Sieg); Ziele rücken per Katalogreihenfolge nach (nicht gleicher Typ).
 - Arbeitsweise: Nutzer will vor größeren Aufgaben einen durchdachten Plan; Aufgaben an Feld-Agenten delegieren, Agenten committen/pushen selbst, Haupt-Thread committet nichts Halbfertiges. Cloud-Build: `bash gradlew testDebugUnitTest assembleDebug -Pkotlin.compiler.execution.strategy=in-process` (SDK `/opt/android-sdk`, Maven kann 429 liefern; Vorschau-Tests brauchen Robolectric-Jars). Vorschaubilder: `app/build/zone-preview/` (Test `ZonePreviewTest`).
 
+## Release-Benennung
+- Release-Kandidaten heißen wie die App + Versionsnummer + Release-Nummer: `Idle-RPG-<versionName>-<variant>.apk/.aab`, z. B. `Idle-RPG-0.1.0-rc17-release.aab` (`versionName` = `0.1.0-rc17` einmal in `app/build.gradle.kts` als `appVersionName`, setzt auch `archivesName`). Bei jedem neuen rc `appVersionName` + `versionCode` hochzählen.
+
 ## Befehle
 - Build: `.\gradlew.bat assembleDebug`
 - Emulator: `D:\Android\Sdk\emulator\emulator.exe -avd Pixel_API35`
-- Install + Start: `adb install -r app\build\outputs\apk\debug\app-debug.apk; adb shell am start -n com.rp.IDLEGAMERP/com.idlerpg.game.MainActivity`
+- Install + Start: `adb install -r app\build\outputs\apk\debug\Idle-RPG-0.1.0-rc17-debug.apk; adb shell am start -n com.rp.IDLEGAMERP/com.idlerpg.game.MainActivity`
 - Screenshot: `adb exec-out screencap -p > shot.png` (in cmd, nicht PowerShell — PS zerstört Binär-Pipe)
