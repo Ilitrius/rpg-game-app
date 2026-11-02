@@ -148,4 +148,15 @@
     <string name="options_note_extra_slots">Zusatz-Inventarplätze (%1$d) sind kein Vielfaches von 20 und werden auf %2$d aufgerundet.</string>
     <string name="options_note_unknown_buffs">Unbekannte Buffs werden entfernt: %1$d</string>
     <string name="options_note_buffs_trimmed">Zu viele Buffs: %1$d überzählige werden entfernt (max. %2$d).</string>
+    <string name="options_location_prestige">Wiedergeburt</string>
+    <string name="options_location_prestige_talent">Wiedergeburt, Talent „%1$s“</string>
+    <string name="options_field_rebirths">Wiedergeburten</string>
+    <string name="options_field_souls">Seelen</string>
+    <string name="options_field_souls_spent">Ausgegebene Seelen (gesamt)</string>
+    <string name="options_field_talent_level">Talentstufe</string>
+    <string name="options_field_gold_talent_level">Mit Gold gekaufte Talentstufen</string>
+    <string name="options_field_best_zone">Beste Gebietsnummer</string>
+    <string name="options_field_best_level">Bester Heldenlevel</string>
+    <string name="options_note_unknown_talents">Unbekannte Talente werden entfernt: %1$d</string>
+    <string name="options_note_gold_talents">Bei %1$d Talenten waren mehr als die Hälfte der Stufen mit Gold gekauft; sie werden auf das erlaubte Maß gesenkt.</string>
 </resources>

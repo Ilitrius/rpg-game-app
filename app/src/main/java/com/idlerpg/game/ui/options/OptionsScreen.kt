@@ -703,6 +703,8 @@ private fun locationText(context: Context, location: SaveLocation): String? = wh
     SaveLocation.Shop -> context.getString(R.string.options_location_shop)
     SaveLocation.Progress -> context.getString(R.string.options_location_progress)
     SaveLocation.Stats -> context.getString(R.string.statistik_location)
+    SaveLocation.Prestige -> context.getString(R.string.options_location_prestige)
+    is SaveLocation.PrestigeTalent -> context.getString(R.string.options_location_prestige_talent, location.talentId)
     is SaveLocation.Buff -> context.getString(R.string.options_location_buff, location.position, location.type)
     is SaveLocation.ProgressGoal ->
         context.getString(R.string.options_location_progress_goal, location.position, location.goalId)
@@ -752,6 +754,13 @@ private fun fieldLabel(context: Context, field: SaveField): String = context.get
         SaveField.INVENTORY_SIZE -> R.string.options_field_inventory_size
         SaveField.BUFF_MAGNITUDE -> R.string.options_field_buff_magnitude
         SaveField.BUFF_REMAINING -> R.string.options_field_buff_remaining
+        SaveField.REBIRTHS -> R.string.options_field_rebirths
+        SaveField.SOULS -> R.string.options_field_souls
+        SaveField.SOULS_SPENT_TOTAL -> R.string.options_field_souls_spent
+        SaveField.TALENT_LEVEL -> R.string.options_field_talent_level
+        SaveField.GOLD_TALENT_LEVEL -> R.string.options_field_gold_talent_level
+        SaveField.BEST_ZONE_ORDER -> R.string.options_field_best_zone
+        SaveField.BEST_LEVEL -> R.string.options_field_best_level
     },
 )
 
@@ -782,6 +791,8 @@ private fun noteMessage(context: Context, note: ImportNote): String = when (note
     )
     is ImportNote.UnknownGoalsDropped -> context.getString(R.string.options_note_unknown_goals, note.count)
     is ImportNote.ExtraSlotsRounded -> context.getString(R.string.options_note_extra_slots, note.from, note.to)
+    is ImportNote.UnknownTalentsDropped -> context.getString(R.string.options_note_unknown_talents, note.count)
+    is ImportNote.GoldTalentLevelsReduced -> context.getString(R.string.options_note_gold_talents, note.count)
     is ImportNote.UnknownBuffsDropped -> context.getString(R.string.options_note_unknown_buffs, note.count)
     is ImportNote.BuffsTrimmed -> context.getString(R.string.options_note_buffs_trimmed, note.count, note.max)
     is ImportNote.UnknownZonesIgnored -> {

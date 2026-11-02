@@ -6,6 +6,7 @@ import com.idlerpg.game.data.EquipmentSlot
 import com.idlerpg.game.data.GameJson
 import com.idlerpg.game.data.GameState
 import com.idlerpg.game.data.Item
+import com.idlerpg.game.data.PrestigeState
 import com.idlerpg.game.data.ProgressState
 import com.idlerpg.game.data.StatsState
 import com.idlerpg.game.data.ShopState
@@ -14,7 +15,10 @@ import com.idlerpg.game.domain.buffs.Buffs
 import com.idlerpg.game.domain.equipment.Enchanting
 import com.idlerpg.game.domain.equipment.Inventory
 import com.idlerpg.game.domain.equipment.ItemGenerator
+import com.idlerpg.game.domain.prestige.PrestigeBonuses
+import com.idlerpg.game.domain.prestige.Talents
 import com.idlerpg.game.domain.progress.Goals
+import com.idlerpg.game.domain.character.Progression
 import com.idlerpg.game.domain.world.Zones
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -66,6 +70,13 @@ enum class SaveField(val key: String) {
     INVENTORY_SIZE("inventory"),
     BUFF_MAGNITUDE("magnitude"),
     BUFF_REMAINING("remainingMillis"),
+    REBIRTHS("rebirths"),
+    SOULS("souls"),
+    SOULS_SPENT_TOTAL("soulsSpentTotal"),
+    TALENT_LEVEL("talents"),
+    GOLD_TALENT_LEVEL("goldTalentLevels"),
+    BEST_ZONE_ORDER("bestZoneOrder"),
+    BEST_LEVEL("bestLevel"),
 }
 
 /** Where a rejected value sits in the save, so the error message can point the player to it. */
@@ -120,6 +131,12 @@ sealed interface SaveLocation {
     /** Active buff number [position] (1-based) of type [type]. */
     data class Buff(val position: Int, val type: String) : SaveLocation
 
+    /** Rebirth data (`prestige`). */
+    data object Prestige : SaveLocation
+
+    /** Talent entry with catalog id [talentId] in `prestige`. */
+    data class PrestigeTalent(val talentId: String) : SaveLocation
+
     /** Goal entry number [position] (1-based) with catalog id [goalId]. */
     data class ProgressGoal(val position: Int, val goalId: String) : SaveLocation
 }
@@ -172,6 +189,12 @@ sealed interface ImportNote {
     /** [count] buffs of unknown type were removed. */
     data class UnknownBuffsDropped(val count: Int) : ImportNote
 
+    /** [count] talents of unknown id were removed from the rebirth data. */
+    data class UnknownTalentsDropped(val count: Int) : ImportNote
+
+    /** [count] talents had more gold-bought levels than allowed (max. half); reduced to the allowed share. */
+    data class GoldTalentLevelsReduced(val count: Int) : ImportNote
+
     /** [count] buffs beyond the maximum of [max] were cut off. */
     data class BuffsTrimmed(val count: Int, val max: Int) : ImportNote
 }
@@ -197,6 +220,10 @@ object SaveTransfer {
 
     /** Lowest valid [WorldState.heroHp]: -1 = unknown/full, 0 = hero was defeated. */
     const val MIN_HERO_HP = -1
+
+    /** Generous bounds for rebirth counters (a rebirth pays < 200 souls); keeps sums overflow-safe. */
+    const val MAX_REBIRTHS = 1_000_000
+    const val MAX_SOULS = 1_000_000_000_000L
 
     private val DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE
 
@@ -266,7 +293,8 @@ object SaveTransfer {
         }
 
         // Capacity is 40 + bought slots; the game auto-sells instead of overfilling.
-        val capacity = Inventory.capacity(state)
+        // Prestige talent "slots" adds more on top (PrestigeBonuses.extraSlots).
+        val capacity = Inventory.capacity(state) + PrestigeBonuses.of(state).extraSlots
         if (state.equipment.inventory.size > capacity) {
             return SaveError.OutOfRange(
                 SaveField.INVENTORY_SIZE, SaveLocation.Root, 0, capacity.toLong(), state.equipment.inventory.size.toLong(),
@@ -278,7 +306,53 @@ object SaveTransfer {
         validateProgress(state.progress)?.let { return it }
         validateStats(state.stats)?.let { return it }
         validateBuffs(state.buffs)?.let { return it }
+        validatePrestige(state.prestige)?.let { return it }
         return null
+    }
+
+    /** Only known talents are checked (unknown ones are dropped by [normalize]). */
+    private fun validatePrestige(p: PrestigeState): SaveError? {
+        val loc = SaveLocation.Prestige
+        if (p.rebirths !in 0..MAX_REBIRTHS) {
+            return SaveError.OutOfRange(SaveField.REBIRTHS, loc, 0, MAX_REBIRTHS.toLong(), p.rebirths.toLong())
+        }
+        if (p.souls !in 0..MAX_SOULS) return SaveError.OutOfRange(SaveField.SOULS, loc, 0, MAX_SOULS, p.souls)
+        if (p.soulsSpentTotal !in 0..MAX_SOULS) {
+            return SaveError.OutOfRange(SaveField.SOULS_SPENT_TOTAL, loc, 0, MAX_SOULS, p.soulsSpentTotal)
+        }
+        if (p.bestZoneOrder !in 0..Zones.COUNT) {
+            return SaveError.OutOfRange(SaveField.BEST_ZONE_ORDER, loc, 0, Zones.COUNT.toLong(), p.bestZoneOrder.toLong())
+        }
+        if (p.bestLevel !in 0..Progression.MAX_LEVEL) {
+            return SaveError.OutOfRange(SaveField.BEST_LEVEL, loc, 0, Progression.MAX_LEVEL.toLong(), p.bestLevel.toLong())
+        }
+        for (talent in Talents.catalog) {
+            val tloc = SaveLocation.PrestigeTalent(talent.id)
+            val level = p.talents[talent.id]
+            if (level != null && level !in 0..talent.maxLevel) {
+                return SaveError.OutOfRange(SaveField.TALENT_LEVEL, tloc, 0, talent.maxLevel.toLong(), level.toLong())
+            }
+            val gold = p.goldTalentLevels[talent.id]
+            if (gold != null && gold !in 0..talent.maxLevel) {
+                return SaveError.OutOfRange(SaveField.GOLD_TALENT_LEVEL, tloc, 0, talent.maxLevel.toLong(), gold.toLong())
+            }
+        }
+        return null
+    }
+
+    /** Drops unknown talent ids and reduces gold-bought levels to the allowed half (MAX_GOLD_SHARE). */
+    private fun normalizePrestige(p: PrestigeState, notes: MutableList<ImportNote>): PrestigeState {
+        val unknown = (p.talents.keys + p.goldTalentLevels.keys).filter { Talents.byId(it) == null }.distinct()
+        if (unknown.isNotEmpty()) notes += ImportNote.UnknownTalentsDropped(unknown.size)
+        val talents = p.talents.filterKeys { Talents.byId(it) != null }
+        var reduced = 0
+        val gold = p.goldTalentLevels.filterKeys { Talents.byId(it) != null }.mapValues { (id, g) ->
+            val allowed = (talents[id] ?: 0) / 2
+            if (g > allowed) { reduced++; allowed } else g
+        }
+        if (reduced > 0) notes += ImportNote.GoldTalentLevelsReduced(reduced)
+        if (unknown.isEmpty() && reduced == 0) return p
+        return p.copy(talents = talents, goldTalentLevels = gold)
     }
 
     /**
@@ -321,6 +395,8 @@ object SaveTransfer {
         val keptBuffs = knownBuffs.take(Buffs.MAX_BUFFS)
         if (keptBuffs.size != knownBuffs.size) notes += ImportNote.BuffsTrimmed(knownBuffs.size - keptBuffs.size, Buffs.MAX_BUFFS)
         if (keptBuffs.size != buffs.size) result = result.copy(buffs = BuffState(keptBuffs))
+        val prestige = normalizePrestige(result.prestige, notes)
+        if (prestige !== result.prestige) result = result.copy(prestige = prestige)
         return result to notes
     }
 

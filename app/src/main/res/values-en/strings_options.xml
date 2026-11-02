@@ -140,4 +140,15 @@
     <string name="options_note_extra_slots">Extra inventory slots (%1$d) are not a multiple of 20 and will be rounded up to %2$d.</string>
     <string name="options_note_unknown_buffs">Unknown buffs will be removed: %1$d</string>
     <string name="options_note_buffs_trimmed">Too many buffs: %1$d surplus will be removed (max. %2$d).</string>
+    <string name="options_location_prestige">Rebirth</string>
+    <string name="options_location_prestige_talent">Rebirth, talent “%1$s”</string>
+    <string name="options_field_rebirths">Rebirths</string>
+    <string name="options_field_souls">Souls</string>
+    <string name="options_field_souls_spent">Souls spent (total)</string>
+    <string name="options_field_talent_level">Talent level</string>
+    <string name="options_field_gold_talent_level">Talent levels bought with gold</string>
+    <string name="options_field_best_zone">Best zone number</string>
+    <string name="options_field_best_level">Best hero level</string>
+    <string name="options_note_unknown_talents">Unknown talents will be removed: %1$d</string>
+    <string name="options_note_gold_talents">%1$d talents had more than half of their levels bought with gold; they will be reduced to the allowed share.</string>
 </resources>
