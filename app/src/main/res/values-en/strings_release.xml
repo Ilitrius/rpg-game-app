@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="options_release_button">Release info</string>
+    <string name="options_release_title">Release info %1$s</string>
+    <string name="options_release_none">There are no release notes for this version.</string>
+    <string name="options_release_close">Close</string>
+</resources>

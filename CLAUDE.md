@@ -39,6 +39,11 @@ Zusätzlich `spielwelt`: Abenteuer-Ansicht (Ich-Perspektive), Gebiete, Monster, 
 - Import-Validierung (`optionen`, `ui/options/SaveTransfer`): prüft alle GameState-Felder über `SaveField`/`SaveLocation`; neue Felder dem Optionen-Agenten melden. Unbekannte Zonen-IDs werden normalisiert statt abgelehnt.
 - `progress: ProgressState` (Ziele, `domain/progress`, UI `ui/character/GoalsCard`, Strings `strings_ziele.xml`): `DailyReward` (pure, Zeit injiziert: 20-h-Fenster, Uhr-Rückstellung über `clockHighWaterMillis` -5 min gesperrt, Streak-Bruch >48 h, Gold ≈ 150 Kills der aktuellen Zone, +10 %/Tag bis Tag 7, ab Tag 7 Wochenbonus; nur lokaler Schutz) und `Goals` (Katalog `Goals.catalog` ~38 Ziele, Typen `kills/bosses/level/zones` als String, Fortschritt = Zähler − `baseline`, immer 3 aktive, geclaimte bleiben als `claimed` in der Liste; unbekannte Typen/IDs werden übersprungen bzw. beim Import mit `ImportNote.UnknownGoalsDropped` entfernt). Abholen immer ein `repository.update`.
 
+## Release Notes (Pflicht bei jedem Release)
+- Zu **jeder** Version (`appVersionName` in `app/build.gradle.kts`) gehören zwei Textdateien im Git: `app/src/main/assets/release-notes/<versionName>.de.txt` und `.en.txt` (z. B. `0.1.0-rc18.de.txt`). Reiner Text, Abschnitte „Neu / Verbessert / Korrigiert“ (en: New / Improved / Fixed), Stichpunkte mit „•“, aus Spielersicht formuliert (keine Interna).
+- Die App zeigt sie in Optionen → „Über Idle RPG“ → Button **Release-Info** (`ui/options/ReleaseNotes`, Dialog in `AboutCard`; Sprache = UI-Sprache, Fallback de → en). Strings in `strings_release.xml`.
+- `ReleaseNotesTest` schlägt fehl, wenn für die aktuelle `appVersionName` eine der beiden Dateien fehlt oder leer ist. Ablauf beim Release: Version hochzählen → Notes de/en schreiben → Tests → Commit/Push → Bundle bauen. Alte Notes bleiben als Verlauf im Git liegen.
+
 ## Audio, Updates (Stand)
 - Ton: `audio/SoundManager` (SoundPool), Effekte aus `tools/generate_sounds.py` -> `res/raw/sfx_*.wav` (siehe `tools/SOUNDS.md`); Ein/Aus + Lautstärke in `GameSettings`.
 - Update-Hinweis: `update/InAppUpdater` (Play In-App Updates, flexibel, fail-safe), Snackbar in `MainScreen`, Strings `strings_update.xml`.

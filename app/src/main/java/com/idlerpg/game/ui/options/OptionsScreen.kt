@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -602,12 +603,16 @@ private fun FutureSettingsCard() {
 private fun AboutCard() {
     val context = LocalContext.current
     // Version kommt aus der Build-Konfiguration (versionName/versionCode), nicht manuell gepflegt.
+    val versionName = remember {
+        runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull() ?: "?"
+    }
     val version = remember {
         runCatching {
             val info = context.packageManager.getPackageInfo(context.packageName, 0)
             context.getString(R.string.options_about_version, info.versionName ?: "?", PackageInfoCompat.getLongVersionCode(info))
         }.getOrDefault("?")
     }
+    var showReleaseInfo by rememberSaveable { mutableStateOf(false) }
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
@@ -619,7 +624,26 @@ private fun AboutCard() {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            ActionButton(Icons.Outlined.Info, stringResource(R.string.options_release_button), primary = false) {
+                showReleaseInfo = true
+            }
         }
+    }
+    if (showReleaseInfo) {
+        val language = context.resources.configuration.locales[0].language
+        val notes = remember(versionName, language) { ReleaseNotes.load(context, versionName, language) }
+        AlertDialog(
+            onDismissRequest = { showReleaseInfo = false },
+            title = { Text(stringResource(R.string.options_release_title, versionName)) },
+            text = {
+                Column(Modifier.heightIn(max = 420.dp).verticalScroll(rememberScrollState())) {
+                    Text(notes ?: stringResource(R.string.options_release_none), style = MaterialTheme.typography.bodyMedium)
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showReleaseInfo = false }) { Text(stringResource(R.string.options_release_close)) }
+            },
+        )
     }
 }
 

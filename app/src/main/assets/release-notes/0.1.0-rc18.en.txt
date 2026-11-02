@@ -1,0 +1,10 @@
+New
+• More realistic graphics for all items: weapons, helmets, armor, gloves, boots, rings, amulets and talismans are now rendered in detail, with metal shine, leather texture, shadows and gems in the color of their rarity.
+• The enchant level (+1 to +10) is now shown right in the item icon, in equipment and in the inventory.
+• New in Options: the "Release info" button shows what is new in the installed version.
+
+Improved
+• Scrolling through the inventory is smoother.
+
+Fixed
+• Shop: the elixir texts showed "%%" instead of "%".

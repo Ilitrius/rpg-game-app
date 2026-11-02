@@ -1,0 +1,10 @@
+Neu
+• Realistischere Grafik für alle Gegenstände: Waffen, Helme, Rüstungen, Handschuhe, Stiefel, Ringe, Amulette und Talismane sind jetzt detailreich gerendert, mit Metallglanz, Lederstruktur, Schatten und Edelsteinen in der Farbe der Seltenheit.
+• Das Verzauberungs-Level (+1 bis +10) steht jetzt direkt im Symbol des Gegenstands, in der Ausrüstung und im Inventar.
+• Neu in den Optionen: Der Button „Release-Info“ zeigt die Neuerungen der installierten Version.
+
+Verbessert
+• Das Scrollen durch das Inventar läuft flüssiger.
+
+Korrigiert
+• Shop: Die Elixier-Texte zeigten „%%“ statt „%“.
