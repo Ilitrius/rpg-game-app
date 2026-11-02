@@ -9,6 +9,8 @@ import com.idlerpg.game.data.EquipmentSlot
 import com.idlerpg.game.data.GameState
 import com.idlerpg.game.data.Item
 import com.idlerpg.game.data.WorldState
+import com.idlerpg.game.data.ActiveBuff
+import com.idlerpg.game.domain.buffs.Buffs
 import com.idlerpg.game.domain.character.CombatStats
 import com.idlerpg.game.domain.character.Hit
 import com.idlerpg.game.domain.character.Progression
@@ -27,6 +29,7 @@ import com.idlerpg.game.domain.world.MonsterScaling
 import com.idlerpg.game.domain.world.MonsterStats
 import com.idlerpg.game.domain.world.OfflineProgress
 import com.idlerpg.game.domain.world.OfflineReward
+import com.idlerpg.game.domain.world.Rest
 import com.idlerpg.game.domain.world.WorldProgress
 import com.idlerpg.game.domain.world.Zone
 import com.idlerpg.game.domain.world.Zones
@@ -88,6 +91,11 @@ data class AdventureUiState(
     val autoBossDecision: AutoBossDecision = AutoBossDecision(AutoBossReason.OFF),
     /** Daily reward or a goal is ready to claim (HUD hint). */
     val claimable: Boolean = false,
+    /** Active buffs (HUD bar); runtime counts active play time only. */
+    val buffs: List<ActiveBuff> = emptyList(),
+    /** Gold of the hero and the price of the instant heal while [defeated] (see [Rest]). */
+    val gold: Long = 0,
+    val healCost: Long = 0,
 ) {
     val killsTowardsBoss: Long get() = WorldProgress.killsTowardsBoss(world, zone)
 
@@ -143,6 +151,10 @@ const val TRAVEL_TRANSITION_MILLIS = 1400L
 /** Hero HP is saved at most this often while playing (plus on every kill and in the background). */
 private const val HP_SAVE_INTERVAL_MILLIS = 5_000L
 
+/** Buff runtimes are reduced once per second of foreground time (a longer pause counts at most [BUFF_MAX_DELTA_MILLIS]). */
+private const val BUFF_TICK_MILLIS = 1_000L
+private const val BUFF_MAX_DELTA_MILLIS = 3_000L
+
 /**
  * The "Willkommen zurück" summary only appears after at least this long away; shorter absences
  * (switching apps) are credited silently — offline yields only ~1 minute of fighting per hour.
@@ -196,6 +208,9 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
     private var hpSaveJob: Job? = null
     private var offlineJob: Deferred<Unit>? = null
     private var foreground = false
+    private var buffJob: Job? = null
+    private var buffState: GameState = GameState()
+    private var hasBuffs = false
 
     // Statistics gathered in memory; written together with the next reward/background save (no extra writes).
     private var statHit = 0L
@@ -221,6 +236,9 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
     private val combo = ComboTracker()
 
     private val wake = Channel<Unit>(Channel.CONFLATED)
+
+    /** Signals that the instant heal was paid (ends the rest after a defeat). */
+    private val healPaid = Channel<Unit>(Channel.CONFLATED)
     private var bossRequested = false
 
     /** Zone the hero travels to until the repository confirms it (avoids flicker back). */
@@ -236,7 +254,9 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     private fun onGameState(s: GameState) {
-        val newStats = CombatStats.of(s)
+        val newStats = CombatStats.live(s)
+        buffState = s
+        hasBuffs = s.buffs.active.isNotEmpty()
         val old = stats
         if (old == null) {
             heroHp = CombatRules.restoreHeroHp(s.world.heroHp, newStats.maxHp).toDouble()
@@ -262,6 +282,8 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
                 attackDurationMillis = stab,
                 world = s.world,
                 claimable = hasClaimable(s, System.currentTimeMillis()),
+                buffs = s.buffs.active,
+                gold = s.gold,
                 equippedWeapon = s.equipment.equipped[EquipmentSlot.WEAPON],
             ).let(::withAutoBoss)
         }
@@ -281,6 +303,17 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
                 saveHeroHp()
             }
         }
+        buffJob = viewModelScope.launch {
+            // Buff runtime = measured foreground time only (no wall clock, nothing in the background/offline).
+            var last = SystemClock.elapsedRealtime()
+            while (isActive) {
+                delay(BUFF_TICK_MILLIS)
+                val now = SystemClock.elapsedRealtime()
+                val delta = (now - last).coerceAtMost(BUFF_MAX_DELTA_MILLIS)
+                last = now
+                if (hasBuffs) runCatching { repository.update { Buffs.tick(it, delta) } }
+            }
+        }
     }
 
     /** Call when the app goes to the background (lifecycle ON_STOP). */
@@ -291,6 +324,8 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         loopJob = null
         hpSaveJob?.cancel()
         hpSaveJob = null
+        buffJob?.cancel()
+        buffJob = null
         // A zone change interrupted by pausing the loop is completed right away.
         _ui.update { st -> st.travelingTo?.let { st.copy(zone = it, travelingTo = null, monster = null, phase = MonsterPhase.GONE) } ?: st }
         if (_ui.value.bossFight) endBossFight()
@@ -565,9 +600,9 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         val m = st.monster ?: return
         val gold = m.stats.rollGold()
         val xp = m.stats.xp
-        val item = Loot.rollDrop(m.stats.level, stats?.totalStats?.luck ?: 0)
+        val item = Loot.rollDrop(m.stats.level, stats?.totalStats?.luck ?: 0, dropMultiplier = Buffs.bonus(buffState, Buffs.DROP))
         _ui.update { it.copy(phase = MonsterPhase.DYING) }
-        _events.tryEmit(AdventureEvent.Kill(xp, gold))
+        _events.tryEmit(AdventureEvent.Kill(Buffs.scale(xp, Buffs.bonus(buffState, Buffs.XP)), Buffs.scale(gold, Buffs.bonus(buffState, Buffs.GOLD))))
         val zoneId = st.zone.id
         val now = System.currentTimeMillis()
         val hp = currentHp()
@@ -579,7 +614,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
             var leveledUp = false
             runCatching {
                 repository.update { s ->
-                    var n = CombatRules.applyKillReward(s, xp, gold, zoneId, now)
+                    var n = CombatRules.applyKillReward(s, xp, gold, zoneId, now, applyBuffs = true)
                     leveledUp = n.character.level > s.character.level
                     if (item != null) {
                         val (withItem, d) = Loot.grant(n, item)
@@ -606,7 +641,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         // The victory moves the saved zone forward; keep showing this zone until the travel transition.
         if (next != null) pendingZoneId = zone.id
         _ui.update { it.copy(phase = MonsterPhase.DYING) }
-        _events.tryEmit(AdventureEvent.Kill(xp, gold))
+        _events.tryEmit(AdventureEvent.Kill(Buffs.scale(xp, Buffs.bonus(buffState, Buffs.XP)), Buffs.scale(gold, Buffs.bonus(buffState, Buffs.GOLD))))
         endBossFight()
         val now = System.currentTimeMillis()
         val hp = currentHp()
@@ -617,9 +652,12 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
             var leveledUp = false
             runCatching {
                 repository.update { s ->
-                    val won = WorldProgress.applyBossVictory(s, zone, xp, gold, now)
+                    val won = WorldProgress.applyBossVictory(s, zone, xp, gold, now, applyBuffs = true)
                     leveledUp = won.character.level > s.character.level
-                    val (withItem, d) = Loot.grant(won, item)
+                    val (withItem, d) = Loot.grant(
+                        Buffs.add(won, Buffs.DAMAGE, Buffs.BOSS_DAMAGE_MAGNITUDE, Buffs.BOSS_DURATION_MILLIS, Buffs.SOURCE_BOSS),
+                        item,
+                    )
                     drop = d
                     pendingStats(withItem.copy(world = withItem.world.copy(heroHp = hp)))
                 }
@@ -639,9 +677,24 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
     private suspend fun onDefeat() {
         heroHp = 0.0
         publishHeroHp()
-        _ui.update { it.copy(defeated = true, phase = MonsterPhase.GONE) }
-        delay(CombatRules.DEFEAT_MILLIS)
+        val cost = Rest.healCost(_ui.value.zone, _ui.value.heroLevel)
+        healPaid.tryReceive() // drop a stale signal
+        _ui.update { it.copy(defeated = true, phase = MonsterPhase.GONE, healCost = cost) }
+        // Free rest, or end it early by paying for the heal.
+        withTimeoutOrNull(Rest.FREE_REST_MILLIS) { healPaid.receive() }
         recoverFromDefeat()
+    }
+
+    /** Pays the instant heal after a defeat (price = [Rest.healCost]); no-op without enough gold. */
+    fun healNow() {
+        val st = _ui.value
+        if (!st.defeated) return
+        val cost = st.healCost
+        idleApp.appScope.launch {
+            var paid = false
+            runCatching { repository.update { s -> Rest.pay(s, cost)?.also { paid = true } ?: s } }
+            if (paid) healPaid.trySend(Unit)
+        }
     }
 
     private fun recoverFromDefeat() {
@@ -665,7 +718,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
     private fun regen(hero: CombatStats, millis: Long) {
         if (millis <= 0 || heroHp >= hero.maxHp) return
         val before = ceil(heroHp).toInt()
-        heroHp = (heroHp + CombatRules.regen(hero.maxHp, millis)).coerceAtMost(hero.maxHp.toDouble())
+        heroHp = (heroHp + CombatRules.regen(hero.maxHp, millis) * Buffs.bonus(buffState, Buffs.REGEN)).coerceAtMost(hero.maxHp.toDouble())
         if (ceil(heroHp).toInt() != before) publishHeroHp()
     }
 

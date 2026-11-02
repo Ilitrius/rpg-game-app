@@ -63,8 +63,8 @@ object WorldProgress {
      * as defeated, resets the boss kill counter, unlocks the next zone and moves the hero there
      * ([WorldState.currentZoneId]). The last zone has no successor: the hero stays, nothing unlocks.
      */
-    fun applyBossVictory(state: GameState, zone: Zone, xp: Long, gold: Long, nowMillis: Long): GameState {
-        val rewarded = CombatRules.applyKillReward(state, xp, gold, zone.id, nowMillis)
+    fun applyBossVictory(state: GameState, zone: Zone, xp: Long, gold: Long, nowMillis: Long, applyBuffs: Boolean = false): GameState {
+        val rewarded = CombatRules.applyKillReward(state, xp, gold, zone.id, nowMillis, applyBuffs = applyBuffs)
         val w = rewarded.world
         val next = Zones.next(zone)
         return rewarded.copy(

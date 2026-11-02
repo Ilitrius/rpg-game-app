@@ -30,12 +30,15 @@ object Loot {
     const val MAX_OFFLINE_ITEMS = 20
     const val BOSS_RARITY_BOOST = 1.0
 
-    fun dropChance(luck: Int): Double =
-        (BASE_DROP_CHANCE + luck.coerceAtLeast(0) * DROP_CHANCE_PER_LUCK).coerceAtMost(MAX_DROP_CHANCE)
+    /** Drop chance; [multiplier] is the drop buff (1.0 = none), which may lift it up to twice [MAX_DROP_CHANCE]. */
+    fun dropChance(luck: Int, multiplier: Double = 1.0): Double {
+        val base = (BASE_DROP_CHANCE + luck.coerceAtLeast(0) * DROP_CHANCE_PER_LUCK).coerceAtMost(MAX_DROP_CHANCE)
+        return if (multiplier <= 1.0) base else (base * multiplier).coerceAtMost(MAX_DROP_CHANCE * 2)
+    }
 
     /** Rolls the drop of a regular monster of [monsterLevel]; null = nothing dropped. */
-    fun rollDrop(monsterLevel: Int, luck: Int, random: Random = Random.Default): Item? =
-        if (random.nextDouble() < dropChance(luck)) ItemGenerator.roll(monsterLevel, random) else null
+    fun rollDrop(monsterLevel: Int, luck: Int, random: Random = Random.Default, dropMultiplier: Double = 1.0): Item? =
+        if (random.nextDouble() < dropChance(luck, dropMultiplier)) ItemGenerator.roll(monsterLevel, random) else null
 
     /** Guaranteed boss drop. */
     fun bossDrop(bossLevel: Int, random: Random = Random.Default): Item =

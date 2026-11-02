@@ -1,6 +1,7 @@
 package com.idlerpg.game.domain.combat
 
 import com.idlerpg.game.data.GameState
+import com.idlerpg.game.domain.buffs.Buffs
 import com.idlerpg.game.domain.character.CombatStats
 import com.idlerpg.game.domain.character.Progression
 import com.idlerpg.game.domain.world.MonsterStats
@@ -59,7 +60,8 @@ object CombatRules {
 
     /**
      * Grants the reward of [kills] killed monsters in [zoneId]: XP (with level-ups), gold,
-     * kill counters, and sets the last-active time to [nowMillis].
+     * kill counters, and sets the last-active time to [nowMillis]. With [applyBuffs] the active XP/gold
+     * buffs multiply the reward (online only; offline progress ignores buffs).
      */
     fun applyKillReward(
         state: GameState,
@@ -68,7 +70,10 @@ object CombatRules {
         zoneId: String,
         nowMillis: Long,
         kills: Long = 1,
+        applyBuffs: Boolean = false,
     ): GameState {
+        val xp = if (applyBuffs) Buffs.scale(xp.coerceAtLeast(0), Buffs.bonus(state, Buffs.XP)) else xp
+        val gold = if (applyBuffs) Buffs.scale(gold.coerceAtLeast(0), Buffs.bonus(state, Buffs.GOLD)) else gold
         val leveled = Progression.applyXp(state, xp.coerceAtLeast(0))
         val w = state.world
         return leveled.copy(

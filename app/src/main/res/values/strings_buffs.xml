@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="buff_damage">Schaden</string>
+    <string name="buff_xp">Erfahrung</string>
+    <string name="buff_gold">Gold</string>
+    <string name="buff_drop">Beutechance</string>
+    <string name="buff_regen">Regeneration</string>
+    <string name="buff_click">Klickkraft</string>
+    <string name="buff_line">+%1$d %% %2$s</string>
+    <string name="buff_source_elixir">Trank</string>
+    <string name="buff_source_daily">Tagesbelohnung</string>
+    <string name="buff_source_goal">Ziel</string>
+    <string name="buff_source_boss">Bosssieg</string>
+    <string name="buff_bar_desc">Aktive Effekte, antippen für Details</string>
+    <string name="buff_sheet_title">Aktive Effekte</string>
+    <string name="buff_sheet_hint">Die Zeit läuft nur, solange du spielst. Offline und im Hintergrund pausieren Effekte.</string>
+    <string name="buff_sheet_empty">Keine aktiven Effekte.</string>
+    <string name="rest_heal_button">Sofort heilen (%1$s Gold)</string>
+    <string name="rest_heal_no_gold">Zu wenig Gold für sofortige Heilung (%1$s)</string>
+    <string name="rest_free_hint">oder kurz rasten – kostenlos</string>
+</resources>
