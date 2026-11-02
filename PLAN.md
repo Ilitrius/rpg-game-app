@@ -20,6 +20,8 @@ Stand: 2026-10-30 · Entwurf auf Basis des Ist-Zustands im Repo (aktueller Build
 | Must | Update-Hinweis (Play In-App Updates) | umgesetzt |
 | Must | Splash-Screen mit Logo | umgesetzt (AndroidX SplashScreen, Launcher-Icon auf `#232C24`) |
 | Must | Versionsnummer + Build in Optionen sichtbar | umgesetzt (Karte „Über Idle RPG“, aus `PackageInfo`) |
+| Must | Einführung/Tutorial (Tester-Feedback) | umgesetzt rc16 (`ui/tutorial`) |
+| Should | App bewerten / App teilen (Tester-Feedback) | umgesetzt rc16 (`ui/options/AppLinks`) |
 | Should | Crash-Reporting (opt-in) | fehlt |
 | Could | Google Play Games Anmeldung (Punkte, Erfolge, Cloud-Spielstand) | geplant, siehe Roadmap |
 | Could | Charakter-Reset / Wiedergeburt mit permanenten Boni und Eigenschaften | geplant, siehe Roadmap |

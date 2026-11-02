@@ -13,6 +13,12 @@ val keystoreProps = Properties().apply {
 }
 
 android {
+    // In-app language switch (Optionen): ship all languages in the bundle, Play would only install the device language.
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
     namespace = "com.idlerpg.game"
     compileSdk = 35
 

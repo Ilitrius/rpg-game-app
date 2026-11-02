@@ -118,12 +118,28 @@ class GameSettings(private val store: SettingsStore) {
             _reminders.value = value
         }
 
+    private val _tutorialSeen = MutableStateFlow(store.getBoolean(KEY_TUTORIAL_SEEN, false))
+
+    val tutorialSeenFlow: StateFlow<Boolean> = _tutorialSeen.asStateFlow()
+
+    /**
+     * Introduction (`ui/tutorial`) finished or skipped. Default false, so every player (existing saves
+     * included) sees it once; "Einfuehrung erneut ansehen" in Optionen sets it back to false.
+     */
+    var tutorialSeen: Boolean
+        get() = _tutorialSeen.value
+        set(value) {
+            store.putBoolean(KEY_TUTORIAL_SEEN, value)
+            _tutorialSeen.value = value
+        }
+
     /** Player chose "Nicht mehr anzeigen" on the start-up donation hint (default: show it at every start). */
     var donationHintHidden: Boolean
         get() = store.getBoolean(KEY_DONATION_HINT_HIDDEN, false)
         set(value) = store.putBoolean(KEY_DONATION_HINT_HIDDEN, value)
 
     companion object {
+        const val KEY_TUTORIAL_SEEN = "tutorial_seen"
         const val KEY_DONATION_HINT_HIDDEN = "donation_hint_hidden"
         const val KEY_LAST_EXPORT = "last_export_epoch_millis"
         const val KEY_LAST_PROMPT = "last_backup_prompt_epoch_millis"

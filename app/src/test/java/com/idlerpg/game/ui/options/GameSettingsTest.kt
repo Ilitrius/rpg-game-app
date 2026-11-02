@@ -27,6 +27,19 @@ class GameSettingsTest {
     }
 
     @Test
+    fun tutorialIsUnseenByDefaultPersistsAndCanBeReplayed() {
+        val store = FakeStore()
+        val settings = GameSettings(store)
+        assertFalse(settings.tutorialSeen)
+        settings.tutorialSeen = true
+        assertTrue(GameSettings(store).tutorialSeen)
+        assertTrue(settings.tutorialSeenFlow.value)
+        settings.tutorialSeen = false
+        assertFalse(settings.tutorialSeenFlow.value)
+        assertFalse(GameSettings(store).tutorialSeen)
+    }
+
+    @Test
     fun donationHintShowsByDefaultAndCanBeHiddenForGood() {
         val store = FakeStore()
         assertFalse(GameSettings(store).donationHintHidden)

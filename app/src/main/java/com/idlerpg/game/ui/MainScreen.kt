@@ -18,10 +18,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.idlerpg.game.audio.Sfx
@@ -33,7 +37,10 @@ import com.idlerpg.game.update.InAppUpdater
 import com.idlerpg.game.update.UpdateUiState
 import com.idlerpg.game.ui.character.CharacterScreen
 import com.idlerpg.game.ui.equipment.EquipmentScreen
+import com.idlerpg.game.ui.options.GameSettings
 import com.idlerpg.game.ui.options.OptionsScreen
+import com.idlerpg.game.ui.tutorial.TutorialAnchors
+import com.idlerpg.game.ui.tutorial.TutorialOverlay
 import com.idlerpg.game.ui.shop.ShopScreen
 
 /**
@@ -49,34 +56,59 @@ fun MainScreen(updater: InAppUpdater? = null) {
     val sound = remember { SoundManager.get(context) }
     if (updater != null) UpdatePrompt(updater, snackbar)
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackbar) },
-        bottomBar = {
-            MainMenuBar(
-                selected = selectedTab,
-                onSelect = { tab ->
+    // Introduction (ui/tutorial): shown once to every player, again via Optionen. Closes open panels.
+    val settings = remember { GameSettings.get(context) }
+    val tutorialSeen by settings.tutorialSeenFlow.collectAsStateWithLifecycle()
+    LaunchedEffect(tutorialSeen) { if (!tutorialSeen) selectedTab = null }
+    var adventureBounds by remember { mutableStateOf(Rect.Zero) }
+    val tabBounds = remember { mutableStateMapOf<MainTab, Rect>() }
+
+    Box(Modifier.fillMaxSize()) {
+        Scaffold(
+            snackbarHost = { SnackbarHost(snackbar) },
+            bottomBar = {
+                MainMenuBar(
+                    selected = selectedTab,
+                    onTabPositioned = { tab, rect -> tabBounds[tab] = rect },
+                    onSelect = { tab ->
+                        sound.play(Sfx.CLICK)
+                        selectedTab = if (selectedTab == tab) null else tab
+                    },
+                )
+            },
+        ) { innerPadding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .onGloballyPositioned { adventureBounds = it.boundsInRoot() },
+            ) {
+                // Owned by the Spielwelt agent (ui/adventure).
+                AdventureScreen()
+                selectedTab?.let { TabPanel(it) }
+            }
+        }
+        if (!tutorialSeen) {
+            TutorialOverlay(
+                anchors = TutorialAnchors(adventureBounds, MainTab.entries.map { tabBounds[it] ?: Rect.Zero }),
+                onFinish = {
                     sound.play(Sfx.CLICK)
-                    selectedTab = if (selectedTab == tab) null else tab
+                    settings.tutorialSeen = true
                 },
             )
-        },
-    ) { innerPadding ->
-        Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-            // Owned by the Spielwelt agent (ui/adventure).
-            AdventureScreen()
-            selectedTab?.let { TabPanel(it) }
         }
     }
 }
 
 @Composable
-private fun MainMenuBar(selected: MainTab?, onSelect: (MainTab) -> Unit) {
+private fun MainMenuBar(selected: MainTab?, onTabPositioned: (MainTab, Rect) -> Unit, onSelect: (MainTab) -> Unit) {
     NavigationBar {
         MainTab.entries.forEach { tab ->
             val label = stringResource(tab.label)
             NavigationBarItem(
                 selected = selected == tab,
                 onClick = { onSelect(tab) },
+                modifier = Modifier.onGloballyPositioned { onTabPositioned(tab, it.boundsInRoot()) },
                 icon = { Icon(tab.icon, contentDescription = label) },
                 label = { Text(label, maxLines = 1) },
             )

@@ -138,4 +138,7 @@
     <string name="options_share_chooser">Share Idle RPG</string>
     <string name="options_share_text">I\'m playing Idle RPG: your hero roams the land and defeats monsters automatically. Give it a try: %1$s</string>
     <string name="options_share_unavailable">No app found to share with.</string>
+    <string name="options_help_title">Help</string>
+    <string name="options_help_description">The short introduction explains combat, zones, stat points, gear and the shop.</string>
+    <string name="options_help_replay">Show introduction again</string>
 </resources>

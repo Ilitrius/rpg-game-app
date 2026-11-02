@@ -31,6 +31,7 @@ import androidx.compose.material.icons.outlined.OpenInBrowser
 import androidx.compose.material.icons.outlined.PrivacyTip
 import androidx.compose.material.icons.outlined.SaveAlt
 import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.School
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material.icons.outlined.Tune
@@ -216,6 +217,7 @@ fun OptionsScreen() {
                     (context as? android.app.Activity)?.recreate()
                 }
             })
+            HelpCard(onReplayTutorial = { settings.tutorialSeen = false })
             RateShareCard(
                 onRate = { if (!AppLinks.openRating(context)) notify(context.getString(R.string.options_rate_unavailable)) },
                 onShare = { if (!AppLinks.share(context)) notify(context.getString(R.string.options_share_unavailable)) },
@@ -290,6 +292,24 @@ fun OptionsScreen() {
                 TextButton(onClick = { showPrivacySummary = false }) { Text(stringResource(R.string.options_error_ok)) }
             },
         )
+    }
+}
+
+@Composable
+private fun HelpCard(onReplayTutorial: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            SectionHeader(Icons.Outlined.School, stringResource(R.string.options_help_title))
+            Text(
+                stringResource(R.string.options_help_description),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            ActionButton(Icons.Outlined.School, stringResource(R.string.options_help_replay), primary = false, onClick = onReplayTutorial)
+        }
     }
 }
 

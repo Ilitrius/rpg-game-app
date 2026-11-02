@@ -146,4 +146,7 @@
     <string name="options_share_chooser">Idle RPG teilen</string>
     <string name="options_share_text">Ich spiele Idle RPG: Dein Held zieht automatisch durch die Lande und besiegt Monster. Probier es aus: %1$s</string>
     <string name="options_share_unavailable">Keine App zum Teilen gefunden.</string>
+    <string name="options_help_title">Hilfe</string>
+    <string name="options_help_description">Die kurze Einführung erklärt Kampf, Gebiete, Stat-Punkte, Ausrüstung und Shop.</string>
+    <string name="options_help_replay">Einführung erneut ansehen</string>
 </resources>

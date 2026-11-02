@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tutorial_progress">Step %1$d of %2$d</string>
+    <string name="tutorial_skip">Skip</string>
+    <string name="tutorial_back">Back</string>
+    <string name="tutorial_next">Next</string>
+    <string name="tutorial_finish">Let\'s go</string>
+
+    <string name="tutorial_welcome_title">Welcome, hero!</string>
+    <string name="tutorial_welcome_text">Your hero fights all on their own. Every victory brings experience and gold, sometimes gear too. Here is a quick look at the essentials.</string>
+    <string name="tutorial_tap_title">Strike yourself</string>
+    <string name="tutorial_tap_text">Tap the monster for extra hits. Quick streaks build up a combo. You don\'t have to tap to make progress, though.</string>
+    <string name="tutorial_zone_title">Zones and bosses</string>
+    <string name="tutorial_zone_text">This is your current zone. After enough victories you can challenge the boss. Defeat it and your hero moves on to the next zone. Tap the name to open the zone list.</string>
+    <string name="tutorial_character_title">Grow stronger</string>
+    <string name="tutorial_character_text">Every level up gives you stat points. Spend them on Strength, Dexterity, Vitality and Luck in the Character tab. You\'ll also find goals and the daily reward there.</string>
+    <string name="tutorial_gear_title">Gear and shop</string>
+    <string name="tutorial_gear_text">Equip the loot you find under Equipment and sell what you don\'t need. In the shop you spend your gold on new weapons and armor.</string>
+    <string name="tutorial_offline_title">Even while you\'re away</string>
+    <string name="tutorial_offline_text">Your hero keeps fighting when you close the app (up to 8 hours, at a lower rate). In Options you can back up your save and watch this introduction again.</string>
+</resources>

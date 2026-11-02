@@ -7,7 +7,7 @@ Quelle der Ablehnung: Programmrichtlinien + Play-Console-Anforderungen. Genauen 
 - Splash-Screen (AndroidX SplashScreen) und Versionsanzeige (Optionen → „Über Idle RPG“) ab rc10 (aktuell rc16).
 
 - `allowBackup="false"` (Spielstand wird nicht in Google Drive gesichert → "nur lokal" in der Datenschutzerklärung stimmt).
-- versionCode 16 / `0.1.0-rc16` (neu: Optionen → „Bewerten & teilen“) für den Neueinreichungs-Build.
+- versionCode 16 / `0.1.0-rc16` (neu: Einführung/Tutorial, Optionen → „Bewerten & teilen“ und „Hilfe“, alle Sprachen im Bundle) für den Neueinreichungs-Build.
 - Policy-Basis: https://play.google/developer-content-policy/ (das ist die Richtlinie, **keine** Datenschutzerklärungs-URL).
 
 ## Datenschutzerklärung

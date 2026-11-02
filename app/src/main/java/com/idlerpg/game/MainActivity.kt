@@ -9,6 +9,9 @@ import com.idlerpg.game.ui.options.GameSettings
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -57,8 +60,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             IdleRPGTheme {
                 MainScreen(updater = updater)
-                BackupReminderDialog()
-                DonationHintDialog()
+                // Start-up dialogs never stack on the introduction: not at all on a start that shows it.
+                val settings = GameSettings.get(this)
+                val tutorialSeen by settings.tutorialSeenFlow.collectAsStateWithLifecycle()
+                val tutorialThisStart = rememberSaveable { !settings.tutorialSeen }
+                if (tutorialSeen && !tutorialThisStart) {
+                    BackupReminderDialog()
+                    DonationHintDialog()
+                }
             }
         }
     }

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tutorial_progress">Schritt %1$d von %2$d</string>
+    <string name="tutorial_skip">Überspringen</string>
+    <string name="tutorial_back">Zurück</string>
+    <string name="tutorial_next">Weiter</string>
+    <string name="tutorial_finish">Los geht\'s</string>
+
+    <string name="tutorial_welcome_title">Willkommen, Held!</string>
+    <string name="tutorial_welcome_text">Dein Held kämpft ganz von allein. Jeder Sieg bringt Erfahrung und Gold, manchmal auch Ausrüstung. Hier zeigen wir dir kurz das Wichtigste.</string>
+    <string name="tutorial_tap_title">Selbst zuschlagen</string>
+    <string name="tutorial_tap_text">Tippe auf das Monster für zusätzliche Treffer. Schnelle Serien bauen eine Combo auf. Du musst aber nicht tippen, damit es vorangeht.</string>
+    <string name="tutorial_zone_title">Gebiete und Bosse</string>
+    <string name="tutorial_zone_text">Hier siehst du dein Gebiet. Nach genug Siegen kannst du den Boss herausfordern. Besiegst du ihn, zieht dein Held ins nächste Gebiet. Tippe auf den Namen, um die Gebietsliste zu öffnen.</string>
+    <string name="tutorial_character_title">Stärker werden</string>
+    <string name="tutorial_character_text">Bei jedem Levelaufstieg bekommst du Stat-Punkte. Verteile sie im Charakter-Tab auf Stärke, Geschick, Vitalität und Glück. Dort findest du auch Ziele und die Tagesbelohnung.</string>
+    <string name="tutorial_gear_title">Ausrüstung und Shop</string>
+    <string name="tutorial_gear_text">Lege gefundene Beute unter Ausrüstung an und verkaufe, was du nicht brauchst. Im Shop gibst du dein Gold für neue Waffen und Rüstungen aus.</string>
+    <string name="tutorial_offline_title">Auch wenn du weg bist</string>
+    <string name="tutorial_offline_text">Dein Held kämpft weiter, wenn du die App schließt (bis zu 8 Stunden, mit geringerer Ausbeute). In den Optionen sicherst du deinen Spielstand und kannst diese Einführung erneut ansehen.</string>
+</resources>

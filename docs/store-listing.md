@@ -2,7 +2,7 @@
 
 **In der Play Console eingetragen: 2026-11-02.** Bei Funktionsänderungen (z. B. Tutorial) hier und in der Console nachziehen.
 
-Regeln: Titel max. 30 Zeichen, Kurzbeschreibung max. 80, Beschreibung max. 4000. Keine Keyword-Listen, keine Wörter wie „Beste“, „#1“, „Gratis“ in Titel/Kurzbeschreibung, keine Vergleiche mit anderen Spielen. Nur beschreiben, was im Build wirklich drin ist (Tutorial erst ergänzen, wenn umgesetzt).
+Regeln: Titel max. 30 Zeichen, Kurzbeschreibung max. 80, Beschreibung max. 4000. Keine Keyword-Listen, keine Wörter wie „Beste“, „#1“, „Gratis“ in Titel/Kurzbeschreibung, keine Vergleiche mit anderen Spielen. Nur beschreiben, was im Build wirklich drin ist. Tutorial ist ab rc16 drin: Zeile unten erst nach Veröffentlichung von rc16 in der Console ergänzen.
 
 Keywords (natürlich eingebaut): Idle RPG, Idle-Rollenspiel, Ich-Perspektive, Monster, Beute/Loot, Ausrüstung, Held, Level, Bosse, offline, Clicker.
 
@@ -123,6 +123,10 @@ The game has no purchases. If you enjoy it, you can make a voluntary donation in
 
 Start now, and your hero sets out on their journey.
 ```
+
+## Ergänzung ab rc16 (nach Veröffentlichung einfügen)
+- DE, nach „SPIELSTAND SICHERN“: `EINFACHER EINSTIEG` / `Eine kurze Einführung zeigt dir beim ersten Start das Wichtigste. Du kannst sie überspringen und jederzeit in den Optionen erneut ansehen.`
+- EN: `EASY START` / `A short introduction shows you the essentials on first launch. You can skip it and watch it again any time in the options.`
 
 ## Vor dem Einfügen prüfen
 - Fakten gegen den hochgeladenen Build: 100 Zonen, Auto-Boss, Combo, Ziele/Tagesbelohnung/Statistiken, Sound, Sprachwahl (alle seit rc9+ im Code).
