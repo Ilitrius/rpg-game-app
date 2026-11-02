@@ -2,4 +2,16 @@
 <resources>
     <!-- Play Console > Spiel > Play Games Services > Konfiguration: numerische Projekt-ID eintragen. -->
     <string name="game_services_project_id" translatable="false">000000000000</string>
+
+    <!-- Erfolgs-IDs aus der Play Console (Erfolge). Leer = noch nicht angelegt, wird übersprungen. -->
+    <string name="achievement_kills_100" translatable="false"></string>
+    <string name="achievement_kills_1000" translatable="false"></string>
+    <string name="achievement_kills_10000" translatable="false"></string>
+    <string name="achievement_level_10" translatable="false"></string>
+    <string name="achievement_level_50" translatable="false"></string>
+    <string name="achievement_level_100" translatable="false"></string>
+    <string name="achievement_boss_first" translatable="false"></string>
+    <string name="achievement_boss_10" translatable="false"></string>
+    <string name="achievement_zones_10" translatable="false"></string>
+    <string name="achievement_gold_1m" translatable="false"></string>
 </resources>

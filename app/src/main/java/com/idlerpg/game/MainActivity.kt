@@ -13,7 +13,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 import com.idlerpg.game.audio.SoundManager
+import com.idlerpg.game.games.LocalPlayGames
+import com.idlerpg.game.games.PlayGamesManager
 import com.idlerpg.game.ui.MainScreen
 import com.idlerpg.game.update.InAppUpdater
 import com.idlerpg.game.ui.options.BackupReminderDialog
@@ -23,10 +29,14 @@ import com.idlerpg.game.ui.theme.IdleRPGTheme
 class MainActivity : ComponentActivity() {
     // Created during construction: registers an activity-result launcher (Play in-app update).
     private val updater = InAppUpdater(this)
+    private val playGames = PlayGamesManager(this)
 
     // Sound plays only while the activity is visible (SoundPool is released in the background).
     private val soundLifecycle = object : DefaultLifecycleObserver {
-        override fun onStart(owner: LifecycleOwner) = SoundManager.get(this@MainActivity).onForeground()
+        override fun onStart(owner: LifecycleOwner) {
+            SoundManager.get(this@MainActivity).onForeground()
+            playGames.refresh()
+        }
         override fun onStop(owner: LifecycleOwner) = SoundManager.get(this@MainActivity).onBackground()
     }
 
@@ -49,16 +59,24 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         lifecycle.addObserver(soundLifecycle)
+        // Achievements follow the saved game; sync re-runs when sign-in completes.
+        val repository = (application as IdleRpgApp).repository
+        lifecycleScope.launch {
+            combine(repository.state, playGames.signedIn) { state, _ -> state }
+                .collect { playGames.sync(it) }
+        }
         // Game is always dark-themed, so force light system bar icons
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
         )
         setContent {
-            IdleRPGTheme {
-                MainScreen(updater = updater)
-                BackupReminderDialog()
-                DonationHintDialog()
+            CompositionLocalProvider(LocalPlayGames provides playGames) {
+                IdleRPGTheme {
+                    MainScreen(updater = updater)
+                    BackupReminderDialog()
+                    DonationHintDialog()
+                }
             }
         }
     }

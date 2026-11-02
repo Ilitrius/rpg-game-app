@@ -57,6 +57,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -205,6 +206,7 @@ fun OptionsScreen() {
             )
 
             val autoBoss by settings.autoBossFlow.collectAsStateWithLifecycle()
+            PlayGamesCard()
             AutoBossCard(autoBoss = autoBoss, onChange = { settings.autoBoss = it })
 
             val language by settings.languageFlow.collectAsStateWithLifecycle()
@@ -439,6 +441,34 @@ private fun SoundCard(
                     enabled = soundOn,
                     modifier = Modifier.weight(1f),
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PlayGamesCard() {
+    val games = com.idlerpg.game.games.LocalPlayGames.current ?: return
+    val signedIn by games.signedIn.collectAsState()
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SectionHeader(Icons.Outlined.Tune, stringResource(R.string.games_title))
+            Text(
+                stringResource(if (signedIn) R.string.games_signed_in else R.string.games_description),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (signedIn) {
+                androidx.compose.material3.Button(onClick = { games.showAchievements() }) {
+                    Text(stringResource(R.string.games_show_achievements))
+                }
+            } else {
+                androidx.compose.material3.Button(onClick = { games.signIn() }) {
+                    Text(stringResource(R.string.games_sign_in))
+                }
             }
         }
     }

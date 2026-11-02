@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="games_title">Game account</string>
+    <string name="games_description">Sign in to Google Play Games to unlock achievements.</string>
+    <string name="games_signed_in">Signed in to Google Play Games.</string>
+    <string name="games_sign_in">Sign in</string>
+    <string name="games_show_achievements">Show achievements</string>
+</resources>
