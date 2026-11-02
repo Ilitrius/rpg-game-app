@@ -7,6 +7,7 @@ import com.idlerpg.game.data.EquipmentSlot
 import com.idlerpg.game.data.GameState
 import com.idlerpg.game.data.Item
 import com.idlerpg.game.data.Stats
+import com.idlerpg.game.domain.prestige.PrestigeBonuses
 import kotlin.math.floor
 import kotlin.random.Random
 
@@ -124,12 +125,32 @@ data class CombatStats(
             return base.copy(damageMin = min, damageMax = floor(base.damageMax * m).toInt().coerceAtLeast(min))
         }
 
-        /** Convenience: combat values for the hero in [state]. */
-        fun of(state: GameState): CombatStats = compute(
-            base = state.character.stats,
-            level = state.character.level,
-            equipped = state.equipment.equipped.values,
+        /** Convenience: combat values for the hero in [state], incl. permanent prestige talents. */
+        fun of(state: GameState): CombatStats = withPrestige(
+            compute(
+                base = state.character.stats,
+                level = state.character.level,
+                equipped = state.equipment.equipped.values,
+            ),
+            PrestigeBonuses.of(state),
         )
+
+        /**
+         * Applies the rebirth talents to [c]: damage, HP, crit multiplier; attack speed (still capped at
+         * [MAX_ATTACKS_PER_SECOND]: the attack animation cannot go faster). Neutral bonuses return [c].
+         */
+        fun withPrestige(c: CombatStats, b: PrestigeBonuses): CombatStats {
+            if (b.isNeutral) return c
+            val min = floor(c.damageMin * b.damage).toInt().coerceAtLeast(c.damageMin)
+            val max = floor(c.damageMax * b.damage).toInt().coerceAtLeast(min)
+            return c.copy(
+                damageMin = min,
+                damageMax = max,
+                attacksPerSecond = (c.attacksPerSecond * b.speed).coerceAtMost(MAX_ATTACKS_PER_SECOND).coerceAtLeast(c.attacksPerSecond),
+                maxHp = floor(c.maxHp * b.hp).toInt().coerceAtLeast(c.maxHp),
+                critMultiplier = (c.critMultiplier + b.critBonus).coerceAtMost(MAX_CRIT_MULTIPLIER + b.critBonus),
+            )
+        }
 
         /**
          * Computes all derived values.

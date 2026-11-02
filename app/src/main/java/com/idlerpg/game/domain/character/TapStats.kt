@@ -1,6 +1,9 @@
 package com.idlerpg.game.domain.character
 
+import com.idlerpg.game.data.GameState
 import com.idlerpg.game.data.Stats
+import com.idlerpg.game.domain.buffs.Buffs
+import com.idlerpg.game.domain.prestige.PrestigeBonuses
 import kotlin.math.min
 import kotlin.random.Random
 
@@ -50,23 +53,32 @@ object TapStats {
     /** Combo count at which [MAX_COMBO_MULTIPLIER] is reached (25). */
     val comboCap: Int get() = Math.round((MAX_COMBO_MULTIPLIER - 1.0) / COMBO_PER_TAP).toInt()
 
-    private fun scale(combat: CombatStats, combo: Int) =
-        TAP_DAMAGE_FACTOR * clickMultiplier(combat.totalStats) * comboMultiplier(combo)
+    /**
+     * Extra tap multiplier from outside the stats: active [Buffs.CLICK] buff x prestige click talent.
+     * 1.0 = none. Pass it as `bonus` to [tapHit] (the fight loop passes the current state).
+     */
+    fun clickBonus(state: GameState): Double =
+        Buffs.bonus(state, Buffs.CLICK) * PrestigeBonuses.of(state).click
 
-    /** Damage of a tap with the given roll [base] damage, min [MIN_TAP_DAMAGE]. */
-    fun tapDamage(combat: CombatStats, base: Long, combo: Int): Long =
-        Math.round(base * scale(combat, combo)).coerceAtLeast(MIN_TAP_DAMAGE)
+    private fun scale(combat: CombatStats, combo: Int, bonus: Double = 1.0) =
+        TAP_DAMAGE_FACTOR * clickMultiplier(combat.totalStats) * comboMultiplier(combo) * bonus.coerceAtLeast(0.0)
+
+    /** Damage of a tap with the given roll [base] damage, min [MIN_TAP_DAMAGE]. [bonus] see [clickBonus]. */
+    fun tapDamage(combat: CombatStats, base: Long, combo: Int, bonus: Double = 1.0): Long =
+        Math.round(base * scale(combat, combo, bonus)).coerceAtLeast(MIN_TAP_DAMAGE)
 
     /** Min damage of a non-crit tap at [combo]. */
-    fun minTapDamage(combat: CombatStats, combo: Int = 0): Long = tapDamage(combat, combat.damageMin.toLong(), combo)
+    fun minTapDamage(combat: CombatStats, combo: Int = 0, bonus: Double = 1.0): Long =
+        tapDamage(combat, combat.damageMin.toLong(), combo, bonus)
 
     /** Max damage of a non-crit tap at [combo]. */
-    fun maxTapDamage(combat: CombatStats, combo: Int = 0): Long = tapDamage(combat, combat.damageMax.toLong(), combo)
+    fun maxTapDamage(combat: CombatStats, combo: Int = 0, bonus: Double = 1.0): Long =
+        tapDamage(combat, combat.damageMax.toLong(), combo, bonus)
 
     /** Rolls one tap (damage roll + crit as for auto attacks, then scaled). Crit flag is kept. */
-    fun tapHit(combat: CombatStats, combo: Int, random: Random = Random.Default): Hit {
+    fun tapHit(combat: CombatStats, combo: Int, random: Random = Random.Default, bonus: Double = 1.0): Hit {
         val hit = combat.rollHit(random)
-        return Hit(tapDamage(combat, hit.damage, combo), hit.critical)
+        return Hit(tapDamage(combat, hit.damage, combo, bonus), hit.critical)
     }
 
     /** Expected tap DPS (incl. crits) at [tapsPerSecond] with a full combo. */

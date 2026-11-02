@@ -57,3 +57,6 @@
 
 ## Buffs & Rast (Spielwelt)
 - [2026-11-02] Buff-API für andere Agenten: `Buffs.add(state, type, magnitude, durationMillis, source)` (pur, in dasselbe `repository.update` wie Kauf/Belohnung packen); Typen `Buffs.DAMAGE/XP/GOLD/DROP/REGEN/CLICK`. Laufzeit zählt nur aktive Spielzeit. `CLICK` ist definiert, aber noch nicht an `TapStats` angebunden (charakter).
+
+## Prestige (Wiedergeburt)
+- [2026-11-02] API: `Prestige.canRebirth/soulsPreview/rebirth(state, now)/buyTalent(state,id,PayWith)/respec/trackBest(state)`, Boni `PrestigeBonuses.of(state)` (`xp/gold/drop` Multiplikatoren, `extraSlots`, `restFactor`, `comboWindowMillis`). Einbindung von xp/gold/drop/extraSlots/restFactor/Combo-Fenster in Kampfschleife, Loot, Inventarkapazität und Rast machen spielwelt/ausruestung; `trackBest` nach Level-up/Zonenfreischaltung aufrufen. `inventoryExtraSlots` bleibt bei Wiedergeburt erhalten. Import-Regeln: Talentstufe <= Max, `goldTalentLevels[id]*2 <= talents[id]`, unbekannte IDs verwerfen, `bestZoneOrder <= 100`, `bestLevel <= 999`.

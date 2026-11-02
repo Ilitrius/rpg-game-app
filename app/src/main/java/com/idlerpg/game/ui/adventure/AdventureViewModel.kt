@@ -351,7 +351,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
     fun onEnemyTapped(): Hit? {
         val hero = stats ?: return null
         if (!foreground) return null
-        val hit = TapStats.tapHit(hero, combo.peekNext(SystemClock.elapsedRealtime()))
+        val hit = TapStats.tapHit(hero, combo.peekNext(SystemClock.elapsedRealtime()), bonus = TapStats.clickBonus(buffState))
         var applied = false
         _ui.update { st ->
             val n = applyTapHit(st, hit)
