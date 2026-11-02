@@ -11,16 +11,26 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextMeasurer
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import com.idlerpg.game.data.EquipmentSlot
 import com.idlerpg.game.data.Item
 import com.idlerpg.game.data.Rarity
 import com.idlerpg.game.domain.character.StarterItems
+import com.idlerpg.game.domain.equipment.Enchanting
 import com.idlerpg.game.domain.equipment.ItemBaseTypes
 import com.idlerpg.game.ui.equipment.ItemPainters.drawAmulet
 import com.idlerpg.game.ui.equipment.ItemPainters.drawAxeIcon
@@ -36,6 +46,7 @@ import com.idlerpg.game.ui.equipment.ItemPainters.drawRing
 import com.idlerpg.game.ui.equipment.ItemPainters.drawSwordIcon
 import com.idlerpg.game.ui.equipment.ItemPainters.drawTalisman
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 /** Rarity color: Gewöhnlich grau, Ungewöhnlich grün, Selten blau, Episch lila, Legendär orange. */
 fun rarityColor(rarity: Rarity): Color = when (rarity) {
@@ -58,11 +69,17 @@ fun ItemIcon(
     modifier: Modifier = Modifier,
     framed: Boolean = true,
     contentDescription: String? = itemDisplayName(item),
+    showEnchant: Boolean = true,
 ) {
     val sem = if (contentDescription != null) Modifier.semantics { this.contentDescription = contentDescription } else Modifier
+    val sprite = rememberItemSprite(item)
+    val measurer = rememberTextMeasurer()
+    val enchant = if (showEnchant && framed) Enchanting.level(item) else 0
     Canvas(modifier.then(sem)) {
         if (framed) drawRarityFrame(item.rarity)
-        drawFitted(inset = if (framed) 0.1f else 0f) { drawItemGraphic(item) }
+        val inset = if (framed) 0.1f else 0f
+        if (sprite != null) drawSprite(sprite, inset * 0.4f) else drawFitted(inset) { drawItemGraphic(item) }
+        if (enchant > 0) drawEnchantBadge(measurer, enchant)
     }
 }
 
@@ -81,6 +98,41 @@ fun EmptySlotIcon(slot: EquipmentSlot, modifier: Modifier = Modifier, contentDes
         drawFitted(inset = 0.16f) { drawItemGraphic(placeholder) }
         drawContext.canvas.restore()
     }
+}
+
+/** "+N" enchant level in a small dark pill at the top-left corner of the tile. */
+private fun DrawScope.drawEnchantBadge(measurer: TextMeasurer, level: Int) {
+    val side = min(size.width, size.height)
+    val text = measurer.measure(
+        "+$level",
+        TextStyle(fontSize = (side * 0.22f).toSp(), fontWeight = FontWeight.Bold, color = Color(0xFFFFD36A)),
+    )
+    val padX = side * 0.05f
+    val padY = side * 0.015f
+    val margin = side * 0.07f
+    val w = text.size.width + 2 * padX
+    val h = text.size.height + 2 * padY
+    drawRoundRect(
+        Color.Black.copy(alpha = 0.62f),
+        topLeft = Offset(margin, margin), size = Size(w, h), cornerRadius = CornerRadius(h * 0.35f),
+    )
+    drawText(text, topLeft = Offset(margin + padX, margin + padY))
+}
+
+/** Draws a pre-rendered item sprite centered in the draw area (with [inset] fraction margin). */
+private fun DrawScope.drawSprite(sprite: ImageBitmap, inset: Float) {
+    val side = (min(size.width, size.height) * (1f - 2f * inset)).roundToInt().coerceAtLeast(1)
+    val x = ((size.width - side) / 2f).roundToInt()
+    val y = ((size.height - side) / 2f).roundToInt()
+    // Medium (mipmapped) filtering when shrinking a lot, bicubic otherwise.
+    val quality = if (side < sprite.width * 0.7f) FilterQuality.Medium else FilterQuality.High
+    drawImage(
+        sprite,
+        srcSize = IntSize(sprite.width, sprite.height),
+        dstOffset = IntOffset(x, y),
+        dstSize = IntSize(side, side),
+        filterQuality = quality,
+    )
 }
 
 /** Scales the 100 × 100 unit icon space into the draw area (centered, with [inset] fraction margin). */

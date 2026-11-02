@@ -16,3 +16,7 @@
 *.jks
 *.keystore
 /release/
+
+# Python caches
+__pycache__/
+*.pyc

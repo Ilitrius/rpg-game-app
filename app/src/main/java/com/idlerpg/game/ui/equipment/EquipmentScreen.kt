@@ -525,7 +525,7 @@ private fun ItemDetailSheet(
         ) {
             SheetBackBar(onDismiss)
             Row(verticalAlignment = Alignment.CenterVertically) {
-                ItemIcon(item, Modifier.size(112.dp))
+                ItemIcon(item, Modifier.size(112.dp), showEnchant = false)
                 Spacer(Modifier.width(16.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(itemDisplayName(item), style = MaterialTheme.typography.titleLarge, color = rarityColor(item.rarity), fontWeight = FontWeight.SemiBold)
@@ -701,7 +701,7 @@ private fun ComparisonBlock(state: GameState, item: Item) {
             // embedded in a sentence template ("Vergleich mit Robuste Lederstiefel").
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (equipped != null) {
-                    ItemIcon(equipped, Modifier.size(40.dp), contentDescription = null)
+                    ItemIcon(equipped, Modifier.size(40.dp), contentDescription = null, showEnchant = false)
                 } else {
                     EmptySlotIcon(item.slot, Modifier.size(40.dp))
                 }

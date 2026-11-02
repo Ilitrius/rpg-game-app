@@ -6,6 +6,7 @@ Kills geben XP (→ Stat-Punkte frei verteilbar; Stats bestimmen, wie schnell Mo
 ## Grafik-Regel
 - **Nur hochauflösende Grafik.** Keine Pixel-Art, keine Low-Res-Sprites, keine primitiven Platzhalter als finale Grafik.
 - Vektor (VectorDrawable/SVG) bevorzugt; Bitmaps nur in xxxhdpi als WebP; Rendering mit `FilterQuality.High`. Zielauflösung 1080x2400+.
+- **Realistische Items (seit 2026-11-02):** Item-Grafik sind selbst gerenderte Raytracing-Bilder (512 px WebP, `drawable-nodpi/item_*.webp`, Quelle `tools/render_items`, siehe dortige README). Anzeige über `ui/equipment/ItemSprites` + `ItemIcon` (off-Main decodiert, LRU-Cache 24 MB), Vektor-Zeichner `ItemPainters` bleiben als Fallback. Neue Item-Typen: Modell in `tools/render_items`, Bilder rendern, in `ItemSprites.resFor` eintragen. Noch Vektor: Waffen in der Hand (`ui/character/weapon`, Ich-Perspektive/Paper-Doll/Charakter-Tab), Monster, Hintergründe.
 
 ## Agenten pro Menü-Feld
 Jedes Feld im Menüband hat eigenen Agenten in `.claude/agents/`: `charakter`, `ausruestung`, `shop`, `optionen`.
@@ -60,17 +61,17 @@ Zusätzlich `spielwelt`: Abenteuer-Ansicht (Ich-Perspektive), Gebiete, Monster, 
 - Git-Identität nur repo-lokal gesetzt (Ilitrius / rene.puf@gmail.com)
 
 ## Stand & nächste Schritte (Ende 2026-10-28)
-- Version `0.1.0-rc17` (versionCode 17), Branch `claude/synchronisierung-9eed30` (Merge aus rc16-Tutorial/Teilen, Play Games, Prestige + Zurück-Pfeil `ui/SheetBackButton` in allen Bottom-Sheets); im Emulator geprüft (Pixel_API35), Debug-Build + Unit-Tests + Lint grün. Play-Games-IDs in `games_ids.xml` noch Platzhalter. Offen: signiertes Bundle baut der Nutzer lokal.
+- Version `0.1.0-rc18` (versionCode 18, Stand 2026-11-02): realistische Item-Grafik (Raytracing-Bilder `tools/render_items`, `ItemSprites`), "+N"-Verzauberungs-Abzeichen im Item-Icon (`ItemIcon`, `showEnchant`), Elixier-Texte ohne "%%"; Debug-Build + Lint + Unit-Tests grün, im Emulator geprüft. Basis rc17 (Branch `claude/synchronisierung-9eed30`, Merge aus rc16-Tutorial/Teilen, Play Games, Prestige + Zurück-Pfeil `ui/SheetBackButton` in allen Bottom-Sheets); im Emulator geprüft (Pixel_API35), Debug-Build + Unit-Tests + Lint grün. Play-Games-IDs in `games_ids.xml` noch Platzhalter. Offen: signiertes Bundle baut der Nutzer lokal.
 - Neu seit rc8: 100 Zonen (19 Biome x 5 Stufen, Auto-Wechsel nach Bosssieg, prozedurale Grafik), Clicker + Combo (`TapStats`, `ComboTracker`), Auto-Boss (`AutoBossGate`, Geräteeinstellung `autoBoss`), Zonenliste mit Biom-Köpfen, Schnellverkauf im Shop (nach Seltenheit + "Alles", Verbesserungen bleiben), Tagesbelohnung + Ziele, Statistiken, Backup-Erinnerung, HUD-Hinweispunkt.
 - Offen: Prestige/Wiedergeburt (erst Plan, greift stark in Zonen/Save ein), Release-Skript für signiertes Bundle (`.\gradlew.bat bundleRelease` macht der Nutzer lokal, Key liegt dort), neue Play-Store-Screenshots (Gerät/Emulator nötig).
 - Vor dem Release auf Gerät prüfen: neue Zonengrafik (Uhrwerk-Zahnräder wirken klumpig), Zonenliste, Karten im Charakter-Tab, Hinweispunkt. Auto-Wechsel greift auch bei erneutem Sieg über alten Boss (ggf. nur beim ersten Sieg); Ziele rücken per Katalogreihenfolge nach (nicht gleicher Typ).
 - Arbeitsweise: Nutzer will vor größeren Aufgaben einen durchdachten Plan; Aufgaben an Feld-Agenten delegieren, Agenten committen/pushen selbst, Haupt-Thread committet nichts Halbfertiges. Cloud-Build: `bash gradlew testDebugUnitTest assembleDebug -Pkotlin.compiler.execution.strategy=in-process` (SDK `/opt/android-sdk`, Maven kann 429 liefern; Vorschau-Tests brauchen Robolectric-Jars). Vorschaubilder: `app/build/zone-preview/` (Test `ZonePreviewTest`).
 
 ## Release-Benennung
-- Release-Kandidaten heißen wie die App + Versionsnummer + Release-Nummer: `Idle-RPG-<versionName>-<variant>.apk/.aab`, z. B. `Idle-RPG-0.1.0-rc17-release.aab` (`versionName` = `0.1.0-rc17` einmal in `app/build.gradle.kts` als `appVersionName`, setzt auch `archivesName`). Bei jedem neuen rc `appVersionName` + `versionCode` hochzählen.
+- Release-Kandidaten heißen wie die App + Versionsnummer + Release-Nummer: `Idle-RPG-<versionName>-<variant>.apk/.aab`, z. B. `Idle-RPG-0.1.0-rc18-release.aab` (`versionName` = `0.1.0-rc17` einmal in `app/build.gradle.kts` als `appVersionName`, setzt auch `archivesName`). Bei jedem neuen rc `appVersionName` + `versionCode` hochzählen.
 
 ## Befehle
 - Build: `.\gradlew.bat assembleDebug`
 - Emulator: `D:\Android\Sdk\emulator\emulator.exe -avd Pixel_API35`
-- Install + Start: `adb install -r app\build\outputs\apk\debug\Idle-RPG-0.1.0-rc17-debug.apk; adb shell am start -n com.rp.IDLEGAMERP/com.idlerpg.game.MainActivity`
+- Install + Start: `adb install -r app\build\outputs\apk\debug\Idle-RPG-0.1.0-rc18-debug.apk; adb shell am start -n com.rp.IDLEGAMERP/com.idlerpg.game.MainActivity`
 - Screenshot: `adb exec-out screencap -p > shot.png` (in cmd, nicht PowerShell — PS zerstört Binär-Pipe)

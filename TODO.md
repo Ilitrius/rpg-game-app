@@ -9,7 +9,8 @@ Legende: `[ ]` offen · `[x]` erledigt
 
 ## Offen: Neue, realistischere Grafik (Wunsch des Nutzers, Stand 2026-11-02)
 Ziel: Die Grafik soll deutlich authentischer und realistischer aussehen. Noch nicht geplant oder umgesetzt; vor Beginn erst einen Plan zur Freigabe erstellen.
-- [ ] **Items** (Waffen, Rüstungen, Helme, Handschuhe, Stiefel, Amulette, Ringe, Elixiere): `ItemIcon`, `ui/character/weapon` (Faust, Waffen in der Hand) und Paper-Doll wirken authentischer und realistischer.
+- [x] **Items, Inventar-/Shop-/Ausrüstungs-Symbole** (2026-11-02): alle 16 Item-Typen als Raytracing-Bilder (45 WebP, 1,6 MB, `tools/render_items`), `ItemSprites` + `ItemIcon` mit Vektor-Fallback. Emulator-Messung beim Inventar-Scrollen: 0 % statt 17 % ruckelnde Frames, +21 MB Speicher.
+- [ ] **Items, Rest:** Waffen in der Hand (Ich-Perspektive `FirstPersonWeapon`, Paper-Doll, Charakter-Tab `WeaponImage`) noch Vektor; Elixier-Symbole im Shop; Feinschliff Lederkappe, Lederwams, Plattenstiefel (wirken noch einfach); Edelstein-Funkeln.
 - [ ] **Monster**: `ProceduralMonsters` und Boss-Grafiken deutlich realistischer statt Cartoon-/Vektor-Stil.
 - [ ] **Hintergründe**: `BiomeStyles` / `BiomeScene` (100 Zonen, 19 Biome) deutlich realistischer.
 - Offene Fragen für den Plan: Bisherige Grafik-Regel (CLAUDE.md) bevorzugt Vektor und prozedurale Zeichnung; für Realismus sind vermutlich Bitmaps nötig (nur xxxhdpi, WebP, `FilterQuality.High`). Dann Quelle der Bilder klären (Lizenz, KI-generiert, Stil einheitlich), APK-/Bundle-Größe (aktuell ca. 5 MB) und Ladezeit/Speicher prüfen, Reihenfolge festlegen (z. B. erst eine Zone + ein Monster + eine Waffe als Stilprobe).

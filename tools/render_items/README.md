@@ -1,0 +1,31 @@
+# Item-Renderer (realistische Item-Grafik)
+
+Offline-Raytracer (Python, numpy + Pillow), der die Item-Bilder erzeugt. Die Ergebnisse liegen als
+512-px-WebP mit Alpha in `app/src/main/res/drawable-nodpi/item_*.webp` und werden von
+`ui/equipment/ItemSprites.kt` / `ItemIcon` verwendet (Vektor-Zeichner als Fallback).
+
+## Aufruf
+
+```bash
+python -I tools/render_items/render.py all --rarity all --size 704   # alle 45 Bilder (ca. 70 s, parallel)
+python -I tools/render_items/render.py mace --rarity epic --out <ordner>   # einzelnes Item
+```
+
+- `--size`: Render-Auflösung (Supersampling), `--out-size`: Ausgabegröße (Standard 512).
+- Items mit Edelstein (`short_sword`, `mace`, `axe`, `silver_ring`, `gold_ring`, `amulet`, `talisman`)
+  entstehen je Seltenheit (`item_<name>_<common|uncommon|rare|epic|legendary>.webp`), alle anderen einmal.
+
+## Aufbau
+
+- `sdf.py`: Renderer (orthografisches Sphere-Tracing von Signed-Distance-Feldern, weiche Schatten,
+  Umgebungsverdunkelung, Studio-Umgebung für Spiegelungen, Fresnel, Material-Bumps, Drop-Shadow, Auto-Bildausschnitt).
+- `items.py`: Materialien (Stahl, Messing, Silber, Leder, Edelstein, Rost), Hilfsfunktionen, Kurzschwert.
+- `items_weapons.py`, `items_armor.py`, `items_jewelry.py`: Modelle je Typ.
+- Neues Item: Builder schreiben (`(scene, materials, bounds, view_rotation)`), im `BUILDERS` des Moduls
+  eintragen, in `ItemSprites.resFor` zuordnen.
+
+## Hinweise
+
+- Alle Bilder sind selbst erzeugt (keine fremden Quellen, keine Lizenzfragen).
+- Größe: ca. 1,6 MB für alle 45 Bilder. Laufzeit: einmal off-Main decodiert, LRU-Cache 24 MB.
+- Nicht enthalten: Waffen in der Hand (Ich-Perspektive, Paper-Doll, Charakter-Tab) sind noch Vektor.

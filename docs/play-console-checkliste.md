@@ -7,7 +7,7 @@ Quelle der Ablehnung: Programmrichtlinien + Play-Console-Anforderungen. Genauen 
 - Splash-Screen (AndroidX SplashScreen) und Versionsanzeige (Optionen → „Über Idle RPG“) ab rc10 (aktuell rc17).
 
 - `allowBackup="false"` (Spielstand wird nicht in Google Drive gesichert → "nur lokal" in der Datenschutzerklärung stimmt).
-- versionCode 17 / `0.1.0-rc17` (neu: Zurück-Pfeil in allen Untermenüs, Wiedergeburt/Prestige, Play Games; rc16: Einführung/Tutorial, Optionen → „Bewerten & teilen“ und „Hilfe“, alle Sprachen im Bundle) für den Neueinreichungs-Build.
+- versionCode 18 / `0.1.0-rc18` (neu: realistische Item-Grafik, Verzauberungs-Abzeichen im Item-Icon; rc17: Zurück-Pfeil in allen Untermenüs, Wiedergeburt/Prestige, Play Games; rc16: Einführung/Tutorial, Optionen → „Bewerten & teilen“ und „Hilfe“, alle Sprachen im Bundle) für den Neueinreichungs-Build.
 - Policy-Basis: https://play.google/developer-content-policy/ (das ist die Richtlinie, **keine** Datenschutzerklärungs-URL).
 
 ## Datenschutzerklärung

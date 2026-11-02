@@ -704,7 +704,7 @@ private fun ComparisonBlock(state: GameState, item: Item) {
         Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             if (equipped != null) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    ItemIcon(equipped, Modifier.size(36.dp), contentDescription = null)
+                    ItemIcon(equipped, Modifier.size(36.dp), contentDescription = null, showEnchant = false)
                     Spacer(Modifier.width(10.dp))
                     Text(stringResource(R.string.shop_compare_title, itemDisplayName(equipped)), style = MaterialTheme.typography.titleSmall, color = rarityColor(equipped.rarity))
                 }
