@@ -31,7 +31,7 @@ Ziele-Baselines (`Goals`) werden beim Reset neu gesetzt, damit Zähler-Ziele nic
 ## 4. Seelen-Formel
 Seelen beim Reset (Vorschau live im Dialog):
 `souls = floor( (level / 50)^1.5 + zoneOrder^1.3 / 4 )` über den **aktuellen** Lauf, minus bereits ausgezahlte Seelen des Laufs nicht nötig (Reset beendet den Lauf).
-- Sperre: Wiedergeburt erst ab Level 50 **und** Zone 20 (verhindert Spam, Mindestgewinn ≥ 3 Seelen).
+- Sperre: Wiedergeburt erst ab Level 80 **und** Zone 20 (entschieden 2026-11-02; verhindert Spam). Mindestgewinn danach per Simulationstest prüfen.
 - Gedeckelt durch `MAX_LEVEL`/100 Zonen, Overflow-sicher (`Long`, saturierend).
 - Diminishing: Seelen-Bonus wirkt als `1 + 0.02 × Seelen-Talentstufen` additiv, nicht multiplikativ → kein Exponentialschuss.
 
@@ -41,7 +41,8 @@ Kosten pro Stufe: `base × (1 + stufe)^1.4`, Max-Stufen begrenzt.
 - **Kampf:** +3 % Schaden/Stufe (max 30), +2 % Angriffstempo (max 15), +4 % Max-HP (max 20), Krit-Multiplikator +0,05/Stufe.
 - **Beute/Klick:** +Drop-Qualität (`rarityBoost`), +Inventarplätze (+2/Stufe), Klick-Schaden +5 %/Stufe, Combo-Dauer.
 Alle Boni sind **Multiplikatoren auf die Endwerte**, angewendet an genau einer Stelle (`PrestigeBonuses.of(state)`), damit Balance prüfbar bleibt.
-Respec: gratis 1× pro Wiedergeburt (Seelen zurück, nur außerhalb des Kampfes im Dialog).
+Respec: **gratis** (entschieden), Seelen kommen vollständig zurück; nur im Dialog, außerhalb des Kampfes.
+Gold-Kauf (entschieden): Talente sind zusätzlich mit Gold kaufbar (Gold-Senke). Preis `goldCost = soulCost × 5000 × (1 + rebirths)`, Gold bleibt bis zum Reset normal (wird mit zurückgesetzt, daher nur vor der Wiedergeburt sinnvoll einsetzbar), max. 50 % der Stufen eines Talents per Gold; Rest nur mit Seelen. Faktor per Simulation kalibrieren.
 
 ## 6. Einbindung in bestehenden Code
 - `domain/prestige/Prestige.kt` (pure): `canRebirth`, `soulsPreview`, `rebirth(state, now)` → neuer `GameState`, `buyTalent`, `respec`. Zeit/Zufall injiziert (testbar).
@@ -81,8 +82,8 @@ Respec: gratis 1× pro Wiedergeburt (Seelen zurück, nur außerhalb des Kampfes 
 - Ziele/Tagesbelohnung dürfen durch Reset nicht doppelt auszahlbar werden → `progress` bleibt unberührt, Baselines neu.
 - Cloud-Umgebung hat kein Gerät: UI-Prüfung auf Emulator vor Release nötig.
 
-## 11. Offene Entscheidungen (bitte klären)
-1. Mindestanforderung (Level 50 + Zone 20) und Seelenkurve so ok, oder späteres Endgame-Gate (z. B. Zone 50)?
-2. Soll Gold-Anteil (Seelen gegen Gold kaufen) rein, oder nur Seelen als Währung?
-3. Respec gratis oder gegen Gold (Gold-Senke, Plan C)?
-4. Reihenfolge: PLAN.md empfiehlt C/B vor A – A trotzdem jetzt?
+## 11. Entscheidungen
+1. Gate: **Level 80 und Zone 20** (entschieden).
+2. Talente auch mit **Gold** kaufbar (entschieden, siehe Abschnitt 5).
+3. Respec **gratis** (entschieden).
+4. Offen: Reihenfolge – PLAN.md empfiehlt Gold-Senken (C) / Buffs (B) vor Prestige.
