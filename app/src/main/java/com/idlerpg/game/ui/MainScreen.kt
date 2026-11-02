@@ -1,5 +1,10 @@
 package com.idlerpg.game.ui
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -23,6 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -85,7 +91,7 @@ fun MainScreen(updater: InAppUpdater? = null) {
             ) {
                 // Owned by the Spielwelt agent (ui/adventure).
                 AdventureScreen()
-                selectedTab?.let { TabPanel(it) }
+                selectedTab?.let { TabPanel(it, onBack = { sound.play(Sfx.CLICK); selectedTab = null }) }
             }
         }
         if (!tutorialSeen) {
@@ -118,13 +124,20 @@ private fun MainMenuBar(selected: MainTab?, onTabPositioned: (MainTab, Rect) -> 
 
 /** Routes each tab to its feature screen. Each branch is owned by that tab's agent (.claude/agents). */
 @Composable
-private fun TabPanel(tab: MainTab) {
+private fun TabPanel(tab: MainTab, onBack: () -> Unit) {
+    BackHandler(onBack = onBack)
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
-        when (tab) {
-            MainTab.CHARACTER -> CharacterScreen()
-            MainTab.EQUIPMENT -> EquipmentScreen()
-            MainTab.SHOP -> ShopScreen()
-            MainTab.OPTIONS -> OptionsScreen()
+        Column(Modifier.fillMaxSize()) {
+            // Back to the adventure view; same as tapping the active tab again.
+            Row(Modifier.fillMaxWidth().padding(end = 8.dp), horizontalArrangement = Arrangement.End) { SheetBackButton(onBack) }
+            Box(Modifier.weight(1f).fillMaxWidth()) {
+                when (tab) {
+                    MainTab.CHARACTER -> CharacterScreen()
+                    MainTab.EQUIPMENT -> EquipmentScreen()
+                    MainTab.SHOP -> ShopScreen()
+                    MainTab.OPTIONS -> OptionsScreen()
+                }
+            }
         }
     }
 }

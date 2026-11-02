@@ -142,4 +142,7 @@
     <string name="equipment_expand_title">Inventar erweitern</string>
     <string name="equipment_expand_body">+%1$d Plätze (auf %2$d). Jede Stufe kostet das Dreifache.</string>
     <string name="equipment_expand_max">Maximal erweitert (%1$d Plätze).</string>
+    <string name="equipment_best_button_count">Beste Ausrüstung anlegen (%1$d)</string>
+    <string name="equipment_best_button_none">Alles bereits optimal</string>
+    <string name="equipment_best_done">%1$d Teile angelegt</string>
 </resources>

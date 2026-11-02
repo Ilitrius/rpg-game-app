@@ -140,6 +140,21 @@ class ItemGeneratorTest {
 
 class InventoryTest {
 
+    @Test
+    fun equipBestPicksStrongerItemsAndIsIdempotent() {
+        val weak = item("weak", str = 1).copy(damageMin = 1, damageMax = 2)
+        val strong = item("strong", str = 5).copy(damageMin = 10, damageMax = 12)
+        val helm = item("helm", EquipmentSlot.HELMET, str = 3)
+        val start = GameState(equipment = EquipmentState(equipped = mapOf(EquipmentSlot.WEAPON to weak), inventory = listOf(strong, helm)))
+        assertEquals(2, Inventory.equipBestChanges(start))
+        val after = Inventory.equipBest(start)
+        assertEquals("strong", after.equipment.equipped[EquipmentSlot.WEAPON]?.id)
+        assertEquals("helm", after.equipment.equipped[EquipmentSlot.HELMET]?.id)
+        assertEquals(listOf("weak"), after.equipment.inventory.map { it.id })
+        assertEquals(after, Inventory.equipBest(after))
+        assertEquals(0, Inventory.equipBestChanges(after))
+    }
+
     private fun item(id: String, slot: EquipmentSlot = EquipmentSlot.WEAPON, price: Long = 10, str: Int = 1) =
         Item(id = id, name = id, slot = slot, price = price, bonus = Stats(strength = str), damageMin = 1, damageMax = 3)
 

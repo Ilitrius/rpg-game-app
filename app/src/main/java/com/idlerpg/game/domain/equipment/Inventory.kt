@@ -149,6 +149,48 @@ object Inventory {
         )
     }
 
+    /**
+     * Equips the best item per slot from the inventory ("beste Ausrüstung"). Ranked by expected damage per
+     * second with the item in place, then by summed stat bonus, then item level; an item only replaces the
+     * current one when it is strictly better, so repeated calls change nothing. Swapped-out items return to
+     * the inventory. Runs a few passes because stat bonuses of one slot can change the value of another.
+     */
+    fun equipBest(state: GameState): GameState {
+        var current = state
+        repeat(3) {
+            val next = EquipmentSlot.entries.fold(current) { s, slot -> equipBestInSlot(s, slot) }
+            if (next == current) return next
+            current = next
+        }
+        return current
+    }
+
+    /** Number of slots [equipBest] would change (0 = nothing to do); drives the button's enabled state. */
+    fun equipBestChanges(state: GameState): Int {
+        val after = equipBest(state).equipment.equipped
+        return EquipmentSlot.entries.count { after[it]?.id != state.equipment.equipped[it]?.id }
+    }
+
+    private fun equipBestInSlot(state: GameState, slot: EquipmentSlot): GameState {
+        val eq = state.equipment
+        val equipped = eq.equipped[slot]
+        val best = eq.inventory.filter { it.slot == slot }.maxWithOrNull(compareBy<Item> { score(state, it).first }
+            .thenBy { score(state, it).second }.thenBy { it.itemLevel }) ?: return state
+        if (equipped != null) {
+            val b = score(state, best)
+            val e = score(state, equipped)
+            val better = b.first > e.first + 1e-9 || (kotlin.math.abs(b.first - e.first) <= 1e-9 && b.second > e.second)
+            if (!better) return state
+        }
+        return equip(state, best.id)
+    }
+
+    /** (dps with the item equipped, summed stat bonus). */
+    private fun score(state: GameState, item: Item): Pair<Double, Int> {
+        val bonus = item.effectiveBonus
+        return combatWith(state, item).dps to (bonus.strength + bonus.dexterity + bonus.vitality + bonus.luck)
+    }
+
     /** True if an equipped item can be moved back into the inventory. */
     fun canUnequip(state: GameState): Boolean = !isFull(state)
 

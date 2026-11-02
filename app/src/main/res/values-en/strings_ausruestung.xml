@@ -131,4 +131,7 @@
     <string name="equipment_expand_title">Expand inventory</string>
     <string name="equipment_expand_body">+%1$d slots (to %2$d). Each step costs three times as much.</string>
     <string name="equipment_expand_max">Fully expanded (%1$d slots).</string>
+    <string name="equipment_best_button_count">Equip best gear (%1$d)</string>
+    <string name="equipment_best_button_none">Already wearing the best</string>
+    <string name="equipment_best_done">%1$d items equipped</string>
 </resources>

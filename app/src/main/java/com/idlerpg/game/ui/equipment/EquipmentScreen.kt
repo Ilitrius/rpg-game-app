@@ -127,6 +127,19 @@ fun EquipmentScreen() {
             state = current,
             onGoToInventory = { scope.launch { scrollState.animateScrollTo(inventoryTop) } },
         )
+        val betterCount = remember(current.equipment) { Inventory.equipBestChanges(current) }
+        androidx.compose.material3.Button(
+            enabled = betterCount > 0,
+            onClick = {
+                scope.launch {
+                    repository.update { Inventory.equipBest(it) }
+                    Toast.makeText(context, context.getString(R.string.equipment_best_done, betterCount), Toast.LENGTH_SHORT).show()
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(stringResource(if (betterCount > 0) R.string.equipment_best_button_count else R.string.equipment_best_button_none, betterCount))
+        }
         PaperDollCard(current) { item -> selectedId = item.id }
         BonusCard(current)
         InventoryCard(
