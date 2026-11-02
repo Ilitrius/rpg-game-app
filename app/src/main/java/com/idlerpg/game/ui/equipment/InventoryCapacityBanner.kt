@@ -108,6 +108,7 @@ fun InventoryCapacityBanner(state: GameState, onGoToInventory: () -> Unit, modif
         BannerContent(
             full = shown == InventoryFill.FULL,
             used = state.equipment.inventory.size,
+            capacity = Inventory.capacity(state),
             free = Inventory.freeSlots(state),
             fraction = Inventory.fillFraction(state),
             onGoToInventory = onGoToInventory,
@@ -116,7 +117,7 @@ fun InventoryCapacityBanner(state: GameState, onGoToInventory: () -> Unit, modif
 }
 
 @Composable
-private fun BannerContent(full: Boolean, used: Int, free: Int, fraction: Float, onGoToInventory: () -> Unit) {
+private fun BannerContent(full: Boolean, used: Int, capacity: Int, free: Int, fraction: Float, onGoToInventory: () -> Unit) {
     val accent = if (full) FullColor else NearlyFullColor
     val base = MaterialTheme.colorScheme.surfaceContainerHigh
     Surface(
@@ -161,7 +162,7 @@ private fun BannerContent(full: Boolean, used: Int, free: Int, fraction: Float, 
                                 color = lerp(accent, Color.White, 0.12f),
                                 modifier = Modifier.weight(1f),
                             )
-                            CountChip(used, accent)
+                            CountChip(used, capacity, accent)
                         }
                         if (!full) {
                             Text(
@@ -223,10 +224,10 @@ private fun BannerContent(full: Boolean, used: Int, free: Int, fraction: Float, 
 }
 
 @Composable
-private fun CountChip(used: Int, accent: Color) {
+private fun CountChip(used: Int, capacity: Int, accent: Color) {
     Surface(shape = RoundedCornerShape(50), color = accent.copy(alpha = 0.2f), border = BorderStroke(1.dp, accent.copy(alpha = 0.55f))) {
         Text(
-            stringResource(R.string.equipment_inventory_count, used, Inventory.CAPACITY),
+            stringResource(R.string.equipment_inventory_count, used, capacity),
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.SemiBold,
             color = lerp(accent, Color.White, 0.3f),
@@ -240,9 +241,9 @@ private fun CountChip(used: Int, accent: Color) {
  * per 10 slots). Animates when the fill changes.
  */
 @Composable
-internal fun InventoryCapacityBar(used: Int, fraction: Float, accent: Color, modifier: Modifier = Modifier) {
+internal fun InventoryCapacityBar(used: Int, capacity: Int, fraction: Float, accent: Color, modifier: Modifier = Modifier) {
     val animated = animateFloatAsState(fraction, tween(500), label = "capacityBar")
-    val description = stringResource(R.string.equipment_inventory_capacity_description, used, Inventory.CAPACITY)
+    val description = stringResource(R.string.equipment_inventory_capacity_description, used, capacity)
     Canvas(
         modifier
             .fillMaxWidth()
@@ -273,7 +274,7 @@ internal fun InventoryCapacityBar(used: Int, fraction: Float, accent: Color, mod
             )
         }
         // Segment separators (every 10 slots).
-        val segments = (Inventory.CAPACITY / 10).coerceAtLeast(1)
+        val segments = (capacity / 10).coerceAtLeast(1)
         for (i in 1 until segments) {
             val x = size.width * i / segments
             drawLine(Color.Black.copy(alpha = 0.55f), Offset(x, 0f), Offset(x, h), strokeWidth = 1.5.dp.toPx())

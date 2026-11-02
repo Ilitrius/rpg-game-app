@@ -523,7 +523,7 @@ private fun SellHeader(state: GameState, onSell: (Int) -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.shop_sell_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                 Text(
-                    stringResource(R.string.shop_sell_count, state.equipment.inventory.size, Inventory.CAPACITY),
+                    stringResource(R.string.shop_sell_count, state.equipment.inventory.size, Inventory.capacity(state)),
                     style = MaterialTheme.typography.titleSmall,
                     color = if (Inventory.isFull(state)) BadColor else MaterialTheme.colorScheme.onSurfaceVariant,
                 )

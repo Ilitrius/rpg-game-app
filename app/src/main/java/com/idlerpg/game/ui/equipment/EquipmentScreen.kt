@@ -1,5 +1,14 @@
 package com.idlerpg.game.ui.equipment
 
+import com.idlerpg.game.domain.equipment.effectiveBonus
+import com.idlerpg.game.domain.equipment.effectiveDamageMax
+import com.idlerpg.game.domain.equipment.effectiveDamageMin
+import com.idlerpg.game.domain.equipment.Enchanting
+import androidx.compose.material.icons.filled.Casino
+import androidx.compose.material.icons.filled.AutoFixHigh
+import androidx.compose.material.icons.filled.AddBox
+import android.widget.Toast
+import kotlin.random.Random
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -127,6 +136,15 @@ fun EquipmentScreen() {
             selectedId = item.id
             if (item.isNew) scope.launch { repository.update { Inventory.markSeen(it, item.id) } }
         }
+        ExpansionCard(current) {
+            scope.launch {
+                var outcome = Inventory.ExpandOutcome.MAX
+                repository.update { s -> Inventory.expand(s).also { outcome = it.outcome }.state }
+                if (outcome == Inventory.ExpandOutcome.NOT_ENOUGH_GOLD) {
+                    Toast.makeText(context, R.string.equipment_not_enough_gold, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
     val id = selectedId
@@ -153,6 +171,24 @@ fun EquipmentScreen() {
                 onSell = {
                     selectedId = null
                     scope.launch { repository.update { Inventory.sell(it, item.id) } }
+                },
+                onEnchant = {
+                    scope.launch {
+                        var outcome = Enchanting.Outcome.NOT_FOUND
+                        repository.update { s -> Enchanting.enchant(s, item.id).also { outcome = it.outcome }.state }
+                        if (outcome == Enchanting.Outcome.NOT_ENOUGH_GOLD) {
+                            Toast.makeText(context, R.string.equipment_not_enough_gold, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                },
+                onReroll = {
+                    scope.launch {
+                        var outcome = Enchanting.Outcome.NOT_FOUND
+                        repository.update { s -> Enchanting.reroll(s, item.id, Random.Default).also { outcome = it.outcome }.state }
+                        if (outcome == Enchanting.Outcome.NOT_ENOUGH_GOLD) {
+                            Toast.makeText(context, R.string.equipment_not_enough_gold, Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 },
             )
         }
@@ -355,13 +391,13 @@ private fun InventoryCard(state: GameState, modifier: Modifier = Modifier, onIte
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(R.string.equipment_inventory_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                     Text(
-                        stringResource(R.string.equipment_inventory_count, items.size, Inventory.CAPACITY),
+                        stringResource(R.string.equipment_inventory_count, items.size, Inventory.capacity(state)),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = if (fill == InventoryFill.OK) FontWeight.Normal else FontWeight.SemiBold,
                         color = if (fill == InventoryFill.OK) MaterialTheme.colorScheme.onSurfaceVariant else accent,
                     )
                 }
-                InventoryCapacityBar(items.size, Inventory.fillFraction(state), accent)
+                InventoryCapacityBar(items.size, Inventory.capacity(state), Inventory.fillFraction(state), accent)
             }
             if (fill == InventoryFill.FULL) {
                 // Short reminder next to the grid (the detailed banner sits at the top of the tab).
@@ -378,19 +414,19 @@ private fun InventoryCard(state: GameState, modifier: Modifier = Modifier, onIte
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            InventoryGrid(items, onItemClick)
+            InventoryGrid(items, Inventory.capacity(state), onItemClick)
         }
     }
 }
 
 @Composable
-private fun InventoryGrid(items: List<Item>, onItemClick: (Item) -> Unit) {
+private fun InventoryGrid(items: List<Item>, capacity: Int, onItemClick: (Item) -> Unit) {
     BoxWithConstraints(Modifier.fillMaxWidth()) {
         val gap: Dp = 8.dp
         val columns = max(4, ((maxWidth + gap) / (64.dp + gap)).toInt())
         // Show all items plus empty cells to complete the last row (at least one row).
         val cells = max(columns, ((items.size + columns - 1) / columns) * columns).coerceAtMost(
-            ((Inventory.CAPACITY + columns - 1) / columns) * columns,
+            ((capacity + columns - 1) / columns) * columns,
         )
         Column(verticalArrangement = Arrangement.spacedBy(gap)) {
             (0 until cells).chunked(columns).forEach { row ->
@@ -459,6 +495,8 @@ private fun ItemDetailSheet(
     onEquip: () -> Unit,
     onUnequip: () -> Unit,
     onSell: () -> Unit,
+    onEnchant: () -> Unit,
+    onReroll: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
@@ -476,6 +514,7 @@ private fun ItemDetailSheet(
                 Spacer(Modifier.width(16.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(itemDisplayName(item), style = MaterialTheme.typography.titleLarge, color = rarityColor(item.rarity), fontWeight = FontWeight.SemiBold)
+                    if (item.enchantLevel > 0) Text(stringResource(R.string.equipment_enchant_badge, Enchanting.level(item)), style = MaterialTheme.typography.titleSmall, color = GoldColor)
                     Text(
                         "${rarityLabel(item.rarity)} · ${stringResource(slotLabel(item.slot))}",
                         style = MaterialTheme.typography.bodyMedium,
@@ -500,16 +539,17 @@ private fun ItemDetailSheet(
                 Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     if (item.damageMax > 0) {
                         Text(
-                            stringResource(R.string.equipment_detail_damage, item.damageMin, item.damageMax),
+                            stringResource(R.string.equipment_detail_damage, item.effectiveDamageMin, item.effectiveDamageMax),
                             style = MaterialTheme.typography.titleMedium,
                         )
                     }
-                    val lines = StatType.entries.filter { item.bonus[it] != 0 }
+                    val eb = item.effectiveBonus
+                    val lines = StatType.entries.filter { eb[it] != 0 }
                     if (lines.isEmpty()) {
                         Text(stringResource(R.string.equipment_detail_no_bonus), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     lines.forEach { t ->
-                        val v = item.bonus[t]
+                        val v = eb[t]
                         Text(
                             "${if (v > 0) "+" else ""}$v ${stringResource(statLabel(t))}",
                             style = MaterialTheme.typography.bodyLarge,
@@ -523,6 +563,8 @@ private fun ItemDetailSheet(
                     )
                 }
             }
+
+            ForgeBlock(state, item, onEnchant, onReroll)
 
             if (!isEquipped) ComparisonBlock(state, item)
 
@@ -541,6 +583,91 @@ private fun ItemDetailSheet(
                 }
                 OutlinedButton(onClick = onSell, modifier = Modifier.fillMaxWidth()) {
                     Text(stringResource(R.string.equipment_action_sell, numberFormat.format(item.price)), maxLines = 1)
+                }
+            }
+        }
+    }
+}
+
+/** Gold sinks: enchant (+1..+10) and reroll of the stat distribution. */
+@Composable
+private fun ForgeBlock(state: GameState, item: Item, onEnchant: () -> Unit, onReroll: () -> Unit) {
+    val level = Enchanting.level(item)
+    val enchantCost = Enchanting.cost(item)
+    val rerollCost = Enchanting.rerollCost(item)
+    Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.surfaceContainer) {
+        Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                stringResource(R.string.equipment_forge_title),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            EnchantPips(level)
+            Text(
+                stringResource(R.string.equipment_enchant_level, level, Enchanting.MAX_LEVEL),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            if (enchantCost != null) {
+                Button(onClick = onEnchant, enabled = state.gold >= enchantCost, modifier = Modifier.fillMaxWidth()) {
+                    Icon(Icons.Filled.AutoFixHigh, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.equipment_action_enchant, level + 1, numberFormat.format(enchantCost)), maxLines = 1)
+                }
+            } else {
+                Text(stringResource(R.string.equipment_enchant_max), style = MaterialTheme.typography.bodyMedium, color = GoldColor)
+            }
+            if (Enchanting.canReroll(item)) {
+                OutlinedButton(onClick = onReroll, enabled = state.gold >= rerollCost, modifier = Modifier.fillMaxWidth()) {
+                    Icon(Icons.Filled.Casino, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.equipment_action_reroll, numberFormat.format(rerollCost)), maxLines = 1)
+                }
+                Text(
+                    stringResource(R.string.equipment_reroll_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+}
+
+/** Ten vector stars showing the enchant level. */
+@Composable
+private fun EnchantPips(level: Int) {
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        repeat(Enchanting.MAX_LEVEL) { i ->
+            Icon(
+                Icons.Filled.AutoFixHigh,
+                contentDescription = null,
+                tint = if (i < level) GoldColor else MaterialTheme.colorScheme.outlineVariant,
+                modifier = Modifier.size(18.dp),
+            )
+        }
+    }
+}
+
+/** Card for buying inventory slots (40 -> 60 -> 80 -> 100). */
+@Composable
+private fun ExpansionCard(state: GameState, onBuy: () -> Unit) {
+    val cost = Inventory.expansionCost(state)
+    Card(Modifier.fillMaxWidth(), colors = cardColors()) {
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Filled.AddBox, contentDescription = null, tint = GoldColor, modifier = Modifier.size(32.dp))
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.equipment_expand_title), style = MaterialTheme.typography.titleMedium)
+                Text(
+                    if (cost != null) stringResource(R.string.equipment_expand_body, Inventory.EXPANSION_STEP, Inventory.capacity(state) + Inventory.EXPANSION_STEP)
+                    else stringResource(R.string.equipment_expand_max, Inventory.capacity(state)),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            if (cost != null) {
+                Spacer(Modifier.width(8.dp))
+                Button(onClick = onBuy, enabled = state.gold >= cost) {
+                    Text(numberFormat.format(cost), maxLines = 1)
                 }
             }
         }
