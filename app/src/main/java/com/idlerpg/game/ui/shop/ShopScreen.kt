@@ -27,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Sell
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.AlertDialog
@@ -84,6 +85,10 @@ import com.idlerpg.game.domain.character.CombatStats
 import com.idlerpg.game.domain.character.StatType
 import com.idlerpg.game.domain.character.get
 import com.idlerpg.game.domain.equipment.Inventory
+import com.idlerpg.game.domain.equipment.effectiveBonus
+import com.idlerpg.game.domain.equipment.effectiveDamageMax
+import com.idlerpg.game.domain.equipment.effectiveDamageMin
+import com.idlerpg.game.domain.shop.Elixirs
 import com.idlerpg.game.domain.shop.Shop
 import com.idlerpg.game.audio.Sfx
 import com.idlerpg.game.audio.SoundManager
@@ -101,7 +106,7 @@ private val GoodColor = Color(0xFF81C784)
 private val BadColor = Color(0xFFE57373)
 private val GoldColor = Color(0xFFE6BC58)
 
-private enum class ShopMode { BUY, SELL }
+private enum class ShopMode { BUY, SELL, POTIONS }
 
 private const val SELL_NONE = -1
 /** Pending bulk-sale request: [SELL_ALL] or a [Rarity] ordinal. */
@@ -195,6 +200,25 @@ fun ShopScreen() {
         }
     }
 
+    // Gold deduction and buff in ONE update; the result decides the message.
+    fun buyElixir(elixir: Elixirs.Elixir) {
+        scope.launch {
+            var result: Elixirs.Result? = null
+            repository.update { s -> Elixirs.buy(s, elixir).also { result = it }.state }
+            val r = result ?: return@launch
+            if (r.outcome == Elixirs.Outcome.BOUGHT) sound.play(Sfx.COIN)
+            toast(
+                when (r.outcome) {
+                    Elixirs.Outcome.BOUGHT -> res.getString(R.string.shop_elixir_bought)
+                    Elixirs.Outcome.NOT_ENOUGH_GOLD -> res.getString(R.string.shop_not_enough_gold, fmt(r.price - r.state.gold))
+                    Elixirs.Outcome.STRONGER_ACTIVE -> res.getString(R.string.shop_elixir_blocked_stronger)
+                    Elixirs.Outcome.MAX_DURATION -> res.getString(R.string.shop_elixir_blocked_max)
+                    Elixirs.Outcome.BUFFS_FULL -> res.getString(R.string.shop_elixir_blocked_full)
+                },
+            )
+        }
+    }
+
     fun restock() {
         scope.launch {
             var result: Shop.RestockResult? = null
@@ -225,6 +249,11 @@ fun ShopScreen() {
                 }
                 items(offers, key = { "offer_${it.id}" }) { offer ->
                     OfferRow(current, offer) { selectedId = offer.id }
+                }
+            } else if (mode == ShopMode.POTIONS.ordinal) {
+                item(key = "potionhint") { HintText(stringResource(R.string.shop_elixir_hint)) }
+                items(Elixirs.Elixir.entries, key = { "elixir_${it.name}" }) { e ->
+                    ElixirRow(current, e) { buyElixir(e) }
                 }
             } else {
                 val inventory = Inventory.sorted(current.equipment.inventory)
@@ -368,14 +397,27 @@ private fun ModeSelector(mode: ShopMode, onSelect: (ShopMode) -> Unit) {
                 icon = {
                     SegmentedButtonDefaults.Icon(active = mode == m) {
                         Icon(
-                            if (m == ShopMode.BUY) Icons.Filled.ShoppingCart else Icons.Filled.Sell,
+                            when (m) {
+                                ShopMode.BUY -> Icons.Filled.ShoppingCart
+                                ShopMode.SELL -> Icons.Filled.Sell
+                                ShopMode.POTIONS -> Icons.Filled.Science
+                            },
                             contentDescription = null,
                             modifier = Modifier.size(SegmentedButtonDefaults.IconSize),
                         )
                     }
                 },
             ) {
-                Text(stringResource(if (m == ShopMode.BUY) R.string.shop_tab_buy else R.string.shop_tab_sell))
+                Text(
+                    stringResource(
+                        when (m) {
+                            ShopMode.BUY -> R.string.shop_tab_buy
+                            ShopMode.SELL -> R.string.shop_tab_sell
+                            ShopMode.POTIONS -> R.string.shop_tab_potions
+                        },
+                    ),
+                    maxLines = 1,
+                )
             }
         }
     }
@@ -608,13 +650,14 @@ private fun ItemSheet(state: GameState, item: Item, mode: ShopMode, onDismiss: (
 
             Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.surfaceContainerHighest) {
                 Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    val effBonus = item.effectiveBonus
                     if (item.damageMax > 0) {
-                        Text(stringResource(R.string.shop_damage, item.damageMin, item.damageMax), style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(R.string.shop_damage, item.effectiveDamageMin, item.effectiveDamageMax), style = MaterialTheme.typography.titleMedium)
                     }
-                    val lines = StatType.entries.filter { item.bonus[it] != 0 }
+                    val lines = StatType.entries.filter { effBonus[it] != 0 }
                     if (lines.isEmpty()) Text(stringResource(R.string.shop_no_bonus), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     lines.forEach { t ->
-                        val v = item.bonus[t]
+                        val v = effBonus[t]
                         Text("${signed(v)} ${stringResource(statLabel(t))}", style = MaterialTheme.typography.bodyLarge, color = if (v > 0) GoodColor else BadColor)
                     }
                     Text(stringResource(R.string.shop_sell_value, fmt(item.price)), style = MaterialTheme.typography.bodySmall, color = GoldColor)

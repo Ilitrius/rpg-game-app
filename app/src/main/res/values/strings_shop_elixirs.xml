@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Shop: Tränke / Elixiere (Gold-Senke, Buffs). -->
+<resources>
+    <string name="shop_tab_potions">Tränke</string>
+    <string name="shop_elixir_hint">Elixiere wirken 15 Minuten aktive Spielzeit (nicht offline). Der Preis richtet sich nach dem Gold deiner aktuellen Zone.</string>
+    <string name="shop_elixir_xp">Elixier der Erfahrung</string>
+    <string name="shop_elixir_gold">Elixier des Reichtums</string>
+    <string name="shop_elixir_damage">Elixier der Stärke</string>
+    <string name="shop_elixir_drop">Elixier des Glücks</string>
+    <string name="shop_elixir_regen">Elixier der Erholung</string>
+    <string name="shop_elixir_xp_effect">+25 %% Erfahrung · 15 Min.</string>
+    <string name="shop_elixir_gold_effect">+25 %% Gold · 15 Min.</string>
+    <string name="shop_elixir_damage_effect">+25 %% Schaden · 15 Min.</string>
+    <string name="shop_elixir_drop_effect">+25 %% Beutechance · 15 Min.</string>
+    <string name="shop_elixir_regen_effect">+25 %% Regeneration · 15 Min.</string>
+    <string name="shop_elixir_buy">%1$s Gold</string>
+    <string name="shop_elixir_running">Aktiv: noch %1$s</string>
+    <string name="shop_elixir_bought">Elixier getrunken.</string>
+    <string name="shop_elixir_blocked_stronger">Ein stärkerer Effekt läuft bereits.</string>
+    <string name="shop_elixir_blocked_max">Maximale Wirkdauer erreicht.</string>
+    <string name="shop_elixir_blocked_full">Zu viele Effekte aktiv.</string>
+</resources>
