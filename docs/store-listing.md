@@ -1,5 +1,7 @@
 # Play-Store-Eintrag (ASO), Stand rc16
 
+**In der Play Console eingetragen: 2026-11-02.** Bei Funktionsänderungen (z. B. Tutorial) hier und in der Console nachziehen.
+
 Regeln: Titel max. 30 Zeichen, Kurzbeschreibung max. 80, Beschreibung max. 4000. Keine Keyword-Listen, keine Wörter wie „Beste“, „#1“, „Gratis“ in Titel/Kurzbeschreibung, keine Vergleiche mit anderen Spielen. Nur beschreiben, was im Build wirklich drin ist (Tutorial erst ergänzen, wenn umgesetzt).
 
 Keywords (natürlich eingebaut): Idle RPG, Idle-Rollenspiel, Ich-Perspektive, Monster, Beute/Loot, Ausrüstung, Held, Level, Bosse, offline, Clicker.
