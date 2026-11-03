@@ -28,10 +28,10 @@ object TutorialSteps {
         TutorialStep(R.string.tutorial_tap_title, R.string.tutorial_tap_text, TutorialTarget.Enemy),
         TutorialStep(R.string.tutorial_zone_title, R.string.tutorial_zone_text, TutorialTarget.Zone),
         TutorialStep(R.string.tutorial_character_title, R.string.tutorial_character_text, TutorialTarget.Tabs(listOf(MainTab.CHARACTER))),
-        TutorialStep(
-            R.string.tutorial_gear_title, R.string.tutorial_gear_text,
-            TutorialTarget.Tabs(listOf(MainTab.EQUIPMENT, MainTab.SHOP)),
-        ),
+        TutorialStep(R.string.tutorial_goals_title, R.string.tutorial_goals_text, TutorialTarget.Tabs(listOf(MainTab.CHARACTER))),
+        TutorialStep(R.string.tutorial_rebirth_title, R.string.tutorial_rebirth_text, TutorialTarget.Tabs(listOf(MainTab.CHARACTER))),
+        TutorialStep(R.string.tutorial_gear_title, R.string.tutorial_gear_text, TutorialTarget.Tabs(listOf(MainTab.EQUIPMENT))),
+        TutorialStep(R.string.tutorial_shop_title, R.string.tutorial_shop_text, TutorialTarget.Tabs(listOf(MainTab.SHOP))),
         TutorialStep(R.string.tutorial_offline_title, R.string.tutorial_offline_text, TutorialTarget.Tabs(listOf(MainTab.OPTIONS))),
     )
 }

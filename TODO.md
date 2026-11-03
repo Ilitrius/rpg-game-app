@@ -34,7 +34,7 @@ Quelle: bezahlter Testanbieter, Reports `rp_feedback_de.pdf` + `rp_production_de
 - [ ] Community (Discord/Forum): kein Code; erst nach Produktionsfreigabe sinnvoll, Link dann in Optionen.
 - [ ] Visuelle Verbesserungen: laufend, Grafik-Regel aus `CLAUDE.md` gilt.
 
-- [ ] **Tutorial anpassen und erweitern** (Wunsch des Nutzers, 2026-11-03): `ui/tutorial` (6 Schritte) an den aktuellen Stand anpassen und um neue Systeme erweitern (z. B. Endlos-Stufen, Wiedergeburt/Seelen, Buffs/Elixiere, Verzaubern, Ziele/Tagesbelohnung, Auto-Boss, Schnellverkauf, "Beste ausrüsten", Problem melden); Texte DE+EN in `strings_tutorial.xml`, Hervorhebungen auf Gerät prüfen.
+- [x] **Tutorial anpassen und erweitern** (umgesetzt 2026-11-03 für rc21: 9 Schritte inkl. Ziele, Wiedergeburt, Ausrüstung, Shop/Elixiere, Auto-Boss/Endlos; auf Gerät prüfen) (Wunsch des Nutzers, 2026-11-03): `ui/tutorial` (6 Schritte) an den aktuellen Stand anpassen und um neue Systeme erweitern (z. B. Endlos-Stufen, Wiedergeburt/Seelen, Buffs/Elixiere, Verzaubern, Ziele/Tagesbelohnung, Auto-Boss, Schnellverkauf, "Beste ausrüsten", Problem melden); Texte DE+EN in `strings_tutorial.xml`, Hervorhebungen auf Gerät prüfen.
 
 ## Offen: Lint
 - [x] `lintDebug` grün (rc16): `androidx.fragment:fragment-ktx` 1.8.5 ergänzt (Play app-update zog altes Fragment, `InAppUpdater` braucht >= 1.3.0 für die ActivityResult-API); `app_name` als `translatable="false"` (Markenname, gleich in DE/EN).

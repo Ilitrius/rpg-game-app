@@ -9,13 +9,19 @@
     <string name="tutorial_welcome_title">Welcome, hero!</string>
     <string name="tutorial_welcome_text">Your hero fights all on their own. Every victory brings experience and gold, sometimes gear too. Here is a quick look at the essentials.</string>
     <string name="tutorial_tap_title">Strike yourself</string>
-    <string name="tutorial_tap_text">Tap the monster for extra hits. Quick streaks build up a combo. You don\'t have to tap to make progress, though.</string>
-    <string name="tutorial_zone_title">Zones and bosses</string>
-    <string name="tutorial_zone_text">This is your current zone. After enough victories you can challenge the boss. Defeat it and your hero moves on to the next zone. Tap the name to open the zone list.</string>
+    <string name="tutorial_tap_text">Tap the monster for extra hits. Quick streaks build up a combo that deals more damage. You don\'t have to tap to make progress, though.</string>
+    <string name="tutorial_zone_title">Zones, bosses, endless</string>
+    <string name="tutorial_zone_text">This is your current zone. After enough victories you can challenge the boss; defeat it and your hero moves on to the next zone. Turn on auto boss in Options. After zone 100 the game goes on in ever harder endless tiers. Tap the name to open the zone list.</string>
     <string name="tutorial_character_title">Grow stronger</string>
-    <string name="tutorial_character_text">Every level up gives you stat points. Spend them on Strength, Dexterity, Vitality and Luck in the Character tab. You\'ll also find goals and the daily reward there.</string>
-    <string name="tutorial_gear_title">Gear and shop</string>
-    <string name="tutorial_gear_text">Equip the loot you find under Equipment and sell what you don\'t need. In the shop you spend your gold on new weapons and armor.</string>
+    <string name="tutorial_character_text">Every level up gives you stat points. Spend them on Strength, Dexterity, Vitality and Luck in the Character tab. Strength and Dexterity raise damage and speed, Vitality your health, Luck crits and loot.</string>
+    <string name="tutorial_goals_title">Goals and rewards</string>
+    <string name="tutorial_goals_text">In the Character tab you\'ll find goals with gold rewards, the daily reward (more for every day in a row) and your statistics. Check in every day.</string>
+    <string name="tutorial_rebirth_title">Rebirth</string>
+    <string name="tutorial_rebirth_text">From level 80 and zone 20 you can be reborn in the Character tab. You start over but keep souls: spend them on permanent talents for more XP, gold, damage and more. Back up your save first if you like.</string>
+    <string name="tutorial_gear_title">Equipment</string>
+    <string name="tutorial_gear_text">Loot lands in your inventory. "Equip best" puts the strongest piece into every slot. You can enchant (+levels), reroll and sell items; extra slots help when the inventory is full.</string>
+    <string name="tutorial_shop_title">Shop and elixirs</string>
+    <string name="tutorial_shop_text">In the shop you spend gold on new weapons and armor; "Upgrade" shows what makes you stronger. Quick sell clears out the leftovers. Elixirs give you temporary bonuses to damage, XP, gold or loot.</string>
     <string name="tutorial_offline_title">Even while you\'re away</string>
-    <string name="tutorial_offline_text">Your hero keeps fighting when you close the app (up to 8 hours, at a lower rate). In Options you can back up your save and watch this introduction again.</string>
+    <string name="tutorial_offline_text">Your hero keeps fighting when you close the app (up to 8 hours, at a lower rate). In Options you back up your save, set sound, language and auto boss, report problems and watch this introduction again.</string>
 </resources>
