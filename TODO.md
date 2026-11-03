@@ -12,7 +12,7 @@ Legende: `[ ]` offen · `[x]` erledigt
 Ziel: Die Grafik soll deutlich authentischer und realistischer aussehen. Items sind umgesetzt (siehe unten); für Monster und Hintergründe vor Beginn erst einen Plan zur Freigabe erstellen.
 - [x] **Items, Inventar-/Shop-/Ausrüstungs-Symbole** (2026-11-02): alle 16 Item-Typen als Raytracing-Bilder (45 WebP, 1,6 MB, `tools/render_items`), `ItemSprites` + `ItemIcon` mit Vektor-Fallback. Emulator-Messung beim Inventar-Scrollen: 0 % statt 17 % ruckelnde Frames, +21 MB Speicher.
 - [ ] **Items, Rest:** Waffen in der Hand (Ich-Perspektive `FirstPersonWeapon`, Paper-Doll, Charakter-Tab `WeaponImage`) noch Vektor; Elixier-Symbole im Shop; Feinschliff Lederkappe, Lederwams, Plattenstiefel (wirken noch einfach); Edelstein-Funkeln.
-- [ ] **Monster**: Wiese erledigt (2026-11-03: Schleim, Riesenratte, Wildschwein, Schleimkönig als Raytracing-Bilder, `monsters.py`). Offen: 11 weitere handgemachte Monster und 4 Bosse (Wald, Sumpf, Gebirge, Höhle), dazu die 8 Körperformen der generierten Zonen (neutral rendern, per Biom-Palette einfärben); `ProceduralMonsters` bleibt als Fallback.
+- [ ] **Monster**: Wiese (`monsters.py`) und Wald (2026-11-03: Wolf, Waldspinne, Pilzling, Baumhüter, `monsters_forest.py`) erledigt. Offen: Sumpf, Gebirge, Höhle (je 3 Monster + Boss), dazu die 8 Körperformen der generierten Zonen (neutral rendern, per Biom-Palette einfärben); `ProceduralMonsters` bleibt als Fallback.
 - [ ] **Hintergründe**: Wiese erledigt (2026-11-03: `scene_meadow.py`, perspektivische Landschaft, 93 KB). Offen: Wald, Sumpf, Gebirge, Höhle und die 19 Biome (`BiomeStyles` / `BiomeScene`, je Biom ein Bild, die 5 Stufen über Farbe/Nebel/Partikel). Bekannte Mängel Wiese: Wolken stehen still (Bild), Bäume noch einfach, kein Tag/Nacht.
 - Offene Fragen für den Plan: Bisherige Grafik-Regel (CLAUDE.md) bevorzugt Vektor und prozedurale Zeichnung; für Realismus sind vermutlich Bitmaps nötig (nur xxxhdpi, WebP, `FilterQuality.High`). Dann Quelle der Bilder klären (Lizenz, KI-generiert, Stil einheitlich), APK-/Bundle-Größe (aktuell ca. 6,7 MB) und Ladezeit/Speicher prüfen, Reihenfolge festlegen (z. B. erst eine Zone + ein Monster + eine Waffe als Stilprobe).
 
@@ -33,6 +33,8 @@ Quelle: bezahlter Testanbieter, Reports `rp_feedback_de.pdf` + `rp_production_de
 - [ ] Saisonale Events / regelmäßige Inhalts-Updates: Roadmap-Material (siehe Prestige, Buffs, Gold-Senken unten); noch nicht konzipiert.
 - [ ] Community (Discord/Forum): kein Code; erst nach Produktionsfreigabe sinnvoll, Link dann in Optionen.
 - [ ] Visuelle Verbesserungen: laufend, Grafik-Regel aus `CLAUDE.md` gilt.
+
+- [ ] **Tutorial anpassen und erweitern** (Wunsch des Nutzers, 2026-11-03): `ui/tutorial` (6 Schritte) an den aktuellen Stand anpassen und um neue Systeme erweitern (z. B. Endlos-Stufen, Wiedergeburt/Seelen, Buffs/Elixiere, Verzaubern, Ziele/Tagesbelohnung, Auto-Boss, Schnellverkauf, "Beste ausrüsten", Problem melden); Texte DE+EN in `strings_tutorial.xml`, Hervorhebungen auf Gerät prüfen.
 
 ## Offen: Lint
 - [x] `lintDebug` grün (rc16): `androidx.fragment:fragment-ktx` 1.8.5 ergänzt (Play app-update zog altes Fragment, `InAppUpdater` braucht >= 1.3.0 für die ActivityResult-API); `app_name` als `translatable="false"` (Markenname, gleich in DE/EN).

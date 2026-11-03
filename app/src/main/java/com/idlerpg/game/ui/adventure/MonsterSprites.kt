@@ -38,6 +38,10 @@ internal object MonsterSprites {
         MonsterType.GIANT_RAT -> R.drawable.monster_giant_rat
         MonsterType.BOAR -> R.drawable.monster_boar
         MonsterType.SLIME_KING -> R.drawable.monster_slime_king
+        MonsterType.WOLF -> R.drawable.monster_wolf
+        MonsterType.FOREST_SPIDER -> R.drawable.monster_forest_spider
+        MonsterType.MUSHROOM -> R.drawable.monster_mushroom
+        MonsterType.TREANT -> R.drawable.monster_treant
         else -> null
     }
 

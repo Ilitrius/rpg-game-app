@@ -21,6 +21,10 @@ from PIL import Image  # noqa: E402
 import monsters  # noqa: E402
 from sdf import Renderer  # noqa: E402
 
+import monsters_forest  # noqa: E402
+
+ALL = {**monsters.BUILDERS, **monsters_forest.BUILDERS}
+
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 DEFAULT_OUT = os.path.join(ROOT, "app", "src", "main", "res", "drawable-nodpi")
 
@@ -28,7 +32,7 @@ DEFAULT_OUT = os.path.join(ROOT, "app", "src", "main", "res", "drawable-nodpi")
 def render_one(job):
     name, size, height, out_dir = job
     t0 = time.time()
-    scene, mats, bounds, view = monsters.BUILDERS[name]()
+    scene, mats, bounds, view = ALL[name]()
     rd = Renderer(scene, mats, bounds * 1.5, size=size, view_rot=view, ground_shadow=False,
                   light_dir=(-0.60, 0.72, 0.50), ambient_scale=0.50, key_scale=1.45, rim=1.0, gamma=1.75, scurve=0.55)
     rd.margin = 0.97
@@ -62,7 +66,7 @@ def main():
     ap.add_argument("--out", default=DEFAULT_OUT)
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
-    names = list(monsters.BUILDERS) if a.name == "all" else [a.name]
+    names = list(ALL) if a.name == "all" else [a.name]
     jobs = [(n, a.size, a.height, a.out) for n in names]
     with ProcessPoolExecutor() as ex:
         for path, dt, sz, dim in ex.map(render_one, jobs):
