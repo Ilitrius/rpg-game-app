@@ -130,8 +130,8 @@ object Zones {
     /** Tiers beyond this keep the difficulty of this tier (keeps all numbers in range); the counter still rises. */
     const val ENDLESS_SCALING_CAP = 150
 
-    private const val ENDLESS_HP = 1.10
-    private const val ENDLESS_DAMAGE = 1.06
+    private const val ENDLESS_HP = 1.05
+    private const val ENDLESS_DAMAGE = 1.03
     private const val ENDLESS_REWARD = 1.08
 
     /**
