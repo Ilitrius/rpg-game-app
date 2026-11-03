@@ -68,7 +68,7 @@ object OfflineProgress {
         val counted = away.coerceAtMost(MAX_OFFLINE_MILLIS)
 
         val hero = CombatStats.of(state)
-        val zone = Zones.byId(state.world.currentZoneId)
+        val zone = Zones.effective(Zones.byId(state.world.currentZoneId), state.world.endlessTier)
         val level = state.character.level.coerceIn(zone.minLevel, zone.maxLevel)
         val avg = MonsterScaling.average(zone, level)
         val fightSeconds = avg.hp / hero.dps

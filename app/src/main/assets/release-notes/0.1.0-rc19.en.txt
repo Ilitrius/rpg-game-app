@@ -1,6 +1,10 @@
 New
+• Endless tiers: the game goes on after the last area. Every victory over the boss of area 100 opens the next endless tier with stronger monsters (higher levels) and better rewards. Auto boss keeps running there.
 • Realistic graphics for the Meadow: a new landscape with sky, hills, forest and a dirt road.
 • Realistic monsters in the Meadow: Slime, Giant Rat, Wild Boar and the Slime King now look lifelike, with wet gloss, fur, teeth and claws.
 
+Fixed
+• At the end of the game the monsters kept dropping back from level 990 to level 980, and the game went in circles.
+
 Note
-• The other areas and monsters will follow in later versions.
+• The other areas and monsters will get the realistic graphics in later versions.

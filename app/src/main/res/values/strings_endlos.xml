@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="zone_number_endless">Gebiet %1$d · Endlos %2$d</string>
+    <string name="boss_victory_endless">Der Abgrund wird tiefer – die Monster werden stärker!</string>
+    <string name="options_field_endless_tier">Endlos-Stufe</string>
+</resources>

@@ -1,5 +1,7 @@
 package com.idlerpg.game.domain.world
 
+import kotlin.math.pow
+
 /**
  * One region of the world. Zones are ordered by [order]; later zones scale monsters up
  * via the multipliers. Display names live in `strings_spielwelt.xml` (mapped by [id]).
@@ -120,6 +122,36 @@ object Zones {
 
     /** Zone with [id], falling back to the first zone for unknown ids (e.g. old/edited saves). */
     fun byId(id: String?): Zone = byIdMap[id] ?: all.first()
+
+    // ---- Endless tiers beyond zone 100
+    /** Monster levels per endless tier (zone 100 covers 980..990, tier 1 covers 990..1000, ...). */
+    const val ENDLESS_LEVELS_PER_TIER = 10
+
+    /** Tiers beyond this keep the difficulty of this tier (keeps all numbers in range); the counter still rises. */
+    const val ENDLESS_SCALING_CAP = 150
+
+    private const val ENDLESS_HP = 1.10
+    private const val ENDLESS_DAMAGE = 1.06
+    private const val ENDLESS_REWARD = 1.08
+
+    /**
+     * The zone as it is fought: the last zone gets harder with every [endlessTier] (higher monster levels,
+     * HP x1.10, damage x1.06, XP and gold x1.08 per tier), so the game goes on after zone 100 instead of
+     * repeating it. Every other zone, and tier 0, is returned unchanged. Id and order stay those of [zone].
+     */
+    fun effective(zone: Zone, endlessTier: Int): Zone {
+        if (endlessTier <= 0 || zone.order != COUNT) return zone
+        val t = endlessTier.coerceAtMost(ENDLESS_SCALING_CAP)
+        val shift = ENDLESS_LEVELS_PER_TIER * endlessTier.coerceAtMost(ENDLESS_SCALING_CAP * 10)
+        return zone.copy(
+            minLevel = zone.minLevel + shift,
+            maxLevel = zone.maxLevel + shift,
+            hpMultiplier = zone.hpMultiplier * ENDLESS_HP.pow(t),
+            damageMultiplier = zone.damageMultiplier * ENDLESS_DAMAGE.pow(t),
+            rewardMultiplier = zone.rewardMultiplier * ENDLESS_REWARD.pow(t),
+            goldMultiplier = zone.goldMultiplier * ENDLESS_REWARD.pow(t),
+        )
+    }
 
     /** The zone after [zone] in progression order, or null for the last zone. */
     fun next(zone: Zone): Zone? = all.getOrNull(zone.order)

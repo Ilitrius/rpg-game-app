@@ -48,6 +48,7 @@ enum class SaveField(val key: String) {
     ITEM_LEVEL("itemLevel"),
     HERO_HP("heroHp"),
     TOTAL_KILLS("totalKills"),
+    ENDLESS_TIER("endlessTier"),
     ZONE_KILLS("zoneKills"),
     LAST_ACTIVE("lastActiveEpochMillis"),
     BOSS_DEFEATED_AT_KILLS("bossDefeatedAtKills"),
@@ -442,6 +443,7 @@ object SaveTransfer {
             return SaveError.BelowMinimum(SaveField.HERO_HP, loc, MIN_HERO_HP.toLong(), world.heroHp.toLong())
         }
         if (world.totalKills < 0) return SaveError.NegativeValue(SaveField.TOTAL_KILLS, loc)
+        if (world.endlessTier < 0) return SaveError.NegativeValue(SaveField.ENDLESS_TIER, loc)
         if (world.lastActiveEpochMillis < 0) return SaveError.NegativeValue(SaveField.LAST_ACTIVE, loc)
         world.zoneKills.entries.firstOrNull { it.value < 0 }?.let {
             return SaveError.NegativeValue(SaveField.ZONE_KILLS, SaveLocation.WorldZone(shortName(it.key)))

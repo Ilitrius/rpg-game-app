@@ -297,7 +297,7 @@ internal fun BossBanner(message: BannerMessage, onDone: () -> Unit) {
         is BannerMessage.Victory -> Triple(
             stringResource(R.string.boss_victory_title),
             message.unlocked?.let { stringResource(R.string.boss_victory_unlocked, stringResource(it.nameRes())) }
-                ?: if (Zones.next(message.zone) == null) stringResource(R.string.boss_victory_final) else null,
+                ?: if (Zones.next(message.zone) == null) stringResource(R.string.boss_victory_endless) else null,
             Color(0xFFFFD54F),
         )
         is BannerMessage.Failed -> Triple(

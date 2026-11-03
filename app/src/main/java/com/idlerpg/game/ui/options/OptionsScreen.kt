@@ -832,6 +832,7 @@ private fun fieldLabel(context: Context, field: SaveField): String = context.get
         SaveField.ITEM_LEVEL -> R.string.options_field_item_level
         SaveField.HERO_HP -> R.string.options_field_hero_hp
         SaveField.TOTAL_KILLS -> R.string.options_field_total_kills
+        SaveField.ENDLESS_TIER -> R.string.options_field_endless_tier
         SaveField.ZONE_KILLS -> R.string.options_field_zone_kills
         SaveField.LAST_ACTIVE -> R.string.options_field_last_active
         SaveField.BOSS_DEFEATED_AT_KILLS -> R.string.options_field_boss_defeated_at_kills

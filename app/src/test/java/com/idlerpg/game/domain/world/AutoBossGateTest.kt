@@ -21,12 +21,14 @@ class AutoBossGateTest {
     }
 
     @Test
-    fun notForDefeatedBossOrLastZone() {
+    fun notForDefeatedBossButRepeatsInTheLastZone() {
         val g = AutoBossGate()
         assertFalse(g.shouldStart(true, world(60, listOf(zone.id)), zone, 100, 100))
         val last = Zones.last
         val w = WorldState(zoneKills = mapOf(last.id to 99L), defeatedBossIds = Zones.all.dropLast(1).map { it.id })
-        assertFalse("zone 100 has no successor", g.shouldStart(true, w, last, 100, 100))
+        assertTrue("zone 100 repeats its boss for the endless tiers", g.shouldStart(true, w, last, 100, 100))
+        val done = w.copy(defeatedBossIds = Zones.all.map { it.id })
+        assertTrue("also after the final boss was beaten", g.shouldStart(true, done, last, 100, 100))
     }
 
     @Test

@@ -143,13 +143,18 @@ class WorldProgressTest {
     }
 
     @Test
-    fun lastBossUnlocksNothingNew() {
+    fun lastBossUnlocksNothingNewButRaisesTheEndlessTier() {
         val last = Zones.last
         val at = fresh.copy(world = fresh.world.copy(currentZoneId = last.id))
         val won = WorldProgress.applyBossVictory(at, last, 1, 1, 1L)
         assertEquals(at.world.unlockedZoneIds, won.world.unlockedZoneIds)
         assertEquals("last zone: nowhere to travel", last.id, won.world.currentZoneId)
         assertTrue(last.id in won.world.defeatedBossIds)
+        assertEquals(1, won.world.endlessTier)
+        val again = WorldProgress.applyBossVictory(won, last, 1, 1, 2L)
+        assertEquals(2, again.world.endlessTier)
+        val other = WorldProgress.applyBossVictory(fresh, Zones.WIESE, 1, 1, 1L)
+        assertEquals("only the last zone raises the tier", 0, other.world.endlessTier)
     }
 
     @Test

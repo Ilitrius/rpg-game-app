@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="zone_number_endless">Area %1$d · Endless %2$d</string>
+    <string name="boss_victory_endless">The abyss grows deeper - the monsters grow stronger!</string>
+    <string name="options_field_endless_tier">endless tier</string>
+</resources>

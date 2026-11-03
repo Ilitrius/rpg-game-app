@@ -303,7 +303,7 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         stats = newStats
         autoBossGate.observeLevel(s.character.level)
         if (pendingZoneId == s.world.currentZoneId) pendingZoneId = null
-        val zone = Zones.byId(pendingZoneId ?: s.world.currentZoneId)
+        val zone = Zones.effective(Zones.byId(pendingZoneId ?: s.world.currentZoneId), s.world.endlessTier)
         val stab = minOf(DEFAULT_STAB_MILLIS.toLong(), (newStats.attackIntervalMillis * 0.85).toLong()).toInt()
         _ui.update {
             it.copy(

@@ -278,6 +278,8 @@ class SaveTransferValidationTest {
     fun negativeWorldCountersAreRejected() {
         val world = SaveLocation.World
         assertEquals(SaveError.NegativeValue(SaveField.TOTAL_KILLS, world), rejected(base.withWorld { it.copy(totalKills = -1) }))
+        assertEquals(SaveError.NegativeValue(SaveField.ENDLESS_TIER, world), rejected(base.withWorld { it.copy(endlessTier = -1) }))
+        accepted(base.withWorld { it.copy(endlessTier = 12) })
         assertEquals(
             SaveError.NegativeValue(SaveField.LAST_ACTIVE, world),
             rejected(base.withWorld { it.copy(lastActiveEpochMillis = -1) }),

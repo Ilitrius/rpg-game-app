@@ -124,6 +124,8 @@ data class WorldState(
     val heroHp: Int = -1,
     val defeatedBossIds: List<String> = emptyList(),
     val bossDefeatedAtKills: Map<String, Long> = emptyMap(),
+    /** Endless tiers beyond the last zone: +1 per boss victory in zone 100 (see [com.idlerpg.game.domain.world.Zones.effective]). */
+    val endlessTier: Int = 0,
 )
 
 /**

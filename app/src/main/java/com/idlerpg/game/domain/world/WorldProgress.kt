@@ -62,7 +62,8 @@ object WorldProgress {
     /**
      * Grants a boss victory in [zone]: XP/gold like a kill (with prestige/buff bonus, counts as one zone kill), marks the boss
      * as defeated, resets the boss kill counter, unlocks the next zone and moves the hero there
-     * ([WorldState.currentZoneId]). The last zone has no successor: the hero stays, nothing unlocks.
+     * ([WorldState.currentZoneId]). The last zone has no successor: the hero stays, nothing unlocks, but the
+     * endless tier rises ([WorldState.endlessTier]) so the zone gets harder and the game goes on.
      */
     fun applyBossVictory(state: GameState, zone: Zone, xp: Long, gold: Long, nowMillis: Long, applyBuffs: Boolean = false): GameState {
         val rewarded = CombatRules.applyKillReward(state, xp, gold, zone.id, nowMillis, applyBuffs = applyBuffs)
@@ -74,6 +75,7 @@ object WorldProgress {
                 defeatedBossIds = if (zone.id in w.defeatedBossIds) w.defeatedBossIds else w.defeatedBossIds + zone.id,
                 unlockedZoneIds = if (next == null || next.id in w.unlockedZoneIds) w.unlockedZoneIds else w.unlockedZoneIds + next.id,
                 bossDefeatedAtKills = w.bossDefeatedAtKills + (zone.id to (w.zoneKills[zone.id] ?: 0L)),
+                endlessTier = if (next == null) w.endlessTier + 1 else w.endlessTier,
             ),
         ))
     }

@@ -5,9 +5,9 @@ import com.idlerpg.game.data.WorldState
 /**
  * Decides when the optional auto-boss mode may start the zone boss by itself. Transient (lives in
  * the ViewModel, never saved). Rules:
- * - Only when the kill requirement is met ([WorldProgress.canChallengeBoss]), the boss is not yet
- *   defeated (auto-boss pushes progress, it does not re-farm) and the zone has a successor
- *   (the last zone has nothing to travel to).
+ * - Only when the kill requirement is met ([WorldProgress.canChallengeBoss]) and the boss is not yet
+ *   defeated (auto-boss pushes progress, it does not re-farm). The last zone is the exception: its boss
+ *   starts again after every victory, because each one raises the endless tier ([WorldState.endlessTier]).
  * - Only with at least [MIN_HP_FRACTION] of the hero's HP.
  * - After a lost boss fight (timeout or death) the gate stays closed for
  *   `min(10 x (fails + 1), 50)` further kills in that zone; the next failure widens it.
@@ -49,8 +49,8 @@ class AutoBossGate {
     /** Same rules as [shouldStart] but says why the boss does not start (for the HUD hint and tests). */
     fun evaluate(enabled: Boolean, world: WorldState, zone: Zone, heroHp: Int, heroMaxHp: Int): AutoBossDecision {
         if (!enabled) return AutoBossDecision(AutoBossReason.OFF)
-        if (Zones.next(zone) == null) return AutoBossDecision(AutoBossReason.LAST_ZONE)
-        if (WorldProgress.isBossDefeated(world, zone)) return AutoBossDecision(AutoBossReason.BOSS_DEFEATED)
+        val endless = Zones.next(zone) == null
+        if (!endless && WorldProgress.isBossDefeated(world, zone)) return AutoBossDecision(AutoBossReason.BOSS_DEFEATED)
         val missing = WorldProgress.BOSS_KILLS_REQUIRED - WorldProgress.killsTowardsBoss(world, zone)
         if (!WorldProgress.canChallengeBoss(world, zone)) return AutoBossDecision(AutoBossReason.KILLS, missing.coerceAtLeast(1L))
         val kills = world.zoneKills[zone.id] ?: 0L

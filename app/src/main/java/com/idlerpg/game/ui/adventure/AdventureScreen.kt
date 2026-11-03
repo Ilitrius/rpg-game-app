@@ -523,7 +523,8 @@ private fun Hud(
                     color = MaterialTheme.colorScheme.primary,
                 )
                 Text(
-                    stringResource(R.string.zone_number, ui.zone.order),
+                    if (ui.world.endlessTier > 0) stringResource(R.string.zone_number_endless, ui.zone.order, ui.world.endlessTier)
+                    else stringResource(R.string.zone_number, ui.zone.order),
                     style = MaterialTheme.typography.labelSmall,
                     color = Color(0xFFD8D2C0),
                 )
