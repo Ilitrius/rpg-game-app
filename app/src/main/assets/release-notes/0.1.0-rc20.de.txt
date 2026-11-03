@@ -1,0 +1,12 @@
+Neu
+• Realistische Monster im Wald: Wolf, Waldspinne, Pilzling und der Baumhüter sehen jetzt echt aus.
+• Neuer Button „Problem melden“ in den Optionen: öffnet einen Mail-Entwurf mit Version und Gerät, damit Rückmeldungen leichter bei uns ankommen.
+
+Verbessert
+• Endlos-Stufen nach dem letzten Gebiet steigen etwas flacher an und bleiben länger spielbar.
+
+Korrigiert
+• Die „Verbesserung“-Markierung im Shop und „Beste ausrüsten“ stimmen jetzt immer überein.
+
+Hinweis
+• Die übrigen Gebiete und Monster bekommen die realistische Grafik mit weiteren Versionen.

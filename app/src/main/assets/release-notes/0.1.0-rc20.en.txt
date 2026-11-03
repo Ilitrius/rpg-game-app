@@ -1,0 +1,12 @@
+New
+• Realistic monsters in the Forest: Wolf, Forest Spider, Mushroom Creature and the Treant now look lifelike.
+• New "Report a problem" button in Options: opens a mail draft with version and device so feedback reaches us more easily.
+
+Improved
+• Endless tiers after the last area now rise more gently and stay playable for longer.
+
+Fixed
+• The "upgrade" marker in the shop and "Equip best" now always agree.
+
+Note
+• The other areas and monsters will get the realistic graphics in later versions.
