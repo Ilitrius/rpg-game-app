@@ -1,12 +1,12 @@
 Neu
-• Realistische Monster im Wald: Wolf, Waldspinne, Pilzling und der Baumhüter sehen jetzt echt aus.
-• Neuer Button „Problem melden“ in den Optionen: öffnet einen Mail-Entwurf mit Version und Gerät, damit Rückmeldungen leichter bei uns ankommen.
+• Realistische Monster im Wald: Wolf, Waldspinne, Pilzling und der Baumhüter (Boss) wurden komplett neu gezeichnet, mit Fell, Chitin, Rinde, Moos und glühenden Augen.
+• Neuer Button „Problem melden“ unter Optionen → Bewerten & teilen: Er öffnet einen Mail-Entwurf an uns mit App-Version, Android-Version und Gerätemodell. Es werden keine Spieldaten mitgesendet, du kannst den Text vor dem Senden ändern.
 
 Verbessert
-• Endlos-Stufen nach dem letzten Gebiet steigen etwas flacher an und bleiben länger spielbar.
+• Endlos-Stufen nach dem letzten Gebiet: Die Monster werden pro Stufe etwas weniger stark (HP und Schaden steigen flacher). Dadurch bleibt das Spiel dort deutlich länger spielbar, bevor du Wiedergeburt, Verzauberungen und Buffs brauchst.
 
 Korrigiert
-• Die „Verbesserung“-Markierung im Shop und „Beste ausrüsten“ stimmen jetzt immer überein.
+• Im Shop und im Inventar konnte ein Gegenstand als „Verbesserung“ markiert sein, obwohl „Beste ausrüsten“ ihn nicht anlegte. Beides nutzt jetzt dieselbe Regel (mehr Schaden pro Sekunde, bei Gleichstand mehr Attributpunkte). Dadurch schützt „Verbesserungen behalten“ beim Schnellverkauf auch genau die richtigen Gegenstände.
 
 Hinweis
 • Die übrigen Gebiete und Monster bekommen die realistische Grafik mit weiteren Versionen.

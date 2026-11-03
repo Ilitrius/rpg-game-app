@@ -1,12 +1,12 @@
 New
-• Realistic monsters in the Forest: Wolf, Forest Spider, Mushroom Creature and the Treant now look lifelike.
-• New "Report a problem" button in Options: opens a mail draft with version and device so feedback reaches us more easily.
+• Realistic monsters in the Forest: Wolf, Forest Spider, Mushroom Creature and the Treant (boss) were redrawn from scratch, with fur, chitin, bark, moss and glowing eyes.
+• New "Report a problem" button under Options → Rate & share: it opens a mail draft to us with the app version, Android version and device model. No game data is sent, and you can edit the text before sending.
 
 Improved
-• Endless tiers after the last area now rise more gently and stay playable for longer.
+• Endless tiers after the last area: monsters now grow a little less strong per tier (HP and damage rise more gently). The game stays playable there for much longer before you need rebirth, enchantments and buffs.
 
 Fixed
-• The "upgrade" marker in the shop and "Equip best" now always agree.
+• In the shop and inventory an item could be marked as an "upgrade" although "Equip best" did not equip it. Both now use the same rule (more damage per second, or more attribute points when equal). As a result "keep upgrades" in the quick sell now protects exactly the right items.
 
 Note
 • The other areas and monsters will get the realistic graphics in later versions.
