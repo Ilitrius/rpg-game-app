@@ -92,6 +92,27 @@ def sd_torus(p, c, R, r, axis="y"):
     return np.hypot(np.hypot(a, b) - R, h) - r
 
 
+def sd_round_cone(p, a, b, r1, r2):
+    """Capsule with different end radii (r1 at a, r2 at b), exact distance."""
+    ba = b - a
+    l2 = float(np.dot(ba, ba))
+    rr = r1 - r2
+    a2 = l2 - rr * rr
+    il2 = 1.0 / l2
+    pa = p - a
+    y = pa @ ba
+    z = y - l2
+    w = pa * l2 - np.outer(y, ba)
+    x2 = np.sum(w * w, axis=-1)
+    y2 = y * y * l2
+    z2 = z * z * l2
+    k = np.sign(rr) * rr * rr * x2
+    d_far = np.sqrt(x2 + z2) * il2 - r2
+    d_near = np.sqrt(x2 + y2) * il2 - r1
+    d_mid = (np.sqrt(x2 * a2 * il2) + y * rr) * il2 - r1
+    return np.where(np.sign(z) * a2 * z2 > k, d_far, np.where(np.sign(y) * a2 * y2 < k, d_near, d_mid))
+
+
 def smin(a, b, k):
     h = np.clip(0.5 + 0.5 * (b - a) / k, 0.0, 1.0)
     return b + (a - b) * h - k * h * (1.0 - h)
@@ -175,7 +196,8 @@ def environment(d):
 
 class Material:
     def __init__(self, albedo, metal=0.0, rough=0.5, spec=0.5, emissive=0.0, bump=None, tint_fn=None,
-                 sss=0.0, aniso=0.0):
+                 sss=0.0, aniso=0.0, edge=None):
+        self.edge = edge          # (rgb, power, strength): light edge glow for gel/translucent skin
         self.albedo = np.array(albedo, dtype=np.float32)
         self.metal = metal
         self.rough = rough
@@ -192,11 +214,14 @@ class Material:
 
 class Renderer:
     def __init__(self, scene, materials, bounds, size=768, light_dir=(-0.5, 0.75, 0.6), steps=120,
-                 view_rot=None, ground_shadow=True, bg_alpha=True):
+                 view_rot=None, ground_shadow=True, bg_alpha=True, ambient_scale=1.0, key_scale=1.0, rim=0.0,
+                 gamma=1.9, scurve=0.0):
         """bounds: half extent of the visible square in model units (x and y), centred on the origin.
         view_rot: 3x3 matrix applied to model space points (object rotation relative to the camera)."""
         self.scene = scene
         self.materials = materials
+        self.ambient_scale, self.key_scale, self.rim = ambient_scale, key_scale, rim
+        self.gamma, self.scurve = gamma, scurve
         self.bounds = bounds
         self.size = size
         self.light = norm(np.array(light_dir, dtype=np.float32))
@@ -357,8 +382,8 @@ class Renderer:
             else:
                 refl = environment(refl_dir)
             amb_c = np.array([0.34, 0.37, 0.43], dtype=np.float32)
-            amb = amb_c * (0.45 + 0.55 * (nn[:, 1:2] * 0.5 + 0.5)) * ao[sel][:, None]
-            diffuse_col = albedo * (amb + key[:, None] * np.array([1.25, 1.18, 1.05]))
+            amb = amb_c * (0.45 + 0.55 * (nn[:, 1:2] * 0.5 + 0.5)) * ao[sel][:, None] * self.ambient_scale
+            diffuse_col = albedo * (amb + key[:, None] * np.array([1.25, 1.18, 1.05]) * self.key_scale)
             metal_col = albedo * (refl * (0.35 + 0.65 * ao[sel][:, None]) * (0.45 + 0.55 * sh[sel][:, None] + 0.0)
                                   + spec[:, None] * np.array([1.0, 0.97, 0.9]) * 0.8)
             if m.sss > 0:
@@ -368,11 +393,24 @@ class Renderer:
                 + spec[:, None] * np.array([1.0, 0.97, 0.9]) * 0.5
             col = dielectric * (1 - m.metal) + metal_col * m.metal
             col = col + albedo * m.emissive
+            ndv = np.clip(nn @ view, 0.0, 1.0)
+            if m.edge is not None:
+                ecol, epow, estr = m.edge
+                w = (estr * (1.0 - ndv) ** epow)[:, None]
+                col = col * (1 - w) + np.array(ecol, dtype=np.float32) * w * (0.40 + 0.60 * key[:, None] + 0.4 * amb)
+            if self.rim > 0:
+                rim_dir = norm(np.array([[0.85, 0.35, -0.25]], dtype=np.float32))[0]
+                lit = np.clip(nn @ rim_dir, 0.0, 1.0)
+                rimterm = self.rim * (1.0 - ndv) ** 2.2 * lit * (0.5 + 0.5 * ao[sel])
+                col = col + rimterm[:, None] * np.array([0.55, 0.68, 0.95], dtype=np.float32)
             out[sel] = col
         # gentle tone mapping + gamma
         out = out * 1.0
         out = out / (1.0 + out * 0.22)
-        return np.clip(out, 0.0, 1.0) ** (1 / 1.9)
+        v = np.clip(out, 0.0, 1.0) ** (1 / self.gamma)
+        if self.scurve:
+            v = v + self.scurve * (v * v * (3 - 2 * v) - v)
+        return v
 
 
 def save_webp(img, path, out_size=512, quality=92):
