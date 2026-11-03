@@ -86,3 +86,43 @@ class EndlessTierTest {
         assertTrue(WorldProgress.canChallengeBoss(ready.world, last))
     }
 }
+
+/** Not an assertion test: writes `build/endless-calibration.txt` (fight time / damage share per tier for a level-999 hero). */
+class EndlessCalibrationTest {
+    @Test
+    fun writeEndlessCalibration() {
+        val last = Zones.last
+        val sb = StringBuilder("tier monsterLvl | killSec shareOfHeroHp | boss killSec\n")
+        for (tier in listOf(0, 1, 2, 3, 5, 10, 20, 30, 50, 100, 150)) {
+            val z = Zones.effective(last, tier)
+            val lvl = (z.minLevel + z.maxLevel) / 2
+            var k = 0.0; var d = 0.0
+            val seeds = 40
+            val total = z.monsters.sumOf { it.spawnWeight }.toDouble()
+            repeat(seeds) { seed ->
+                val h = hero999(seed)
+                z.monsters.forEach { t ->
+                    val w = t.spawnWeight / total / seeds
+                    val b = MonsterScaling.stats(t, z, lvl)
+                    k += b.maxHp / h.dps * w; d += b.maxHp / h.dps * b.dps / h.maxHp * w
+                }
+            }
+            val boss = MonsterScaling.boss(z); val h0 = hero999(0)
+            sb.appendLine(String.format(java.util.Locale.ROOT, "%4d %6d | %9.2f %6.3f | %9.2f", tier, lvl, k, d, boss.maxHp / h0.dps))
+        }
+        java.io.File("build").mkdirs()
+        java.io.File("build/endless-calibration.txt").writeText(sb.toString())
+    }
+
+    private fun hero999(seed: Int): com.idlerpg.game.domain.character.CombatStats {
+        val level = 999
+        val pts = com.idlerpg.game.domain.character.Progression.STAT_POINTS_PER_LEVEL * (level - 1)
+        val str = (pts * 0.45).toInt(); val dex = (pts * 0.30).toInt(); val vit = pts - str - dex
+        var s = com.idlerpg.game.domain.character.StarterItems.ensureStarterWeapon(com.idlerpg.game.data.GameState())
+        s = s.copy(character = s.character.copy(level = level, stats = com.idlerpg.game.data.Stats(5 + str, 5 + dex, 5 + vit, 5)))
+        val r = Random(seed)
+        val slots = listOf(com.idlerpg.game.data.EquipmentSlot.WEAPON) + com.idlerpg.game.data.EquipmentSlot.entries.filter { it != com.idlerpg.game.data.EquipmentSlot.WEAPON }.shuffled(r)
+        val eq = slots.take(7).associateWith { com.idlerpg.game.domain.equipment.ItemGenerator.roll(990, r, slot = it) }
+        return com.idlerpg.game.domain.character.CombatStats.of(s.copy(equipment = s.equipment.copy(equipped = s.equipment.equipped + eq)))
+    }
+}
