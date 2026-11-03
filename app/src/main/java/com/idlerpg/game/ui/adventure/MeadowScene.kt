@@ -387,6 +387,11 @@ class MeadowScene(private val size: Size) : ZoneScene {
 
     /** Draws everything behind the monster. [drift] runs 0..1 over the cloud cycle. */
     override fun drawBackground(scope: DrawScope, drift: Float, time: Float) = with(scope) {
+        val backdrop = SceneBackdrops.peek(com.idlerpg.game.domain.world.Zones.WIESE_ID)
+        if (backdrop != null) {
+            SceneBackdrops.draw(this, backdrop, w, h, horizonY)
+            return@with
+        }
         drawRect(skyBrush, size = Size(w, horizonY + 6f))
         drawRect(sunGlow, size = Size(w, horizonY + 6f))
         drawCircle(sunDisc, radius = w * 0.06f, center = sunCenter)

@@ -24,6 +24,12 @@ python -I tools/render_items/render.py mace --rarity epic --out <ordner>   # ein
 - Neues Item: Builder schreiben (`(scene, materials, bounds, view_rotation)`), im `BUILDERS` des Moduls
   eintragen, in `ItemSprites.resFor` zuordnen.
 
+## Monster und Hintergründe
+
+- `render_monsters.py <name|all> [--size 1100] [--height 720]`: Monster (`monsters.py`: Schleim, Schleimkönig, Riesenratte, Wildschwein) als eng beschnittene WebPs `monster_<name>.webp` (keine Bodenschatten, Füße am unteren Rand); Licht: wenig Umgebungslicht, starkes Hauptlicht, kühles Randlicht. Dauer ca. 5 min pro Monster bei 1100 px (parallel).
+- `scene_meadow.py [--width 1080 --height 1800]`: perspektivische Wiesen-Landschaft (Himmel, Wolken, 3 Hügelketten, Boden mit Gras/Blumen/Feldweg, Bäume aus dem SDF-Renderer) nach `scene_meadow.webp`; Horizont bei 40 % der Höhe (Kotlin: `SceneBackdrops.HORIZON_FRACTION`). Dauer ca. 3,5 min.
+- Einbindung: `ui/adventure/MonsterSprites.kt` (Sprites + Backdrops, Cache, Vorladen), neue Monster in `MonsterSprites.resFor`, neue Zonen in `SceneBackdrops.resFor`.
+
 ## Hinweise
 
 - Alle Bilder sind selbst erzeugt (keine fremden Quellen, keine Lizenzfragen).

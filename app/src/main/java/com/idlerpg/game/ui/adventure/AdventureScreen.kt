@@ -218,6 +218,12 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
         if (sceneSize.width > 0 && sceneSize.height > 0) createZoneScene(ui.zone, sceneSize.toSize()) else null
     }
 
+    val appResources = LocalContext.current.resources
+    LaunchedEffect(ui.zone.id) {
+        SceneBackdrops.preload(appResources, ui.zone)
+        MonsterSprites.preload(appResources, ui.zone.monsters + ui.zone.boss)
+    }
+
     val monster = ui.monster
     val approach = remember(monster?.spawnId) {
         Animatable(if (ui.phase == MonsterPhase.APPROACHING) 0f else 1f)
