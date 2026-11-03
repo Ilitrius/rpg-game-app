@@ -176,13 +176,16 @@ object Inventory {
         val equipped = eq.equipped[slot]
         val best = eq.inventory.filter { it.slot == slot }.maxWithOrNull(compareBy<Item> { score(state, it).first }
             .thenBy { score(state, it).second }.thenBy { it.itemLevel }) ?: return state
-        if (equipped != null) {
-            val b = score(state, best)
-            val e = score(state, equipped)
-            val better = b.first > e.first + 1e-9 || (kotlin.math.abs(b.first - e.first) <= 1e-9 && b.second > e.second)
-            if (!better) return state
-        }
+        if (equipped != null && !isBetterThanEquipped(state, best)) return state
         return equip(state, best.id)
+    }
+
+    /** Same rule [equipBest] applies: strictly more dps, or equal dps and a larger summed stat bonus. */
+    fun isBetterThanEquipped(state: GameState, item: Item): Boolean {
+        val equipped = state.equipment.equipped[item.slot] ?: return true
+        val b = score(state, item)
+        val e = score(state, equipped)
+        return b.first > e.first + 1e-9 || (kotlin.math.abs(b.first - e.first) <= 1e-9 && b.second > e.second)
     }
 
     /** (dps with the item equipped, summed stat bonus). */

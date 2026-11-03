@@ -227,8 +227,8 @@ class ShopTest {
 
     @Test
     fun bulkSellKeepsUpgradesAndRareItems() {
-        val equippedRing = Item(id = "eq", name = "Ring", slot = EquipmentSlot.RING, bonus = Stats(luck = 5), price = 10)
-        val weakerRing = Item(id = "w", name = "Schwach", slot = EquipmentSlot.RING, bonus = Stats(luck = 2), price = 4)
+        val equippedRing = Item(id = "eq", name = "Ring", slot = EquipmentSlot.RING, bonus = Stats(vitality = 5), price = 10)
+        val weakerRing = Item(id = "w", name = "Schwach", slot = EquipmentSlot.RING, bonus = Stats(vitality = 2), price = 4)
         val betterRing = Item(id = "b", name = "Besser", slot = EquipmentSlot.RING, bonus = Stats(vitality = 9), price = 4)
         val emptySlotBoots = Item(id = "s", name = "Stiefel", slot = EquipmentSlot.BOOTS, bonus = Stats(dexterity = 1), price = 4)
         val rare = Item(id = "r", name = "Selten", slot = EquipmentSlot.RING, rarity = Rarity.RARE, price = 30)
@@ -241,6 +241,10 @@ class ShopTest {
         assertFalse(Shop.isUpgrade(s, weakerRing))
         assertTrue(Shop.isUpgrade(s, betterRing)) // vitality: no DPS, but more attribute points
         assertTrue(Shop.isUpgrade(s, emptySlotBoots))
+        // Shop hint and "beste Ausrüstung" must agree: luck costs DPS-equivalent value, so 9 vitality < 5 luck here.
+        val luckRing = equippedRing.copy(bonus = Stats(luck = 5))
+        val s2 = s.copy(equipment = s.equipment.copy(equipped = mapOf(EquipmentSlot.RING to luckRing)))
+        assertEquals(Shop.isUpgrade(s2, betterRing), Inventory.equipBestChanges(s2.copy(equipment = s2.equipment.copy(inventory = listOf(betterRing)))) > 0)
         assertEquals(listOf("w"), Shop.bulkSellCandidates(s).map { it.id })
         val r = Shop.sellCommonJunk(s)
         assertEquals(1, r.count)

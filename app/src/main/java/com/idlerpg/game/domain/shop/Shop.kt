@@ -188,15 +188,10 @@ object Shop {
     fun sell(state: GameState, itemId: String): GameState = Inventory.sell(state, itemId)
 
     /**
-     * True if equipping [item] would improve the hero: more damage per second, or more attribute
-     * points in total than the item currently in its slot (vitality/luck don't show in DPS).
+     * True if equipping [item] would improve the hero, by the same rule as the equipment tab's
+     * "beste Ausrüstung" button ([Inventory.isBetterThanEquipped]), so both always agree.
      */
-    fun isUpgrade(state: GameState, item: Item): Boolean {
-        val dpsGain = Inventory.combatWith(state, item).dps - CombatStats.of(state).dps
-        if (dpsGain > 1e-6) return true
-        val diff = Inventory.compare(item, state.equipment.equipped[item.slot]).stats
-        return diff.strength + diff.dexterity + diff.vitality + diff.luck > 0
-    }
+    fun isUpgrade(state: GameState, item: Item): Boolean = Inventory.isBetterThanEquipped(state, item)
 
     /** Inventory items "Alle gewöhnlichen verkaufen" sells: common items that are no upgrade. */
     fun bulkSellCandidates(state: GameState): List<Item> = bulkSellCandidates(state, setOf(Rarity.COMMON))
