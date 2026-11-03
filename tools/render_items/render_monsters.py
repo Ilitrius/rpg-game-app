@@ -64,7 +64,7 @@ def main():
     os.makedirs(a.out, exist_ok=True)
     names = list(monsters.BUILDERS) if a.name == "all" else [a.name]
     jobs = [(n, a.size, a.height, a.out) for n in names]
-    with ProcessPoolExecutor() as ex:
+    with ProcessPoolExecutor(max_workers=int(os.environ.get("RENDER_WORKERS", "8"))) as ex:
         for path, dt, sz, dim in ex.map(render_one, jobs):
             print(f"{os.path.basename(path)}  {dim[0]}x{dim[1]}  {dt:.1f}s  {sz/1024:.0f} KB")
 

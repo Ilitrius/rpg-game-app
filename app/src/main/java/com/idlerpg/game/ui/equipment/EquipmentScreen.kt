@@ -84,6 +84,7 @@ import com.idlerpg.game.domain.character.StatType
 import com.idlerpg.game.domain.character.get
 import com.idlerpg.game.domain.equipment.Inventory
 import com.idlerpg.game.domain.equipment.InventoryFill
+import com.idlerpg.game.ui.character.weapon.drawItemSpriteInHand
 import com.idlerpg.game.ui.character.weapon.drawWeaponInHand
 import com.idlerpg.game.ui.character.weapon.weaponLookOf
 import kotlinx.coroutines.launch
@@ -285,6 +286,7 @@ private fun SlotView(slot: EquipmentSlot, item: Item?, onClick: (Item) -> Unit) 
 @Composable
 private fun HeroSilhouette(modifier: Modifier, weapon: Item? = null) {
     val glow = MaterialTheme.colorScheme.primary
+    val weaponSprite = weapon?.let { rememberItemSprite(it) }
     Canvas(modifier) {
         val s = min(size.width / 100f, size.height / 200f)
         val dx = (size.width - 100f * s) / 2f
@@ -307,7 +309,10 @@ private fun HeroSilhouette(modifier: Modifier, weapon: Item? = null) {
             // Subtle rim light on the left side
             drawArc(Color.White.copy(alpha = 0.18f), 150f, 90f, false, Offset(40f, 10f), Size(20f, 24f), style = Stroke(1.2f))
             // Equipped weapon in the right-hand side hand (graphic by the Charakter agent).
-            if (weapon != null) drawWeaponInHand(weaponLookOf(weapon), Offset(82.5f, 103.5f), 8f, 0.2f, Color(0xFF2E342D))
+            if (weapon != null) {
+                if (weaponSprite != null) drawItemSpriteInHand(weaponSprite, weaponLookOf(weapon).kind, Offset(82.5f, 103.5f), 8f, 0.2f)
+                else drawWeaponInHand(weaponLookOf(weapon), Offset(82.5f, 103.5f), 8f, 0.2f, Color(0xFF2E342D))
+            }
         }
     }
 }

@@ -1,0 +1,6 @@
+Neu
+• Realistische Waffe in der Hand: Dolch, Kurzschwert, Streitkolben, Axt und die nackte Faust erscheinen im Kampf als detailreiche Grafik mit Lederhandschuh und Armschiene.
+• Die Waffe im Charakter-Tab und an der Heldenfigur in der Ausrüstung sieht jetzt ebenfalls realistisch aus.
+
+Hinweis
+• Die übrigen Gebiete und Monster bekommen die realistische Grafik mit weiteren Versionen.

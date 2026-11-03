@@ -57,7 +57,7 @@ def main():
             jobs += [(n, r, a.size, a.out, a.out_size) for r in rarities]
         else:
             jobs.append((n, "", a.size, a.out, a.out_size))
-    with ProcessPoolExecutor() as ex:
+    with ProcessPoolExecutor(max_workers=int(os.environ.get("RENDER_WORKERS", "8"))) as ex:
         for path, dt, sz in ex.map(render_one, jobs):
             print(f"{os.path.basename(path)}  {dt:.1f}s  {sz/1024:.0f} KB")
 

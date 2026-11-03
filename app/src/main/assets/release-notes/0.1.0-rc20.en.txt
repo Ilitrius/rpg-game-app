@@ -1,0 +1,6 @@
+New
+• Realistic weapon in hand: dagger, short sword, mace, axe and the bare fist now appear in combat as detailed graphics with a leather glove and arm bracer.
+• The weapon in the Character tab and on the hero figure in Equipment now looks realistic too.
+
+Note
+• The other areas and monsters will get the realistic graphics in later versions.

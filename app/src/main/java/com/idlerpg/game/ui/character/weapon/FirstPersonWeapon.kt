@@ -427,7 +427,10 @@ fun DrawScope.drawFirstPersonWeapon(
         scale(pose.scale, pose.scale, Offset.Zero)
     }) {
         // Hand space: grip center at origin, weapon points to -y, forearm towards +y.
-        if (kind == WeaponKind.FIST) {
+        val held = HeldWeaponSprites.peek(look)
+        if (held != null) {
+            HeldWeaponSprites.draw(this, held)
+        } else if (kind == WeaponKind.FIST) {
             withTransform({ translate(-DaggerPainter.GRIP_CENTER.x, -DaggerPainter.GRIP_CENTER.y) }) {
                 FistPainter.drawWithForearm(this)
             }

@@ -65,6 +65,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import com.idlerpg.game.ui.character.weapon.HeldWeaponSprites
+import com.idlerpg.game.ui.character.weapon.weaponLookOf
 import androidx.compose.ui.platform.LocalDensity
 import com.idlerpg.game.audio.SoundManager
 import com.idlerpg.game.audio.Sfx
@@ -223,6 +225,8 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
         SceneBackdrops.preload(appResources, ui.zone)
         MonsterSprites.preload(appResources, ui.zone.monsters + ui.zone.boss)
     }
+    val heldLook = remember(ui.equippedWeapon) { weaponLookOf(ui.equippedWeapon) }
+    LaunchedEffect(heldLook) { HeldWeaponSprites.preload(appResources, heldLook) }
 
     val monster = ui.monster
     val approach = remember(monster?.spawnId) {

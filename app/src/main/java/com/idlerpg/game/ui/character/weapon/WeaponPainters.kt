@@ -1,5 +1,8 @@
 package com.idlerpg.game.ui.character.weapon
 
+import com.idlerpg.game.ui.equipment.rememberItemSprite
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -622,7 +625,21 @@ fun WeaponImage(
     modifier: Modifier = Modifier,
     rotationDegrees: Float = 0f,
     contentDescription: String? = null,
-) = WeaponImage(weaponLookOf(item), modifier, rotationDegrees, contentDescription)
+) {
+    val sprite = item?.let { rememberItemSprite(it) }
+    val look = weaponLookOf(item)
+    val resources = LocalContext.current.resources
+    if (item == null) LaunchedEffect(Unit) { HeldWeaponSprites.preload(resources, WeaponLook.Fist) }
+    val sem = if (contentDescription != null) Modifier.semantics { this.contentDescription = contentDescription } else Modifier
+    Canvas(modifier.then(sem)) {
+        val fist = if (item == null) HeldWeaponSprites.peek(WeaponLook.Fist) else null
+        when {
+            sprite != null -> drawItemSpriteFit(sprite)
+            fist != null -> drawFistCrop(fist, rotationDegrees)
+            else -> drawWeaponFitted(look, rotationDegrees, shimmer = 0.45f)
+        }
+    }
+}
 
 /** [WeaponImage] for an explicit [WeaponLook]. */
 @Composable

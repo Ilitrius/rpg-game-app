@@ -28,6 +28,7 @@ python -I tools/render_items/render.py mace --rarity epic --out <ordner>   # ein
 
 - `render_monsters.py <name|all> [--size 1100] [--height 720]`: Monster (`monsters.py`: Schleim, Schleimkönig, Riesenratte, Wildschwein) als eng beschnittene WebPs `monster_<name>.webp` (keine Bodenschatten, Füße am unteren Rand); Licht: wenig Umgebungslicht, starkes Hauptlicht, kühles Randlicht. Dauer ca. 5 min pro Monster bei 1100 px (parallel).
 - `scene_meadow.py [--width 1080 --height 1800]`: perspektivische Wiesen-Landschaft (Himmel, Wolken, 3 Hügelketten, Boden mit Gras/Blumen/Feldweg, Bäume aus dem SDF-Renderer) nach `scene_meadow.webp`; Horizont bei 40 % der Höhe (Kotlin: `SceneBackdrops.HORIZON_FRACTION`). Dauer ca. 3,5 min.
+- `weapons_hand.py <kind|all> [--rarity all] [--size 2200] [--height 1650]`: Waffe in der Hand für die Ich-Perspektive (Handschuh, Armschiene, Waffe aufrecht) als `weapon_held_<kind>[_<rarity>].webp` plus `weapon_held_meta.json` (Griffpunkt, Hand-Einheiten je Pixel). Waffenlängen entsprechen den Vektor-Waffen (Spitze/Knauf in Hand-Einheiten, Tabelle `KINDS`), damit die Animation passt. Nach dem Rendern die Zahlen in `HeldWeaponSprites.kt` übernehmen. Dauer ca. 2 min je Bild; `RENDER_WORKERS` begrenzt die Prozesse.
 - Einbindung: `ui/adventure/MonsterSprites.kt` (Sprites + Backdrops, Cache, Vorladen), neue Monster in `MonsterSprites.resFor`, neue Zonen in `SceneBackdrops.resFor`.
 
 ## Hinweise
