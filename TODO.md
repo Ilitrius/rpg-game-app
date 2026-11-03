@@ -29,7 +29,7 @@ Quelle: bezahlter Testanbieter, Reports `rp_feedback_de.pdf` + `rp_production_de
 - [ ] rc18 (signiertes Bundle gebaut, `Idle-RPG-0.1.0-rc18-release.aab`) auf Gerät prüfen und in den Closed Test hochladen. Dann Fragebogen-Antworten gegenprüfen, `docs/play-console-checkliste.md` + `PLAN.md` (Anforderungstabelle) nachziehen.
 
 **Zusätzliche Empfehlungen des Reports (unverbindlich, Einordnung):**
-- [ ] Feedback-Kanal in der App (z. B. Mail-Intent "Problem melden" mit Geräte-/Versionsinfo): klein, ohne Berechtigung; sinnvoll.
+- [x] Feedback-Kanal (rc19): Optionen → Bewerten & teilen → „Problem melden“ (`AppLinks.reportProblem`, Mail-Entwurf an rene.puf@gmail.com mit Version/Android/Gerät, keine Berechtigung; auf Gerät prüfen).
 - [ ] Saisonale Events / regelmäßige Inhalts-Updates: Roadmap-Material (siehe Prestige, Buffs, Gold-Senken unten); noch nicht konzipiert.
 - [ ] Community (Discord/Forum): kein Code; erst nach Produktionsfreigabe sinnvoll, Link dann in Optionen.
 - [ ] Visuelle Verbesserungen: laufend, Grafik-Regel aus `CLAUDE.md` gilt.

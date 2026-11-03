@@ -171,4 +171,8 @@
     <string name="options_field_best_level">Bester Heldenlevel</string>
     <string name="options_note_unknown_talents">Unbekannte Talente werden entfernt: %1$d</string>
     <string name="options_note_gold_talents">Bei %1$d Talenten waren mehr als die Hälfte der Stufen mit Gold gekauft; sie werden auf das erlaubte Maß gesenkt.</string>
+    <string name="options_feedback_button">Problem melden</string>
+    <string name="options_feedback_subject">Idle RPG %1$s: Rückmeldung</string>
+    <string name="options_feedback_body">Hier bitte dein Anliegen beschreiben (was ist passiert, was hast du erwartet?):\n\n\n---\nApp-Version: %1$s\nAndroid: %2$s (API %3$d)\nGerät: %4$s %5$s</string>
+    <string name="options_feedback_unavailable">Keine Mail-App gefunden. Schreibe an rene.puf@gmail.com.</string>
 </resources>

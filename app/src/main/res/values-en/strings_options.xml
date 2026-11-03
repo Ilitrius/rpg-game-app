@@ -163,4 +163,8 @@
     <string name="options_field_best_level">Best hero level</string>
     <string name="options_note_unknown_talents">Unknown talents will be removed: %1$d</string>
     <string name="options_note_gold_talents">%1$d talents had more than half of their levels bought with gold; they will be reduced to the allowed share.</string>
+    <string name="options_feedback_button">Report a problem</string>
+    <string name="options_feedback_subject">Idle RPG %1$s: feedback</string>
+    <string name="options_feedback_body">Please describe your issue here (what happened, what did you expect?):\n\n\n---\nApp version: %1$s\nAndroid: %2$s (API %3$d)\nDevice: %4$s %5$s</string>
+    <string name="options_feedback_unavailable">No mail app found. Write to rene.puf@gmail.com.</string>
 </resources>

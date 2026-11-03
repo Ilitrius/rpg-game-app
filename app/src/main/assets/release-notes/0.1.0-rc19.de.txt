@@ -2,8 +2,11 @@ Neu
 • Endlos-Stufen: Nach dem letzten Gebiet geht das Spiel weiter. Jeder Sieg über den Boss von Gebiet 100 öffnet die nächste Endlos-Stufe mit stärkeren Monstern (höhere Level) und besseren Belohnungen. Der Auto-Boss läuft dort weiter.
 • Realistische Grafik für die Wiese: eine neue Landschaft mit Himmel, Hügeln, Wald und Feldweg.
 • Realistische Monster auf der Wiese: Schleim, Riesenratte, Wildschwein und der Schleimkönig sehen jetzt echt aus, mit nassem Glanz, Fell, Zähnen und Krallen.
+• Neuer Button „Problem melden“ in den Optionen: öffnet einen Mail-Entwurf mit Version und Gerät, damit Rückmeldungen leichter bei uns ankommen.
 
 Korrigiert
+• Die „Verbesserung“-Markierung im Shop und „Beste ausrüsten“ stimmen jetzt immer überein.
+• Endlos-Stufen steigen etwas flacher an.
 • Am Ende des Spiels fielen die Monster nach Level 990 immer wieder auf Level 980 zurück, und das Spiel drehte sich im Kreis.
 
 Hinweis

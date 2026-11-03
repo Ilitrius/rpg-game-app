@@ -22,6 +22,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.VolumeOff
 import androidx.compose.material.icons.automirrored.outlined.VolumeUp
+import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.ContentPaste
@@ -224,6 +225,7 @@ fun OptionsScreen() {
             RateShareCard(
                 onRate = { if (!AppLinks.openRating(context)) notify(context.getString(R.string.options_rate_unavailable)) },
                 onShare = { if (!AppLinks.share(context)) notify(context.getString(R.string.options_share_unavailable)) },
+                onFeedback = { if (!AppLinks.reportProblem(context)) notify(context.getString(R.string.options_feedback_unavailable)) },
             )
             DonateCard(
                 onDonate = {
@@ -317,7 +319,7 @@ private fun HelpCard(onReplayTutorial: () -> Unit) {
 }
 
 @Composable
-private fun RateShareCard(onRate: () -> Unit, onShare: () -> Unit) {
+private fun RateShareCard(onRate: () -> Unit, onShare: () -> Unit, onFeedback: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
@@ -331,6 +333,7 @@ private fun RateShareCard(onRate: () -> Unit, onShare: () -> Unit) {
             )
             ActionButton(Icons.Outlined.StarOutline, stringResource(R.string.options_rate_button), primary = false, onClick = onRate)
             ActionButton(Icons.Outlined.Share, stringResource(R.string.options_share_button), primary = false, onClick = onShare)
+            ActionButton(Icons.Outlined.Email, stringResource(R.string.options_feedback_button), primary = false, onClick = onFeedback)
         }
     }
 }
