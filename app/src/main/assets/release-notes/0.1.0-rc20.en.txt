@@ -1,8 +1,5 @@
 New
-• Realistic graphics for areas 6 to 100: all 19 landscapes (Heath, Desert, Volcano, Crypt, Frost, Jungle, Ruins, Glow-Mushroom Caves, Coast, Bone Desert, Blood Garden, Sky, Underworld, Shadow, Clockwork, Dream, Astral, Void and End) have new, detailed backdrops with sky, celestial bodies, distant views and a fitting ground.
-• Realistic monsters in these areas: slimes, hounds, insects, golems, humanoids, winged creatures, serpents and wraiths, each as enemy and as boss, in the colors of their area with glowing eyes.
+• Realistic graphics in every area: all 100 areas have new, detailed backdrops with sky, celestial bodies, distant views and a fitting ground (Forest, Swamp, Mountains, Cave and the 19 other landscapes from Heath to End).
+• Realistic monsters everywhere: Meadow, Forest, Swamp, Mountains and Cave have their own enemies and bosses (for example wolf, spider, mushroom, toad, will-o'-the-wisp, bat, treant, hydra, yeti and cave dragon). Areas 6 to 100 show slimes, hounds, insects, golems, humanoids, winged creatures, serpents and wraiths in the colors of their area with glowing eyes.
 • Realistic weapon in hand: dagger, short sword, mace, axe and the bare fist now appear in combat as detailed graphics with a leather glove and arm bracer.
 • The weapon in the Character tab and on the hero figure in Equipment now looks realistic too.
-
-Note
-• Areas 2 to 5 (Forest, Swamp, Mountains, Cave) will get the realistic graphics in a later version.

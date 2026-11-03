@@ -356,6 +356,11 @@ class ForestScene(size: Size) : ZoneScene {
     // ------------------------------------------------------------------ drawing
 
     override fun drawBackground(scope: DrawScope, drift: Float, time: Float) = with(scope) {
+        val backdrop = SceneBackdrops.peek(com.idlerpg.game.domain.world.Zones.WALD)
+        if (backdrop != null) {
+            SceneBackdrops.draw(this, backdrop, w, h, horizonY, 0.42f)
+            return@with
+        }
         drawRect(skyBrush, size = Size(w, horizonY + 6f))
         drawRect(glowBrush, size = Size(w, horizonY + h * 0.1f))
 

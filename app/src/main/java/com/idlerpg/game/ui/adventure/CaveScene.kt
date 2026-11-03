@@ -275,6 +275,11 @@ class CaveScene(size: Size) : ZoneScene {
     }
 
     override fun drawBackground(scope: DrawScope, drift: Float, time: Float) = with(scope) {
+        val backdrop = SceneBackdrops.peek(com.idlerpg.game.domain.world.Zones.HOEHLE)
+        if (backdrop != null) {
+            SceneBackdrops.draw(this, backdrop, w, h, horizonY, 0.44f)
+            return@with
+        }
         drawRect(baseBrush, size = size)
         crystals.take(3).forEach { drawCrystal(it, time) }
 

@@ -34,6 +34,8 @@ python -I tools/render_items/render.py mace --rarity epic --out <ordner>   # ein
 - `scene_biome.py <biom|all> [--width 1080 --height 1800]`: Hintergründe der 19 Biome (`scene_<biom>.webp`, ca. 70 KB, 1 min je Bild). Parameter je Biom in der Tabelle `BIOMES` (Farben und Formen wie `BiomeStyles.kt`); neue Formen in `profile()`, neue Böden im Boden-Block.
 - `render_monsters.py gen [--size 1100 --height 720]`: 8 Körperformen (`monsters_gen.py`: Blob, Hund, Insekt, Golem; `monsters_gen2.py`: Humanoid, Geflügelt, Schlange, Geist), je Normal und Boss, neutral grau (`monster_gen_<plan>[_boss].webp`) plus Leuchtebene `_glow.webp` (Material-ID aus `GLOW`, Maske über `Renderer.mat_map`). Kotlin färbt per Farbverlauf-Abbildung ein (`GeneratedSprites`). Dauer 2-12 min je Bild; `RENDER_WORKERS=8` begrenzt RAM.
 
+- Zonen 2-5: `scene_biome.py wald|sumpf|gebirge|hoehle` (eigene Horizonte `HORIZON_OF`) und `monsters_gen3.py` (`render_monsters.py gen_<name>`: Pilz, Kröte, Irrlicht, Fledermaus, Baumhüter, Hydra, Yeti, Drache, je neutral + `_glow`). Paletten der benannten Monster stehen in `GeneratedSprites.named`.
+
 ## Hinweise
 
 - Alle Bilder sind selbst erzeugt (keine fremden Quellen, keine Lizenzfragen).

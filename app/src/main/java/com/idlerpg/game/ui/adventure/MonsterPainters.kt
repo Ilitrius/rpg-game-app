@@ -64,7 +64,7 @@ object MonsterPainters {
                 scale(1f - 0.025f * breath + 0.12f * squash, 1f + 0.035f * breath - 0.35f * squash, Offset(100f, GROUND))
             }) {
                 val sprite = MonsterSprites.peek(type)
-                if (sprite != null) MonsterSprites.draw(this, sprite) else when (type) {
+                if (sprite != null) MonsterSprites.draw(this, sprite) else if (GeneratedSprites.drawNamed(this, type)) Unit else when (type) {
                     MonsterType.SLIME -> Slime.draw(this, time)
                     MonsterType.GIANT_RAT -> Rat.draw(this, time)
                     MonsterType.BOAR -> Boar.draw(this, time)

@@ -110,7 +110,14 @@ internal object SceneBackdrops {
         Biome.ASTRAL -> R.drawable.scene_astral
         Biome.LEERE -> R.drawable.scene_leere
         Biome.ENDE -> R.drawable.scene_ende
-        null -> if (zone.id == Zones.WIESE_ID) R.drawable.scene_meadow else null
+        null -> when (zone.id) {
+            Zones.WIESE_ID -> R.drawable.scene_meadow
+            Zones.WALD_ID -> R.drawable.scene_wald
+            Zones.SUMPF_ID -> R.drawable.scene_sumpf
+            Zones.GEBIRGE_ID -> R.drawable.scene_gebirge
+            Zones.HOEHLE_ID -> R.drawable.scene_hoehle
+            else -> null
+        }
     }
 
     fun peek(zone: Zone): ImageBitmap? = resFor(zone)?.let { cache.get(it) }

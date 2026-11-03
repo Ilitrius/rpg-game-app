@@ -21,13 +21,14 @@ from PIL import Image  # noqa: E402
 import monsters  # noqa: E402
 import monsters_gen  # noqa: E402
 import monsters_gen2  # noqa: E402
+import monsters_gen3  # noqa: E402
 from sdf import Renderer  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 DEFAULT_OUT = os.path.join(ROOT, "app", "src", "main", "res", "drawable-nodpi")
 
 
-ALL = {**monsters.BUILDERS, **monsters_gen.BUILDERS, **monsters_gen2.BUILDERS}
+ALL = {**monsters.BUILDERS, **monsters_gen.BUILDERS, **monsters_gen2.BUILDERS, **monsters_gen3.BUILDERS}
 
 
 def _finish(img, box, height):

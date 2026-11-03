@@ -1,8 +1,5 @@
 Neu
-• Realistische Grafik für die Gebiete 6 bis 100: Alle 19 Landschaften (Heide, Wüste, Vulkan, Gruft, Frost, Dschungel, Ruinen, Glutpilz-Höhlen, Küste, Knochenwüste, Blutgarten, Himmel, Unterwelt, Schatten, Uhrwerk, Traum, Astral, Leere und Ende) haben neue, detailreiche Hintergründe mit Himmel, Himmelskörpern, Fernsicht und passendem Boden.
-• Realistische Monster in diesen Gebieten: Schleime, Hunde, Insekten, Golems, Humanoide, Flügelwesen, Schlangen und Geister, jeweils als Gegner und als Boss, in den Farben ihres Gebiets mit leuchtenden Augen.
+• Realistische Grafik in allen Gebieten: Alle 100 Gebiete haben neue, detailreiche Hintergründe mit Himmel, Himmelskörpern, Fernsicht und passendem Boden (Wald, Sumpf, Gebirge, Höhle und die 19 weiteren Landschaften von Heide bis Ende).
+• Realistische Monster überall: Wiese, Wald, Sumpf, Gebirge und Höhle haben ihre eigenen Gegner und Bosse (zum Beispiel Wolf, Spinne, Pilzling, Kröte, Irrlicht, Fledermaus, Baumhüter, Hydra, Yeti und Höhlendrache). Die Gebiete 6 bis 100 zeigen Schleime, Hunde, Insekten, Golems, Humanoide, Flügelwesen, Schlangen und Geister in den Farben ihres Gebiets mit leuchtenden Augen.
 • Realistische Waffe in der Hand: Dolch, Kurzschwert, Streitkolben, Axt und die nackte Faust erscheinen im Kampf als detailreiche Grafik mit Lederhandschuh und Armschiene.
 • Die Waffe im Charakter-Tab und an der Heldenfigur in der Ausrüstung sieht jetzt ebenfalls realistisch aus.
-
-Hinweis
-• Die Gebiete 2 bis 5 (Wald, Sumpf, Gebirge, Höhle) bekommen die realistische Grafik mit einer weiteren Version.

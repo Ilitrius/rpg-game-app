@@ -55,6 +55,14 @@ BIOMES = {
     "ende": (0x050003, 0xFFB23A, 0x2A1608, 0x6A3A10, 0x3A2A10, 0x0A0604, 0xFFD23A, 0x7A4A18, "towers", "tiles", "eclipse", 0.1, (0.3, 0x5A3010)),
 }
 
+# handmade zones 2-5 (zone scenes use their own horizon heights)
+BIOMES.update({
+    "wald": (0x1B3B28, 0xA8C888, 0x16301C, 0x3E6A42, 0x2E4A24, 0x0F1C0C, 0xF0F0A8, 0x6C8A66, "trees", "grass", "sun", 0.0, (0.30, 0x9ABF98)),
+    "sumpf": (0x1E2A1C, 0x7A8A5A, 0x1A2214, 0x3E4A2C, 0x3A4228, 0x141808, 0xC8F060, 0x5E6A44, "tendrils", "water", "moon", 0.1, (0.60, 0x4A5A38)),
+    "gebirge": (0x2A4A7A, 0xC8DCF0, 0x6A7E96, 0xA6B8CC, 0xB8BCC0, 0x5A5E64, 0xFFF0D0, 0xB8C8DC, "peaks", "rock", "sun", 0.0, (0.50, 0xFFFFFF)),
+    "hoehle": (0x0C0A10, 0x2A2030, 0x14101C, 0x2A2236, 0x3A3240, 0x0C0A10, 0x8A6AFF, 0x2A2236, "spires", "rock", "none", 0.0, (0.0, None)),
+})
+HORIZON_OF = {"wald": 0.42, "gebirge": 0.45}
 TREE_BIOMES = {"dschungel"}
 
 
@@ -121,7 +129,7 @@ def render(name, W, H, seed=11):
     (sky_top, sky_hor, far_n, far_f, g_top, g_bot, glow, fog, far_kind, ground_kind, orb, stars, clouds) = BIOMES[name]
     sky_top, sky_hor, far_n, far_f, g_top, g_bot, glow, fog = (hexc(c) for c in (sky_top, sky_hor, far_n, far_f, g_top, g_bot, glow, fog))
     seed = (sum(map(ord, name)) * 31) % 997
-    yh = HORIZON * H
+    yh = HORIZON_OF.get(name, HORIZON) * H
     f = 1.10 * W
     ys, xs = np.mgrid[0:H, 0:W].astype(np.float32)
     nx = xs / W
@@ -182,6 +190,15 @@ def render(name, W, H, seed=11):
         sky = sky * (1 - ca[..., None]) + cc * ca[..., None]
     img[:] = sky
 
+    if name == "hoehle":
+        xr = nx[0]
+        ceil = (0.05 + 0.20 * profile("spires", xr * 1.3, seed + 9) * 0.9 + 0.05 * fbm1(xr * 4, seed + 3, 3)) * H
+        cmask = ys <= ceil[None, :]
+        rock = np.array([0.10, 0.085, 0.12], dtype=np.float32) * (0.5 + 0.9 * fbm2(xs / W * 40, ys / H * 28, 4, seed + 41))[..., None]
+        rim = cmask & ~np.roll(cmask, -4, axis=0)
+        rock = rock + rim[..., None] * glow * 0.35
+        sky = np.where(cmask[..., None], rock, sky)
+        img[:] = sky
     # ------------------------------------------------------------ far layers
     haze_c = fog
     layers = [(0, 0.060, 0.62), (1, 0.034, 0.40), (2, 0.012, 0.20)]
