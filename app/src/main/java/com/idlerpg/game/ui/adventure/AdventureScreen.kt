@@ -224,6 +224,7 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
     LaunchedEffect(ui.zone.id) {
         SceneBackdrops.preload(appResources, ui.zone)
         MonsterSprites.preload(appResources, ui.zone.monsters + ui.zone.boss)
+        GeneratedSprites.preload(appResources, ui.zone)
     }
     val heldLook = remember(ui.equippedWeapon) { weaponLookOf(ui.equippedWeapon) }
     LaunchedEffect(heldLook) { HeldWeaponSprites.preload(appResources, heldLook) }

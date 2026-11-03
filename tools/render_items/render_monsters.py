@@ -19,16 +19,34 @@ import numpy as np  # noqa: E402
 from PIL import Image  # noqa: E402
 
 import monsters  # noqa: E402
+import monsters_gen  # noqa: E402
+import monsters_gen2  # noqa: E402
 from sdf import Renderer  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 DEFAULT_OUT = os.path.join(ROOT, "app", "src", "main", "res", "drawable-nodpi")
 
 
+ALL = {**monsters.BUILDERS, **monsters_gen.BUILDERS, **monsters_gen2.BUILDERS}
+
+
+def _finish(img, box, height):
+    cropped = img[box[1]:box[3], box[0]:box[2]]
+    pre = cropped.copy()
+    pre[..., :3] *= pre[..., 3:4]
+    h, w = cropped.shape[:2]
+    new_h = height
+    new_w = max(1, round(w * new_h / h))
+    im = Image.fromarray(np.clip(pre * 255, 0, 255).astype(np.uint8), "RGBA").resize((new_w, new_h), Image.LANCZOS)
+    r = np.asarray(im, dtype=np.float32) / 255.0
+    r[..., :3] = np.clip(r[..., :3] / np.maximum(r[..., 3:4], 1e-4), 0, 1)
+    return Image.fromarray(np.clip(r * 255, 0, 255).astype(np.uint8), "RGBA")
+
+
 def render_one(job):
     name, size, height, out_dir = job
     t0 = time.time()
-    scene, mats, bounds, view = monsters.BUILDERS[name]()
+    scene, mats, bounds, view = ALL[name]()
     rd = Renderer(scene, mats, bounds * 1.5, size=size, view_rot=view, ground_shadow=False,
                   light_dir=(-0.60, 0.72, 0.50), ambient_scale=0.50, key_scale=1.45, rim=1.0, gamma=1.75, scurve=0.55)
     rd.margin = 0.97
@@ -49,6 +67,13 @@ def render_one(job):
     r = np.asarray(im, dtype=np.float32) / 255.0
     r[..., :3] = np.clip(r[..., :3] / np.maximum(r[..., 3:4], 1e-4), 0, 1)
     out = Image.fromarray(np.clip(r * 255, 0, 255).astype(np.uint8), "RGBA")
+    if name in monsters_gen.GLOW:
+        gid = monsters_gen.GLOW[name]
+        mask = (rd.mat_map == gid).astype(np.float32)
+        gl = np.zeros((size, size, 4), dtype=np.float32)
+        gl[..., :3] = 1.0
+        gl[..., 3] = mask
+        _finish(gl, box, height).save(os.path.join(out_dir, f"monster_{name}_glow.webp"), "WEBP", quality=92, method=6)
     path = os.path.join(out_dir, f"monster_{name}.webp")
     out.save(path, "WEBP", quality=90, method=6)
     return path, time.time() - t0, os.path.getsize(path), (new_w, new_h)
@@ -62,7 +87,7 @@ def main():
     ap.add_argument("--out", default=DEFAULT_OUT)
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
-    names = list(monsters.BUILDERS) if a.name == "all" else [a.name]
+    names = list(ALL) if a.name == "all" else ([n for n in ALL if n.startswith(a.name)] if a.name.endswith("*") is False and a.name not in ALL else [a.name])
     jobs = [(n, a.size, a.height, a.out) for n in names]
     with ProcessPoolExecutor(max_workers=int(os.environ.get("RENDER_WORKERS", "8"))) as ex:
         for path, dt, sz, dim in ex.map(render_one, jobs):

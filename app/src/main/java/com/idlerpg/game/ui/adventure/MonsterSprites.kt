@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import com.idlerpg.game.R
+import com.idlerpg.game.domain.world.Biome
 import com.idlerpg.game.domain.world.MonsterType
 import com.idlerpg.game.domain.world.Zone
 import com.idlerpg.game.domain.world.Zones
@@ -86,15 +87,36 @@ internal object SceneBackdrops {
         override fun sizeOf(key: Int, value: ImageBitmap): Int = value.width * value.height * 4
     }
 
-    fun resFor(zoneId: String): Int? = when (zoneId) {
-        Zones.WIESE_ID -> R.drawable.scene_meadow
-        else -> null
+    /** Biome backdrops: horizon at 44 % of the image height (the meadow: 40 %). */
+    const val BIOME_HORIZON_FRACTION = 0.44f
+
+    fun resFor(zone: Zone): Int? = when (zone.biome) {
+        Biome.HEIDE -> R.drawable.scene_heide
+        Biome.WUESTE -> R.drawable.scene_wueste
+        Biome.VULKAN -> R.drawable.scene_vulkan
+        Biome.GRUFT -> R.drawable.scene_gruft
+        Biome.FROST -> R.drawable.scene_frost
+        Biome.DSCHUNGEL -> R.drawable.scene_dschungel
+        Biome.RUINEN -> R.drawable.scene_ruinen
+        Biome.GLUTPILZ -> R.drawable.scene_glutpilz
+        Biome.KUESTE -> R.drawable.scene_kueste
+        Biome.KNOCHEN -> R.drawable.scene_knochen
+        Biome.BLUTGARTEN -> R.drawable.scene_blutgarten
+        Biome.HIMMEL -> R.drawable.scene_himmel
+        Biome.UNTERWELT -> R.drawable.scene_unterwelt
+        Biome.SCHATTEN -> R.drawable.scene_schatten
+        Biome.UHRWERK -> R.drawable.scene_uhrwerk
+        Biome.TRAUM -> R.drawable.scene_traum
+        Biome.ASTRAL -> R.drawable.scene_astral
+        Biome.LEERE -> R.drawable.scene_leere
+        Biome.ENDE -> R.drawable.scene_ende
+        null -> if (zone.id == Zones.WIESE_ID) R.drawable.scene_meadow else null
     }
 
-    fun peek(zoneId: String): ImageBitmap? = resFor(zoneId)?.let { cache.get(it) }
+    fun peek(zone: Zone): ImageBitmap? = resFor(zone)?.let { cache.get(it) }
 
     suspend fun preload(resources: Resources, zone: Zone) {
-        val res = resFor(zone.id) ?: return
+        val res = resFor(zone) ?: return
         if (cache.get(res) != null) return
         val bmp = withContext(Dispatchers.Default) {
             runCatching { BitmapFactory.decodeResource(resources, res) }.getOrNull()
@@ -103,9 +125,9 @@ internal object SceneBackdrops {
     }
 
     /** Covers the canvas ([w] x [h]) with [img], keeping its horizon on [horizonY]. */
-    fun draw(scope: DrawScope, img: ImageBitmap, w: Float, h: Float, horizonY: Float) = with(scope) {
+    fun draw(scope: DrawScope, img: ImageBitmap, w: Float, h: Float, horizonY: Float, horizonFraction: Float = HORIZON_FRACTION) = with(scope) {
         val s = max(w / img.width, h / img.height)
-        val yOff = horizonY - HORIZON_FRACTION * img.height * s
+        val yOff = horizonY - horizonFraction * img.height * s
         val xOff = (w - img.width * s) / 2f
         withTransform({
             translate(xOff, yOff)

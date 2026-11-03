@@ -293,10 +293,13 @@ class Renderer:
         idx = np.nonzero(hit)[0]
         color = np.zeros((n, 3), dtype=np.float32)
         alpha = np.zeros(n, dtype=np.float32)
+        mat_map = np.full(n, -1, dtype=np.int16)
         if idx.size:
             p = o[idx] + t[idx, None] * dirv
             color[idx] = self._shade(p, idx)
+            mat_map[idx] = self._last_mat
             alpha[idx] = 1.0
+        self.mat_map = mat_map.reshape(S, S)          # material id per pixel (-1 = background), e.g. for glow layers
         img = np.concatenate([color, alpha[:, None]], axis=-1).reshape(S, S, 4)
         if self.ground_shadow:
             img = self._drop_shadow(img)
@@ -345,6 +348,7 @@ class Renderer:
     def _shade(self, p_cam, idx):
         n = self._normal(p_cam)
         d0, mat = self._sdf(p_cam)
+        self._last_mat = mat
         pm = p_cam @ self.R
         view = v3(0, 0, 1)
         out = np.zeros_like(p_cam)

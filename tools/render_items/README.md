@@ -31,6 +31,9 @@ python -I tools/render_items/render.py mace --rarity epic --out <ordner>   # ein
 - `weapons_hand.py <kind|all> [--rarity all] [--size 2200] [--height 1650]`: Waffe in der Hand für die Ich-Perspektive (Handschuh, Armschiene, Waffe aufrecht) als `weapon_held_<kind>[_<rarity>].webp` plus `weapon_held_meta.json` (Griffpunkt, Hand-Einheiten je Pixel). Waffenlängen entsprechen den Vektor-Waffen (Spitze/Knauf in Hand-Einheiten, Tabelle `KINDS`), damit die Animation passt. Nach dem Rendern die Zahlen in `HeldWeaponSprites.kt` übernehmen. Dauer ca. 2 min je Bild; `RENDER_WORKERS` begrenzt die Prozesse.
 - Einbindung: `ui/adventure/MonsterSprites.kt` (Sprites + Backdrops, Cache, Vorladen), neue Monster in `MonsterSprites.resFor`, neue Zonen in `SceneBackdrops.resFor`.
 
+- `scene_biome.py <biom|all> [--width 1080 --height 1800]`: Hintergründe der 19 Biome (`scene_<biom>.webp`, ca. 70 KB, 1 min je Bild). Parameter je Biom in der Tabelle `BIOMES` (Farben und Formen wie `BiomeStyles.kt`); neue Formen in `profile()`, neue Böden im Boden-Block.
+- `render_monsters.py gen [--size 1100 --height 720]`: 8 Körperformen (`monsters_gen.py`: Blob, Hund, Insekt, Golem; `monsters_gen2.py`: Humanoid, Geflügelt, Schlange, Geist), je Normal und Boss, neutral grau (`monster_gen_<plan>[_boss].webp`) plus Leuchtebene `_glow.webp` (Material-ID aus `GLOW`, Maske über `Renderer.mat_map`). Kotlin färbt per Farbverlauf-Abbildung ein (`GeneratedSprites`). Dauer 2-12 min je Bild; `RENDER_WORKERS=8` begrenzt RAM.
+
 ## Hinweise
 
 - Alle Bilder sind selbst erzeugt (keine fremden Quellen, keine Lizenzfragen).

@@ -32,7 +32,7 @@ import kotlin.random.Random
  * per frame only cheap alpha/offset animation runs. Seeded by the zone order, so every zone looks
  * different but stable.
  */
-internal class BiomeScene(zone: Zone, size: Size) : ZoneScene {
+internal class BiomeScene(private val zone: Zone, size: Size) : ZoneScene {
     private val st = BiomeStyles.of(zone.biome!!)
     private val stage = zone.stage
     /** Intensity 0..1: overall zone threat (60 %) plus escalation inside the biome (40 %). */
@@ -395,6 +395,15 @@ internal class BiomeScene(zone: Zone, size: Size) : ZoneScene {
 
     // ------------------------------------------------------------------ draw
     override fun drawBackground(scope: DrawScope, drift: Float, time: Float) = with(scope) {
+        val backdrop = SceneBackdrops.peek(zone)
+        if (backdrop != null) {
+            SceneBackdrops.draw(this, backdrop, w, h, horizonY, SceneBackdrops.BIOME_HORIZON_FRACTION)
+            // later stages of a biome are a little darker and moodier
+            if (stage > 0) drawRect(Color.Black.copy(alpha = 0.045f * stage))
+            drawParticles(time)
+            if (lightning) strike(time)
+            return@with
+        }
         ensureBaked()
         drawImage(skyLayer!!)
         stars.forEachIndexed { i, sp ->
