@@ -92,6 +92,7 @@ internal object SceneBackdrops {
 
     fun resFor(zoneId: String): Int? = when (zoneId) {
         Zones.WIESE_ID -> R.drawable.scene_meadow
+        Zones.WALD_ID -> R.drawable.scene_forest
         else -> null
     }
 

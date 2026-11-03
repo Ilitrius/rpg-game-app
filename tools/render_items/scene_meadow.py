@@ -25,6 +25,35 @@ DEFAULT_OUT = os.path.join(ROOT, "app", "src", "main", "res", "drawable-nodpi", 
 
 HORIZON = 0.40
 
+arr = lambda *v: np.array(v, dtype=np.float32)
+
+THEMES = {
+    "meadow": dict(
+        out="scene_meadow.webp", sky=(arr(0.13, 0.37, 0.74), arr(0.37, 0.62, 0.90), arr(0.80, 0.89, 0.93)), sun_glow=1.0,
+        cloud_lo=0.50, cloud_hi=0.78, haze=arr(0.80, 0.86, 0.84), fog=0.030,
+        ridges=((arr(0.50, 0.60, 0.72), arr(0.62, 0.72, 0.80)), (arr(0.30, 0.46, 0.42), arr(0.48, 0.64, 0.56)), (arr(0.20, 0.37, 0.16), arr(0.36, 0.52, 0.24))),
+        ground=(arr(0.10, 0.25, 0.06), arr(0.22, 0.42, 0.10), arr(0.46, 0.60, 0.20), arr(0.55, 0.52, 0.24)),
+        flowers=0.90, dirt=(arr(0.46, 0.34, 0.22), arr(0.64, 0.52, 0.36)), grade=arr(1.04, 1.0, 0.93),
+        leaf=(0.20, 0.38, 0.10), tree_shadow=0.42,
+        trees=[(-5.6, 9.0, 4.4, 1), (6.2, 10.5, 4.8, 2), (-8.8, 14.5, 5.2, 3), (9.8, 16.0, 5.2, 4),
+               (-12.5, 22.0, 5.8, 5), (13.2, 25.0, 5.8, 6), (-3.8, 33.0, 6.0, 7), (4.8, 39.0, 6.0, 8),
+               (-18.0, 31.0, 6.4, 9), (19.0, 35.0, 6.4, 10)],
+    ),
+    "forest": dict(
+        out="scene_forest.webp", sky=(arr(0.22, 0.33, 0.34), arr(0.42, 0.56, 0.52), arr(0.68, 0.78, 0.70)), sun_glow=0.45,
+        cloud_lo=0.30, cloud_hi=0.62, haze=arr(0.55, 0.66, 0.58), fog=0.050,
+        ridges=((arr(0.30, 0.42, 0.40), arr(0.42, 0.54, 0.48)), (arr(0.14, 0.28, 0.16), arr(0.26, 0.42, 0.24)), (arr(0.08, 0.20, 0.07), arr(0.18, 0.32, 0.12))),
+        ground=(arr(0.04, 0.10, 0.03), arr(0.11, 0.22, 0.06), arr(0.24, 0.34, 0.10), arr(0.34, 0.25, 0.12)),
+        flowers=2.0, dirt=(arr(0.30, 0.22, 0.14), arr(0.44, 0.34, 0.22)), grade=arr(0.97, 1.0, 0.92),
+        leaf=(0.10, 0.27, 0.07), tree_shadow=0.60,
+        trees=[(-3.6, 5.5, 5.0, 1), (4.0, 6.5, 5.4, 2), (-6.6, 8.0, 5.8, 3), (7.2, 9.5, 6.0, 4), (-9.0, 12.0, 6.2, 5),
+               (9.6, 13.5, 6.4, 6), (-5.2, 16.0, 6.4, 7), (5.6, 18.0, 6.6, 8), (-12.0, 18.0, 6.8, 9), (13.0, 20.0, 6.8, 10),
+               (-2.6, 24.0, 6.8, 11), (3.0, 27.0, 7.0, 12), (-9.0, 27.0, 7.0, 13), (10.0, 30.0, 7.2, 14), (-15.0, 33.0, 7.4, 15),
+               (0.0, 38.0, 7.6, 16), (16.0, 38.0, 7.6, 17)],
+    ),
+}
+T = THEMES["meadow"]
+
 
 # --------------------------------------------------------------------------- 2D noise
 
@@ -70,8 +99,9 @@ def mix(a, b, t):
 # --------------------------------------------------------------------------- trees (sprites from the SDF renderer)
 
 def oak_scene(seed):
+    lc = T["leaf"]
     leaf_tint = lambda p, a: a * (0.55 + 0.9 * fbm(p, 4.0, 3, seed))[:, None] * (0.65 + 0.5 * np.clip(p[:, 1] / 1.8, 0.0, 1.0))[:, None]
-    leaf = Material((0.20, 0.38, 0.10), rough=0.8, spec=0.12, sss=1.1, tint_fn=leaf_tint,
+    leaf = Material(lc, rough=0.8, spec=0.12, sss=1.1, tint_fn=leaf_tint,
                     bump=lambda p: (fbm(p, 38.0, 3, seed + 3) - 0.5) * 0.05)
     bark = Material((0.22, 0.16, 0.11), rough=0.9, spec=0.1,
                     tint_fn=lambda p, a: a * (0.6 + 0.8 * fbm(p * np.array([3.0, 0.8, 3.0], dtype=np.float32), 9.0, 3, 7))[:, None],
@@ -114,25 +144,25 @@ def render_tree(seed, size=640):
 
 # --------------------------------------------------------------------------- landscape
 
-def render(W, H, seed=7):
+def render(W, H, seed=7, theme="meadow"):
+    global T
+    T = THEMES[theme]
     yh = HORIZON * H
     f = 1.10 * W                     # focal length in px
     E = 1.0                          # eye height
     ys, xs = np.mgrid[0:H, 0:W].astype(np.float32)
     img = np.zeros((H, W, 3), dtype=np.float32)
     sun = np.array([0.80 * W, 0.085 * H], dtype=np.float32)
-    haze_col = np.array([0.80, 0.86, 0.84], dtype=np.float32)
+    haze_col = T["haze"]
 
     # ---------------------------------------------------------------- sky
     t = np.clip(ys / yh, 0.0, 1.0)
-    top = np.array([0.13, 0.37, 0.74], dtype=np.float32)
-    mid = np.array([0.37, 0.62, 0.90], dtype=np.float32)
-    hor = np.array([0.80, 0.89, 0.93], dtype=np.float32)
+    top, mid, hor = T["sky"]
     sky = np.where((t < 0.55)[..., None], top + (mid - top) * (t / 0.55)[..., None],
                    mid + (hor - mid) * (np.clip((t - 0.55) / 0.45, 0, 1) ** 1.3)[..., None])
     d_sun = np.hypot(xs - sun[0], ys - sun[1]) / W
-    sky = sky + np.exp(-d_sun * 5.5)[..., None] * np.array([0.55, 0.45, 0.28], dtype=np.float32)
-    sky = sky + (np.exp(-d_sun * 60.0) * 1.3)[..., None] * np.array([1.0, 0.95, 0.80], dtype=np.float32)
+    sky = sky + np.exp(-d_sun * 5.5)[..., None] * np.array([0.55, 0.45, 0.28], dtype=np.float32) * T["sun_glow"]
+    sky = sky + (np.exp(-d_sun * 60.0) * 1.3 * T["sun_glow"])[..., None] * np.array([1.0, 0.95, 0.80], dtype=np.float32)
     # clouds on a plane above the viewer (perspective-correct, lit towards the sun)
     dy = np.maximum(yh - ys, 1.0)
     u = (xs - W / 2) / dy * 0.9
@@ -140,7 +170,7 @@ def render(W, H, seed=7):
 
     def cloud_density(uu, vv):
         base = fbm2(uu * 0.55, vv * 0.55, 6, seed + 10)
-        return smooth(0.50, 0.78, base)
+        return smooth(T["cloud_lo"], T["cloud_hi"], base)
 
     dens = cloud_density(u, v)
     dens_l = cloud_density(u + 0.12 * np.sign(sun[0] - W / 2) * 1.0, v + 0.05)   # sampled towards the light
@@ -176,10 +206,11 @@ def render(W, H, seed=7):
         m = inside & (ys < yh + 6)
         return col, m
 
-    for (base, amp, fr, sd, ct, cb, ts, hz, tex) in (
-        (0.062, 0.050, 1.6, 3, np.array([0.50, 0.60, 0.72], dtype=np.float32), np.array([0.62, 0.72, 0.80], dtype=np.float32), 0.0, 0.50, False),
-        (0.036, 0.045, 2.4, 11, np.array([0.30, 0.46, 0.42], dtype=np.float32), np.array([0.48, 0.64, 0.56], dtype=np.float32), 0.004, 0.34, True),
-        (0.014, 0.030, 3.2, 23, np.array([0.20, 0.37, 0.16], dtype=np.float32), np.array([0.36, 0.52, 0.24], dtype=np.float32), 0.006, 0.18, True),
+    rc_ = T["ridges"]
+    for (base, amp, fr, sd, (ct, cb), ts, hz, tex) in (
+        (0.062, 0.050, 1.6, 3, rc_[0], 0.0, 0.50, False),
+        (0.036, 0.045, 2.4, 11, rc_[1], 0.004, 0.34, True),
+        (0.014, 0.030, 3.2, 23, rc_[2], 0.006, 0.18, True),
     ):
         col, m = ridge(base, amp, fr, sd, ct, cb, ts, hz, tex)
         img = np.where(m[..., None], col, img)
@@ -196,10 +227,7 @@ def render(W, H, seed=7):
     n1 = fbm2(X * 0.45, Z * 0.45, 5, seed + 40, fw)
     n2 = fbm2(X * 2.4, Z * 2.4, 5, seed + 50, fw)
     n3 = fbm2(X * 0.18 + 5.0, Z * 0.18, 4, seed + 60, fw)
-    dark = np.array([0.10, 0.25, 0.06], dtype=np.float32)
-    midg = np.array([0.22, 0.42, 0.10], dtype=np.float32)
-    lightg = np.array([0.46, 0.60, 0.20], dtype=np.float32)
-    dry = np.array([0.55, 0.52, 0.24], dtype=np.float32)
+    dark, midg, lightg, dry = T["ground"]
     g = dark + (midg - dark) * smooth(0.3, 0.62, n1)[..., None]
     g = g + (lightg - g) * (smooth(0.45, 0.8, n2) * 0.7)[..., None]
     g = g + (dry - g) * (smooth(0.62, 0.78, n3) * 0.55)[..., None]
@@ -215,7 +243,7 @@ def render(W, H, seed=7):
     r1, r2, r3 = hash2(cx, cz, 91), hash2(cx, cz, 92), hash2(cx, cz, 93)
     fxp, fzp = (cx + 0.2 + 0.6 * r1) * cell, (cz + 0.2 + 0.6 * r2) * cell
     dist = np.hypot(X - fxp, Z - fzp)
-    has = (r3 > 0.90)
+    has = (r3 > 0.90) & (T["flowers"] < 1.0)
     rad = 0.026 + 0.018 * hash2(cx, cz, 94)
     flower_mask = has & (dist < rad) & (Z < 14.0)
     pick = hash2(cx, cz, 95)
@@ -235,8 +263,7 @@ def render(W, H, seed=7):
     edge_n = (fbm2(Z * 1.6, X * 0.0 + 3.0, 4, seed + 100, fw) - 0.5) * 0.16
     dx = np.abs(X - center) - wpath + edge_n
     on_path = 1.0 - smooth(-0.05, 0.10, dx)
-    dirt_base = np.array([0.46, 0.34, 0.22], dtype=np.float32)
-    dirt_light = np.array([0.64, 0.52, 0.36], dtype=np.float32)
+    dirt_base, dirt_light = T["dirt"]
     dn = fbm2(X * 3.0, Z * 3.0, 5, seed + 110, fw)
     dirt = dirt_base + (dirt_light - dirt_base) * smooth(0.35, 0.7, dn)[..., None]
     # wheel ruts (darker, slightly damp), and a grassy centre strip
@@ -269,7 +296,8 @@ def render(W, H, seed=7):
     g2 = g2 * cloud_sh[..., None]
 
     # tree shadows on the ground + trees as sprites
-    trees = [  # (X, Z, height, seed)
+    trees = T["trees"]
+    _unused = [  # (X, Z, height, seed)
         (-5.6, 9.0, 4.4, 1), (6.2, 10.5, 4.8, 2), (-8.8, 14.5, 5.2, 3), (9.8, 16.0, 5.2, 4),
         (-12.5, 22.0, 5.8, 5), (13.2, 25.0, 5.8, 6), (-3.8, 33.0, 6.0, 7), (4.8, 39.0, 6.0, 8),
         (-18.0, 31.0, 6.4, 9), (19.0, 35.0, 6.4, 10),
@@ -279,10 +307,10 @@ def render(W, H, seed=7):
         sx0, sz0 = tx - 0.55 * th, tz - 0.30 * th        # shadow falls left/towards the viewer
         sw, sl = 0.55 * th, 0.80 * th
         shadow = np.maximum(shadow, np.clip(1.0 - np.hypot((X - sx0) / sw, (Z - sz0) / sl), 0, 1) ** 0.6)
-    g2 = g2 * (1.0 - 0.42 * shadow[..., None])
+    g2 = g2 * (1.0 - T["tree_shadow"] * shadow[..., None])
 
     # aerial perspective on the ground
-    fog = 1.0 - np.exp(-Z * 0.030)
+    fog = 1.0 - np.exp(-Z * T["fog"])
     g2 = g2 * (1 - fog[..., None] * 0.85) + haze_col * (fog[..., None] * 0.85)
     img = np.where(ground[..., None], g2, img)
 
@@ -307,7 +335,7 @@ def render(W, H, seed=7):
         r = np.asarray(im, dtype=np.float32) / 255.0
         a = r[..., 3:4]
         rgb = r[..., :3] / np.maximum(a, 1e-4)
-        fogt = float(1.0 - np.exp(-tz * 0.030)) * 0.85
+        fogt = float(1.0 - np.exp(-tz * T["fog"])) * 0.85
         rgb = rgb * (1 - fogt) + haze_col * fogt
         x0, y0 = int(px - rgb.shape[1] / 2), int(py - rgb.shape[0])
         xa, ya = max(x0, 0), max(y0, 0)
@@ -319,7 +347,7 @@ def render(W, H, seed=7):
         img[sub] = img[sub] * (1 - a[src]) + rgb[src] * a[src]
 
     # grade: warm sun, gentle contrast, vignette, film grain
-    img = img * np.array([1.04, 1.0, 0.93], dtype=np.float32)
+    img = img * T["grade"]
     img = np.clip(img, 0, 1.2)
     img = img / (1.0 + img * 0.10)
     v = np.clip(img, 0, 1) ** (1 / 1.04)
@@ -333,10 +361,12 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--width", type=int, default=1080)
     ap.add_argument("--height", type=int, default=1800)
-    ap.add_argument("--out", default=DEFAULT_OUT)
+    ap.add_argument("--theme", default="meadow", choices=list(THEMES))
+    ap.add_argument("--out", default=None)
     ap.add_argument("--quality", type=int, default=86)
     a = ap.parse_args()
-    img = render(a.width, a.height)
+    a.out = a.out or os.path.join(os.path.dirname(DEFAULT_OUT), THEMES[a.theme]["out"])
+    img = render(a.width, a.height, theme=a.theme)
     im = Image.fromarray((img * 255).astype(np.uint8), "RGB")
     os.makedirs(os.path.dirname(a.out), exist_ok=True)
     if a.out.lower().endswith(".webp"):
