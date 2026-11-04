@@ -1,0 +1,10 @@
+New
+• Realistic graphics in all 100 areas: Swamp, Mountains and Cave have new monsters and landscapes, and all 19 biomes after them have their own detailed backdrops.
+• The monsters of the later areas were redesigned (eight body shapes from slime to dragon) and wear the colours of their biome. Bosses and especially dangerous foes look more menacing, with spikes, horns and glowing cracks.
+• Weapons in hand: the arm, glove, fist and every weapon in the first-person view are now realistic. On the Short Sword, Mace and Axe the gem shows the rarity.
+• New Forest backdrop with trees, light and moss.
+
+Improved
+• The Boar is now a wild boar with bristly fur, a bristle crest, tusks and glowing eyes.
+• The tutorial explains more: goals, rebirth, equipment, shop and elixirs, auto-boss, endless tiers and offline progress (9 steps).
+• Monsters and backdrops load in the background so combat stays smooth when you change areas.
