@@ -12,25 +12,26 @@ def pair(f):
     return np.minimum(f(1), f(-1))
 
 
-def wolf(rarity="common"):
+def wolf(rarity="common", coat=(0.30, 0.28, 0.27), under=(0.62, 0.58, 0.52), eye_col=(0.95, 0.65, 0.08)):
     M_FUR, M_BELLY, M_NOSE, M_EYE, M_TOOTH, M_CLAW, M_FLESH = range(7)
-    fur = fur_material((0.30, 0.28, 0.27), belly=1.5, dirt=0.35, y_ref=0.9, strand=0.004, clump=0.006)
-    belly = fur_material((0.62, 0.58, 0.52), belly=1.0, dirt=0.2, y_ref=0.9)
+    fur = fur_material(coat, belly=1.5, dirt=0.35, y_ref=0.9, strand=0.0035, clump=0.0045)
+    belly = fur_material(under, belly=1.0, dirt=0.2, y_ref=0.9)
     nose = Material((0.03, 0.03, 0.03), rough=0.15, spec=1.4)
-    eye = Material((0.95, 0.65, 0.08), rough=0.03, spec=3.0, emissive=0.55)
+    eye = Material(eye_col, rough=0.03, spec=3.0, emissive=0.55)
     tooth = bone_material((0.92, 0.88, 0.74))
     claw = Material((0.09, 0.08, 0.07), rough=0.35, spec=0.7)
     flesh = flesh_material((0.70, 0.30, 0.32))
-    DY = 0.10
+    DY = 0.20
 
     def scene(p):
         pb = p - v3(0, DY, 0)
-        body = rc(pb, (0, 0.62, -0.60), (0, 0.66, 0.16), 0.20, 0.25)
-        body = smin(body, ell(pb, (0, 0.52, -0.10), (0.19, 0.20, 0.60)), 0.14)
+        body = rc(pb, (0, 0.64, -0.62), (0, 0.66, 0.14), 0.15, 0.22)
+        body = smin(body, ell(pb, (0, 0.55, -0.12), (0.14, 0.16, 0.58)), 0.14)
         body = smin(body, rc(pb, (0, 0.66, 0.16), (0, 0.68, 0.46), 0.25, 0.20), 0.10)
-        body = smin(body, ell(pb, (0, 0.72, 0.40), (0.26, 0.26, 0.20)), 0.12)          # ruff
+        body = smin(body, ell(pb, (0, 0.56, 0.30), (0.21, 0.30, 0.30)), 0.12)           # deep chest
+        body = smin(body, ell(pb, (0, 0.76, 0.42), (0.27, 0.27, 0.21)), 0.12)          # ruff
         head = ell(pb, (0, 0.74, 0.62), (0.20, 0.19, 0.22))
-        muzzle = rc(pb, (0, 0.68, 0.70), (0, 0.60, 1.06), 0.14, 0.065)
+        muzzle = rc(pb, (0, 0.68, 0.70), (0, 0.60, 1.14), 0.13, 0.050)
         body = smin(smin(body, head, 0.09), muzzle, 0.08)
         body = smin(body, ell(pb, (0, 0.84, 0.70), (0.13, 0.07, 0.12)), 0.06)
         lowjaw = rc(pb, (0, 0.55, 0.78), (0, 0.46, 1.02), 0.08, 0.04)
@@ -38,13 +39,16 @@ def wolf(rarity="common"):
         def leg(sx, zf, th):
             return limb(p, [(sx * 0.22, 0.72, zf), (sx * 0.24, 0.40, zf + 0.06), (sx * 0.23, 0.08, zf + 0.02)],
                         [th, th * 0.62, th * 0.42])
-        legs = np.minimum.reduce([leg(1, 0.28, 0.12), leg(-1, 0.28, 0.12), leg(1, -0.46, 0.14), leg(-1, -0.46, 0.14)])
-        tail = limb(pb, [(0, 0.74, -0.70), (0.0, 0.52, -1.00), (0.0, 0.26, -1.16)], [0.07, 0.11, 0.07])
-        fur_d = np.minimum.reduce([body, legs, tail]) - shaggy(p, 0.009, 30.0, stretch=(1, 2.2, 1))
+        def hind(sx):
+            return limb(p, [(sx * 0.20, 0.82, -0.44), (sx * 0.22, 0.56, -0.30), (sx * 0.22, 0.28, -0.56), (sx * 0.22, 0.07, -0.46)],
+                        [0.15, 0.09, 0.055, 0.04])
+        legs = np.minimum.reduce([leg(1, 0.28, 0.10), leg(-1, 0.28, 0.10), hind(1), hind(-1)])
+        tail = limb(pb, [(0, 0.76, -0.70), (0.0, 0.62, -1.05), (0.0, 0.34, -1.22)], [0.06, 0.12, 0.08])
+        fur_d = np.minimum.reduce([body, legs, tail]) - shaggy(p, 0.0065, 32.0, stretch=(1, 2.2, 1))
         ears = pair(lambda s: ell(pb, (s * 0.15, 1.00, 0.56), (0.055, 0.14, 0.035), rz=-s * 0.18))
         bel = ell(pb, (0, 0.36, -0.08), (0.12, 0.12, 0.48))
-        nosed = sd_sphere(pb, v3(0, 0.64, 1.07), 0.04)
-        eyes = pair(lambda s: ell(pb, (s * 0.115, 0.80, 0.80), (0.032, 0.024, 0.026), rz=s * 0.35))
+        nosed = sd_sphere(pb, v3(0, 0.62, 1.15), 0.038)
+        eyes = pair(lambda s: ell(pb, (s * 0.12, 0.82, 0.84), (0.044, 0.030, 0.032), rz=s * 0.35))
 
         def teeth(q):
             out = None
@@ -55,7 +59,7 @@ def wolf(rarity="common"):
                     out = d if out is None else np.minimum(out, d)
             return out
         td = part(pb, (0, 0.55, 1.0), 0.25, teeth)
-        tongue = ell(pb, (0, 0.50, 0.90), (0.04, 0.012, 0.10))
+        tongue = ell(pb, (0, 0.495, 0.92), (0.028, 0.008, 0.07))
         claws = part(p, (0, 0.04, 0.0), 0.9, lambda q: np.minimum.reduce([
             rc(q, (sx * 0.23 + dx, 0.03, zf + 0.10), (sx * 0.23 + dx * 1.3, 0.012, zf + 0.20), 0.016, 0.003)
             for sx in (-1, 1) for zf in (0.28, -0.46) for dx in (-0.03, 0.0, 0.03)]))
@@ -64,25 +68,25 @@ def wolf(rarity="common"):
     return scene, [fur, belly, nose, eye, tooth, claw, flesh], 1.5, rot_x(0.16) @ rot_y(0.50)
 
 
-def forest_spider(rarity="common"):
+def forest_spider(rarity="common", body_c=(0.10, 0.075, 0.05), leg_c=(0.14, 0.10, 0.06), eye_col=(0.9, 0.05, 0.03), mark_c=(0.70, 0.55, 0.12)):
     M_BODY, M_LEG, M_EYE, M_FANG, M_MARK = range(5)
     st = np.array([1.0, 3.0, 1.0], dtype=np.float32)
 
     def hairy(p, a):
         return a * (0.8 + 0.4 * value_noise(p * st, 80.0, 4))[:, None]
-    body_m = Material((0.10, 0.075, 0.05), rough=0.55, spec=0.45, tint_fn=hairy,
+    body_m = Material(body_c, rough=0.55, spec=0.45, tint_fn=hairy,
                       bump=lambda p: (value_noise(p * st, 90.0, 2) - 0.5) * 0.008)
-    leg_m = Material((0.14, 0.10, 0.06), rough=0.5, spec=0.5, tint_fn=hairy,
+    leg_m = Material(leg_c, rough=0.5, spec=0.5, tint_fn=hairy,
                      bump=lambda p: (value_noise(p * st, 110.0, 5) - 0.5) * 0.006)
-    eye = Material((0.9, 0.05, 0.03), rough=0.03, spec=3.0, emissive=0.8)
+    eye = Material(eye_col, rough=0.03, spec=3.0, emissive=0.8)
     fang = Material((0.06, 0.04, 0.03), rough=0.25, spec=1.0)
-    mark = Material((0.70, 0.55, 0.12), rough=0.6, spec=0.2)
+    mark = Material(mark_c, rough=0.6, spec=0.2)
 
     def scene(p):
-        ab = ell(p, (0, 0.52, -0.52), (0.46, 0.42, 0.56), rx=0.35) - shaggy(p, 0.014, 30.0)
+        ab = ell(p, (0, 0.52, -0.52), (0.46, 0.42, 0.56), rx=0.35) - shaggy(p, 0.006, 36.0)
         ceph = ell(p, (0, 0.42, 0.18), (0.30, 0.26, 0.34))
         head = ell(p, (0, 0.40, 0.44), (0.20, 0.20, 0.17))
-        body = smin(smin(ab, ceph, 0.12), head, 0.08) - shaggy(p, 0.008, 40.0, seed=7)
+        body = smin(smin(ab, ceph, 0.12), head, 0.08) - shaggy(p, 0.004, 46.0, seed=7)
         mk = np.maximum(ell(p, (0, 0.80, -0.52), (0.18, 0.04, 0.32), rx=0.2), -ell(p, (0, 0.84, -0.52), (0.08, 0.05, 0.14), rx=0.2))
         legs = None
         for s in (-1, 1):

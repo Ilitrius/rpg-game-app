@@ -293,10 +293,13 @@ class Renderer:
         idx = np.nonzero(hit)[0]
         color = np.zeros((n, 3), dtype=np.float32)
         alpha = np.zeros(n, dtype=np.float32)
+        mats = np.full(n, -1, dtype=np.int32)
         if idx.size:
             p = o[idx] + t[idx, None] * dirv
             color[idx] = self._shade(p, idx)
             alpha[idx] = 1.0
+            mats[idx] = self._sdf(p)[1].astype(np.int32)
+        self.mat_img = mats.reshape(S, S)   # material index per pixel (-1 = background), for layer splits
         img = np.concatenate([color, alpha[:, None]], axis=-1).reshape(S, S, 4)
         if self.ground_shadow:
             img = self._drop_shadow(img)

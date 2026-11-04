@@ -35,3 +35,10 @@ python -I tools/render_items/render.py mace --rarity epic --out <ordner>   # ein
 - Alle Bilder sind selbst erzeugt (keine fremden Quellen, keine Lizenzfragen).
 - Größe: ca. 1,6 MB für alle 45 Bilder. Laufzeit: einmal off-Main decodiert, LRU-Cache 24 MB.
 - Nicht enthalten: Waffen in der Hand (Ich-Perspektive, Paper-Doll, Charakter-Tab) sind noch Vektor.
+
+## Alle Zonen (Stand 2026-11-04)
+
+- Handgemachte Monster: `monsters.py` (Wiese), `monsters_forest.py`, `monsters_swamp.py`, `monsters_rock.py` (Gebirge + Höhle); alle über `render_monsters.py <name|all>`.
+- Hintergründe der handgemachten Zonen: `scene_meadow.py --theme meadow|forest|swamp|mountain|cave` (Themen in `THEMES`; `NOTREES=1` für schnelle Vorschau).
+- Generierte Zonen: `render_gen.py <body|all>` rendert die 8 Körperformen aus `monsters_gen.py` je ruhig/furchteinflößend als vier Ebenen (`skin` grau, `eye`, `glow`, `fixed`), aufgeteilt nach Material-Rolle (`Renderer.mat_img`); die App färbt sie pro Biom (`GenMonsterSprites`). `--preview` zeigt eine Beispiel-Einfärbung.
+- Biom-Hintergründe: `scene_biomes.py <id|all>` (Farben spiegeln `BiomeStyles.kt`), Ausgabe `scene_biome_<id>.webp`.

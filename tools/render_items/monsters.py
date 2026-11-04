@@ -244,9 +244,10 @@ def slime_king(rarity="common"):
 
 def giant_rat(rarity="common"):
     M_FUR, M_FLESH, M_EYE, M_TOOTH, M_CLAW, M_TAIL, M_WHISK = 0, 1, 2, 3, 4, 5, 6
-    fur = fur_material((0.34, 0.29, 0.25), belly=1.45, dirt=0.55, y_ref=0.55)
+    fur = fur_material((0.30, 0.26, 0.22), belly=1.45, dirt=0.55, y_ref=0.55, strand=0.0028, clump=0.004)
     flesh = flesh_material((0.74, 0.40, 0.40))
     tooth = bone_material((0.90, 0.78, 0.45))
+    rat_eye = Material((1.0, 0.12, 0.05), rough=0.04, spec=3.0, emissive=0.9)
     claw = Material((0.10, 0.08, 0.07), rough=0.35, spec=0.7)
     ring = lambda p: (np.abs(np.sin((p[:, 2] * 1.0 + 0.0) * 120.0)) - 0.5) * 0.0045 + (fbm(p, 60.0, 2, 3) - 0.5) * 0.003
     tail_m = Material((0.62, 0.45, 0.42), rough=0.6, spec=0.35, sss=0.5, bump=ring)
@@ -271,7 +272,7 @@ def giant_rat(rarity="common"):
                            limb(p, [(-0.17, 0.36, 0.18), (-0.24, 0.19, 0.30), (-0.20, 0.07, 0.50)], [0.085, 0.062, 0.045]))
         fpaw = np.minimum(ell(p, (0.20, 0.04, 0.54), (0.05, 0.03, 0.07)), ell(p, (-0.20, 0.04, 0.54), (0.05, 0.03, 0.07)))
         fur_d = np.minimum.reduce([body, haunch, hind, hfoot, front, fpaw])
-        fur_d = fur_d - shaggy(p, 0.016, 26.0)
+        fur_d = fur_d - shaggy(p, 0.006, 34.0)
         # ears (thin, translucent) + inner
         ear_l = ell(p, (0.15, 0.62, 0.34), (0.105, 0.125, 0.014), rz=-0.45, ry=-0.3)
         ear_r = ell(p, (-0.15, 0.62, 0.34), (0.105, 0.125, 0.014), rz=0.45, ry=0.3)
@@ -304,7 +305,7 @@ def giant_rat(rarity="common"):
         incis = np.minimum(rc(p, (0.022, 0.30, 0.755), (0.025, 0.185, 0.765), 0.020, 0.011), rc(p, (-0.022, 0.30, 0.755), (-0.025, 0.185, 0.765), 0.020, 0.011))
         lower_inc = np.minimum(rc(p, (0.018, 0.225, 0.745), (0.020, 0.275, 0.752), 0.012, 0.008), rc(p, (-0.018, 0.225, 0.745), (-0.020, 0.275, 0.752), 0.012, 0.008))
         nose = sd_sphere(p, v3(0, 0.33, 0.80), 0.034)
-        eyes = np.minimum(ell(p, (0.105, 0.485, 0.50), (0.034, 0.034, 0.030)), ell(p, (-0.105, 0.485, 0.50), (0.034, 0.034, 0.030)))
+        eyes = np.minimum(ell(p, (0.118, 0.50, 0.535), (0.048, 0.046, 0.040)), ell(p, (-0.118, 0.50, 0.535), (0.048, 0.046, 0.040)))
         lids = np.minimum(sd_torus(p, v3(0.105, 0.485, 0.495), 0.040, 0.012, axis="z"), sd_torus(p, v3(-0.105, 0.485, 0.495), 0.040, 0.012, axis="z"))
         # tail with scale rings
         tail = limb(p, [(0, 0.28, -0.60), (0.07, 0.24, -0.82), (0.26, 0.15, -0.98), (0.48, 0.07, -0.96), (0.62, 0.035, -0.84)],
@@ -317,7 +318,7 @@ def giant_rat(rarity="common"):
                       (np.minimum(incis, lower_inc), M_TOOTH), (eyes, M_EYE), (lids, M_FUR), (toe_d, M_FLESH),
                       (claw_d, M_CLAW), (tail, M_TAIL), (wh, M_WHISK)])
 
-    return scene, [fur, flesh, wet_black(), tooth, claw, tail_m, whisk], 1.1, rot_x(0.30) @ rot_y(0.42)
+    return scene, [fur, flesh, rat_eye, tooth, claw, tail_m, whisk], 1.1, rot_x(0.30) @ rot_y(0.30)
 
 
 # --------------------------------------------------------------------------- boar

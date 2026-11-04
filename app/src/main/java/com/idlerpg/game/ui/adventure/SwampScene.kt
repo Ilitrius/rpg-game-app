@@ -338,6 +338,11 @@ class SwampScene(size: Size) : ZoneScene {
     }
 
     override fun drawBackground(scope: DrawScope, drift: Float, time: Float) = with(scope) {
+        val backdrop = SceneBackdrops.peek(com.idlerpg.game.domain.world.Zones.SUMPF_ID)
+        if (backdrop != null) {
+            SceneBackdrops.draw(this, backdrop, w, h, horizonY)
+            return@with
+        }
         drawRect(skyBrush, size = Size(w, horizonY + 4f))
         drawRect(sunGlow, size = Size(w, horizonY))
         drawPath(farLine, Color(0xFF8A967F))

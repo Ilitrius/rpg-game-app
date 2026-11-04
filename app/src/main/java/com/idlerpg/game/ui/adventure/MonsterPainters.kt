@@ -86,7 +86,14 @@ object MonsterPainters {
                     MonsterType.YETI -> YetiPainter.draw(this, time)
                     MonsterType.DRAGON -> DragonPainter.draw(this, time)
                     MonsterType.GEN_SWARM, MonsterType.GEN_BEAST, MonsterType.GEN_BRUTE, MonsterType.GEN_BOSS ->
-                        if (zone?.biome != null) ProceduralMonsters.draw(this, zone, type, time)
+                        if (zone?.biome != null) {
+                            ProceduralMonsters.drawAura(this, zone, type, time, front = false)
+                            if (GenMonsterSprites.draw(this, zone, type, time)) {
+                                ProceduralMonsters.drawAura(this, zone, type, time, front = true)
+                            } else {
+                                ProceduralMonsters.draw(this, zone, type, time)
+                            }
+                        }
                 }
                 if (flash > 0f) {
                     drawRect(

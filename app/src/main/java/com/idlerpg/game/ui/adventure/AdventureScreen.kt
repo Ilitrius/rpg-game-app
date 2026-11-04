@@ -222,6 +222,7 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
     LaunchedEffect(ui.zone.id) {
         SceneBackdrops.preload(appResources, ui.zone)
         MonsterSprites.preload(appResources, ui.zone.monsters + ui.zone.boss)
+        GenMonsterSprites.preload(appResources, ui.zone, ui.zone.monsters + ui.zone.boss)
     }
 
     val monster = ui.monster

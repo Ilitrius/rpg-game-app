@@ -51,6 +51,34 @@ THEMES = {
                (-2.6, 24.0, 6.8, 11), (3.0, 27.0, 7.0, 12), (-9.0, 27.0, 7.0, 13), (10.0, 30.0, 7.2, 14), (-15.0, 33.0, 7.4, 15),
                (0.0, 38.0, 7.6, 16), (16.0, 38.0, 7.6, 17)],
     ),
+    "swamp": dict(
+        out="scene_swamp.webp", sky=(arr(0.25, 0.30, 0.24), arr(0.42, 0.50, 0.38), arr(0.62, 0.68, 0.50)), sun_glow=0.35,
+        cloud_lo=0.25, cloud_hi=0.55, haze=arr(0.50, 0.56, 0.40), fog=0.075,
+        ridges=((arr(0.34, 0.40, 0.32), arr(0.44, 0.50, 0.38)), (arr(0.18, 0.26, 0.16), arr(0.28, 0.36, 0.22)), (arr(0.10, 0.16, 0.09), arr(0.18, 0.26, 0.13))),
+        ground=(arr(0.05, 0.08, 0.04), arr(0.13, 0.18, 0.07), arr(0.24, 0.30, 0.12), arr(0.30, 0.26, 0.14)),
+        flowers=2.0, dirt=(arr(0.12, 0.15, 0.09), arr(0.22, 0.26, 0.15)), grade=arr(0.95, 1.0, 0.88),
+        leaf=(0.13, 0.20, 0.07), tree_shadow=0.55, water=True,
+        trees=[(-4.0, 6.0, 4.6, 21), (4.4, 7.5, 4.8, 22), (-7.5, 10.0, 5.4, 23), (8.0, 12.0, 5.6, 24), (-5.0, 15.0, 5.8, 25),
+               (6.0, 17.0, 6.0, 26), (-11.0, 19.0, 6.4, 27), (12.0, 22.0, 6.6, 28), (-3.0, 26.0, 6.6, 29), (3.0, 30.0, 6.8, 30),
+               (-14.0, 32.0, 7.0, 31), (15.0, 35.0, 7.2, 32)],
+    ),
+    "mountain": dict(
+        out="scene_mountain.webp", sky=(arr(0.16, 0.34, 0.70), arr(0.44, 0.64, 0.90), arr(0.84, 0.91, 0.97)), sun_glow=1.0,
+        cloud_lo=0.52, cloud_hi=0.80, haze=arr(0.84, 0.90, 0.96), fog=0.022, amp_k=3.2,
+        ridges=((arr(0.80, 0.86, 0.94), arr(0.90, 0.94, 0.98)), (arr(0.56, 0.63, 0.73), arr(0.80, 0.85, 0.92)), (arr(0.38, 0.43, 0.50), arr(0.68, 0.73, 0.80))),
+        ground=(arr(0.58, 0.62, 0.68), arr(0.80, 0.84, 0.90), arr(0.95, 0.97, 1.0), arr(0.46, 0.43, 0.41)),
+        flowers=2.0, dirt=(arr(0.40, 0.38, 0.36), arr(0.60, 0.58, 0.55)), grade=arr(0.97, 1.0, 1.05),
+        leaf=(0.09, 0.24, 0.15), tree_shadow=0.30,
+        trees=[(-9.0, 20.0, 5.5, 41), (10.0, 24.0, 5.5, 42), (-16.0, 30.0, 6.5, 43), (17.0, 34.0, 6.5, 44)],
+    ),
+    "cave": dict(
+        out="scene_cave.webp", sky=(arr(0.07, 0.06, 0.10), arr(0.14, 0.11, 0.17), arr(0.34, 0.26, 0.30)), sun_glow=0.0,
+        cloud_lo=0.99, cloud_hi=1.0, haze=arr(0.32, 0.25, 0.30), fog=0.045, amp_k=1.5,
+        ridges=((arr(0.26, 0.20, 0.22), arr(0.34, 0.26, 0.28)), (arr(0.20, 0.15, 0.16), arr(0.28, 0.21, 0.21)), (arr(0.14, 0.10, 0.11), arr(0.22, 0.16, 0.15))),
+        ground=(arr(0.09, 0.08, 0.09), arr(0.18, 0.15, 0.15), arr(0.32, 0.27, 0.26), arr(0.38, 0.28, 0.20)),
+        flowers=2.0, dirt=(arr(0.22, 0.18, 0.16), arr(0.40, 0.33, 0.28)), grade=arr(1.0, 0.95, 1.0),
+        leaf=(0.10, 0.10, 0.12), tree_shadow=0.2, trees=[],
+    ),
 }
 T = THEMES["meadow"]
 
@@ -193,7 +221,7 @@ def render(W, H, seed=7, theme="meadow"):
         top_row = top_y[None, :]
         inside = ys >= top_row
         depth = np.clip((ys - top_smooth[None, :]) / (0.10 * H), 0, 1)
-        slope = np.gradient(top_smooth) * (W / 400.0)
+        slope = np.gradient(top_smooth) * (W / 400.0) / T.get("amp_k", 1.0)
         lit = np.clip(0.62 + 0.9 * (-slope)[None, :] * 0.35, 0.4, 1.0)
         col = col_top[None, None, :] * (1 - depth[..., None]) + col_bot[None, None, :] * depth[..., None]
         col = col * lit[..., None]
@@ -208,9 +236,9 @@ def render(W, H, seed=7, theme="meadow"):
 
     rc_ = T["ridges"]
     for (base, amp, fr, sd, (ct, cb), ts, hz, tex) in (
-        (0.062, 0.050, 1.6, 3, rc_[0], 0.0, 0.50, False),
-        (0.036, 0.045, 2.4, 11, rc_[1], 0.004, 0.34, True),
-        (0.014, 0.030, 3.2, 23, rc_[2], 0.006, 0.18, True),
+        (0.062, 0.050 * T.get("amp_k", 1.0), 1.6, 3, rc_[0], 0.0, 0.50, False),
+        (0.036, 0.045 * T.get("amp_k", 1.0), 2.4, 11, rc_[1], 0.004, 0.34, True),
+        (0.014, 0.030 * T.get("amp_k", 1.0), 3.2, 23, rc_[2], 0.006, 0.18, True),
     ):
         col, m = ridge(base, amp, fr, sd, ct, cb, ts, hz, tex)
         img = np.where(m[..., None], col, img)
@@ -252,6 +280,20 @@ def render(W, H, seed=7, theme="meadow"):
                              np.array([0.62, 0.38, 0.85], dtype=np.float32)))
     fcol = fcol * (1.0 - 0.35 * smooth(0.0, rad, dist))[..., None]
     g = np.where(flower_mask[..., None], fcol, g)
+    if T.get("water"):
+        wn = fbm2(X * 0.16 + 9.0, Z * 0.16 + 3.0, 4, seed + 160, fw)
+        wm = smooth(0.60, 0.64, wn) * smooth(0.10, 0.28, np.abs(X) / np.maximum(Z, 0.5)) * smooth(3.5, 7.0, Z)
+        wm = wm * (1.0 - smooth(0.0, 1.0, np.zeros_like(Z)))
+        refl = np.clip(Z / 9.0, 0.30, 0.95)[..., None]
+        ripple = 0.5 + 0.5 * np.sin(Z * 9.0 + 3.0 * fbm2(X * 1.2, Z * 1.2, 3, seed + 170, fw))
+        water = np.array([0.05, 0.09, 0.07], dtype=np.float32) * (1 - refl) + T["haze"] * 1.25 * refl
+        water = water * (0.92 + 0.12 * ripple)[..., None]
+        # algae / lily film and muddy bank
+        film = smooth(0.55, 0.8, fbm2(X * 1.6, Z * 1.6, 4, seed + 180, fw))
+        water = water * (1 - 0.55 * film[..., None]) + np.array([0.18, 0.30, 0.08], dtype=np.float32) * (0.55 * film[..., None])
+        bank = smooth(0.56, 0.60, wn) * (1 - smooth(0.60, 0.64, wn))
+        g = g * (1 - 0.45 * bank[..., None])
+        g = g * (1 - wm[..., None]) + water * wm[..., None]
     # clover / short grass tufts: dark centre dots for depth
     tuft = smooth(0.74, 0.92, fbm2(X * 5.5, Z * 5.5, 3, seed + 80, fw))
     g = g * (1.0 - 0.28 * tuft[..., None])
@@ -296,7 +338,7 @@ def render(W, H, seed=7, theme="meadow"):
     g2 = g2 * cloud_sh[..., None]
 
     # tree shadows on the ground + trees as sprites
-    trees = T["trees"]
+    trees = [] if os.environ.get("NOTREES") else T["trees"]
     _unused = [  # (X, Z, height, seed)
         (-5.6, 9.0, 4.4, 1), (6.2, 10.5, 4.8, 2), (-8.8, 14.5, 5.2, 3), (9.8, 16.0, 5.2, 4),
         (-12.5, 22.0, 5.8, 5), (13.2, 25.0, 5.8, 6), (-3.8, 33.0, 6.0, 7), (4.8, 39.0, 6.0, 8),

@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import com.idlerpg.game.R
+import com.idlerpg.game.domain.world.Biome
 import com.idlerpg.game.domain.world.MonsterType
 import com.idlerpg.game.domain.world.Zone
 import com.idlerpg.game.domain.world.Zones
@@ -42,6 +43,18 @@ internal object MonsterSprites {
         MonsterType.FOREST_SPIDER -> R.drawable.monster_forest_spider
         MonsterType.MUSHROOM -> R.drawable.monster_mushroom
         MonsterType.TREANT -> R.drawable.monster_treant
+        MonsterType.TOXIC_SLIME -> R.drawable.monster_toxic_slime
+        MonsterType.MIRE_TOAD -> R.drawable.monster_mire_toad
+        MonsterType.WISP -> R.drawable.monster_wisp
+        MonsterType.HYDRA -> R.drawable.monster_hydra
+        MonsterType.STONE_GOLEM -> R.drawable.monster_stone_golem
+        MonsterType.SNOW_WOLF -> R.drawable.monster_snow_wolf
+        MonsterType.ICE_WISP -> R.drawable.monster_ice_wisp
+        MonsterType.YETI -> R.drawable.monster_yeti
+        MonsterType.BAT -> R.drawable.monster_bat
+        MonsterType.CAVE_SPIDER -> R.drawable.monster_cave_spider
+        MonsterType.CRYSTAL_GOLEM -> R.drawable.monster_crystal_golem
+        MonsterType.DRAGON -> R.drawable.monster_dragon
         else -> null
     }
 
@@ -93,13 +106,43 @@ internal object SceneBackdrops {
     fun resFor(zoneId: String): Int? = when (zoneId) {
         Zones.WIESE_ID -> R.drawable.scene_meadow
         Zones.WALD_ID -> R.drawable.scene_forest
+        Zones.SUMPF_ID -> R.drawable.scene_swamp
+        Zones.GEBIRGE_ID -> R.drawable.scene_mountain
+        Zones.HOEHLE_ID -> R.drawable.scene_cave
         else -> null
     }
 
+    /** One backdrop per biome; its five stages share it (the scene adds darkness and particles per stage). */
+    fun resFor(biome: Biome): Int = when (biome) {
+        Biome.HEIDE -> R.drawable.scene_biome_heide
+        Biome.WUESTE -> R.drawable.scene_biome_wueste
+        Biome.VULKAN -> R.drawable.scene_biome_vulkan
+        Biome.GRUFT -> R.drawable.scene_biome_gruft
+        Biome.FROST -> R.drawable.scene_biome_frost
+        Biome.DSCHUNGEL -> R.drawable.scene_biome_dschungel
+        Biome.RUINEN -> R.drawable.scene_biome_ruinen
+        Biome.GLUTPILZ -> R.drawable.scene_biome_glutpilz
+        Biome.KUESTE -> R.drawable.scene_biome_kueste
+        Biome.KNOCHEN -> R.drawable.scene_biome_knochen
+        Biome.BLUTGARTEN -> R.drawable.scene_biome_blutgarten
+        Biome.HIMMEL -> R.drawable.scene_biome_himmel
+        Biome.UNTERWELT -> R.drawable.scene_biome_unterwelt
+        Biome.SCHATTEN -> R.drawable.scene_biome_schatten
+        Biome.UHRWERK -> R.drawable.scene_biome_uhrwerk
+        Biome.TRAUM -> R.drawable.scene_biome_traum
+        Biome.ASTRAL -> R.drawable.scene_biome_astral
+        Biome.LEERE -> R.drawable.scene_biome_leere
+        Biome.ENDE -> R.drawable.scene_biome_ende
+    }
+
+    fun resFor(zone: Zone): Int? = zone.biome?.let { resFor(it) } ?: resFor(zone.id)
+
     fun peek(zoneId: String): ImageBitmap? = resFor(zoneId)?.let { cache.get(it) }
 
+    fun peek(zone: Zone): ImageBitmap? = resFor(zone)?.let { cache.get(it) }
+
     suspend fun preload(resources: Resources, zone: Zone) {
-        val res = resFor(zone.id) ?: return
+        val res = resFor(zone) ?: return
         if (cache.get(res) != null) return
         val bmp = withContext(Dispatchers.Default) {
             runCatching { BitmapFactory.decodeResource(resources, res) }.getOrNull()

@@ -32,7 +32,7 @@ import kotlin.random.Random
  * per frame only cheap alpha/offset animation runs. Seeded by the zone order, so every zone looks
  * different but stable.
  */
-internal class BiomeScene(zone: Zone, size: Size) : ZoneScene {
+internal class BiomeScene(private val zone: Zone, size: Size) : ZoneScene {
     private val st = BiomeStyles.of(zone.biome!!)
     private val stage = zone.stage
     /** Intensity 0..1: overall zone threat (60 %) plus escalation inside the biome (40 %). */
@@ -395,6 +395,16 @@ internal class BiomeScene(zone: Zone, size: Size) : ZoneScene {
 
     // ------------------------------------------------------------------ draw
     override fun drawBackground(scope: DrawScope, drift: Float, time: Float) = with(scope) {
+        val backdrop = SceneBackdrops.peek(zone)
+        if (backdrop != null) {
+            // raytraced landscape; the stage still shows through eyes in the dark, particles, lightning and
+            // the darkness/vignette of drawForeground
+            SceneBackdrops.draw(this, backdrop, w, h, horizonY)
+            drawEyes(time)
+            drawParticles(time)
+            if (lightning) strike(time)
+            return@with
+        }
         ensureBaked()
         drawImage(skyLayer!!)
         stars.forEachIndexed { i, sp ->
@@ -403,6 +413,14 @@ internal class BiomeScene(zone: Zone, size: Size) : ZoneScene {
         drawOrb(time)
         drawImage(farLayer!!)
         layers.forEachIndexed { i, l -> l.lights?.let { lp -> drawPath(lp, st.glow.copy(alpha = 0.12f * (0.5f + 0.5f * SceneKit.wave(time, 3, i * 2f)))) } }
+        drawEyes(time)
+        drawImage(groundLayer!!, Offset(0f, horizonY))
+        if (animatedGround) drawGroundDetails(time)
+        drawParticles(time)
+        if (lightning) strike(time)
+    }
+
+    private fun DrawScope.drawEyes(time: Float) {
         eyes.forEachIndexed { i, e ->
             val a = (0.55f + 0.45f * SceneKit.wave(time, 2 + i % 3, i * 1.7f)).coerceIn(0f, 1f) * (if (time % 20f in 0f..0.25f && i % 2 == 0) 0.2f else 1f)
             val s = eyeSize
@@ -410,10 +428,6 @@ internal class BiomeScene(zone: Zone, size: Size) : ZoneScene {
             drawCircle(eyeColor, s, Offset(e.x - s * 2f, e.y), alpha = a)
             drawCircle(eyeColor, s, Offset(e.x + s * 2f, e.y), alpha = a)
         }
-        drawImage(groundLayer!!, Offset(0f, horizonY))
-        if (animatedGround) drawGroundDetails(time)
-        drawParticles(time)
-        if (lightning) strike(time)
     }
 
     // orb brushes are built once; the pulse scales them around the orb center
@@ -533,7 +547,8 @@ internal class BiomeScene(zone: Zone, size: Size) : ZoneScene {
 
     override fun drawForeground(scope: DrawScope, time: Float) = with(scope) {
         drawRect(darkness)
-        drawPath(frame, frameBrush)
+        // the painted frame (thorns, tendrils) only suits the vector landscape, not the raytraced one
+        if (SceneBackdrops.peek(zone) == null) drawPath(frame, frameBrush)
         drawRect(vignette)
     }
 }

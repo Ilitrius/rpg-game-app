@@ -45,6 +45,12 @@ internal object ProceduralMonsters {
         c.draw(scope, time)
     }
 
+    /** Only the aura (glow + orbiting wisps) behind ([front] = false) or in front of the creature; used with sprites. */
+    fun drawAura(scope: DrawScope, zone: Zone, type: MonsterType, time: Float, front: Boolean) {
+        val c = synchronized(cache) { cache.getOrPut(zone.id + "/" + type.id) { Creature(zone, type) } }
+        c.drawAura(scope, time, front)
+    }
+
     /** Number of draw ops of the creature (for the performance budget test). */
     fun opCount(zone: Zone, type: MonsterType): Int = synchronized(cache) { cache.getOrPut(zone.id + "/" + type.id) { Creature(zone, type) } }.opCount
 
@@ -83,8 +89,13 @@ private class Creature(val zone: Zone, val type: MonsterType) {
     private val plates = fear > 0.4f
     private val crack = fear > 0.3f
 
+    private var auraBack = 0
+    private var auraFront = 0
+
     init {
         buildAura()
+        auraBack = back.size
+        auraFront = front.size
         when (body) {
             Body.BLOB -> blob()
             Body.HOUND -> hound()
@@ -99,6 +110,12 @@ private class Creature(val zone: Zone, val type: MonsterType) {
     }
 
     val opCount: Int get() = back.size + ops.size + front.size
+
+    fun drawAura(scope: DrawScope, time: Float, inFront: Boolean) {
+        val list = if (inFront) front else back
+        val n = if (inFront) auraFront else auraBack
+        for (i in 0 until n) list[i](scope, time)
+    }
 
     fun draw(scope: DrawScope, time: Float) {
         back.forEach { scope.it(time) }

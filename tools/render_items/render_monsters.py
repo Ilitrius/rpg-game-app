@@ -22,8 +22,10 @@ import monsters  # noqa: E402
 from sdf import Renderer  # noqa: E402
 
 import monsters_forest  # noqa: E402
+import monsters_swamp  # noqa: E402
+import monsters_rock  # noqa: E402
 
-ALL = {**monsters.BUILDERS, **monsters_forest.BUILDERS}
+ALL = {**monsters.BUILDERS, **monsters_forest.BUILDERS, **monsters_swamp.BUILDERS, **monsters_rock.BUILDERS}
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 DEFAULT_OUT = os.path.join(ROOT, "app", "src", "main", "res", "drawable-nodpi")
