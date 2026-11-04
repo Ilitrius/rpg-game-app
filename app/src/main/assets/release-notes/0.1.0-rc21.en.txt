@@ -3,8 +3,12 @@ New
 • The monsters of the later areas were redesigned (eight body shapes from slime to dragon) and wear the colours of their biome. Bosses and especially dangerous foes look more menacing, with spikes, horns and glowing cracks.
 • Weapons in hand: the arm, glove, fist and every weapon in the first-person view are now realistic. On the Short Sword, Mace and Axe the gem shows the rarity.
 • New Forest backdrop with trees, light and moss.
+• Elixirs in the shop are real bottles with see-through glass and glowing liquid.
+• Your weapon in the Character tab and on the equipment figure is now realistic too.
 
 Improved
 • The Boar is now a wild boar with bristly fur, a bristle crest, tusks and glowing eyes.
 • The tutorial explains more: goals, rebirth, equipment, shop and elixirs, auto-boss, endless tiers and offline progress (9 steps).
+• Leather Cap, Leather Vest, Leather and Plate Boots are more detailed: stitching, grain, straps and plates.
+• Blades shine evenly without stripes; gems sparkle from Rare upwards.
 • Monsters and backdrops load in the background so combat stays smooth when you change areas.
