@@ -1,4 +1,4 @@
-# Play Console: "Was ist neu" für 0.1.0-rc21
+# Play Console: "Was ist neu" für 0.1.0-rc22
 
 Format für die Play Console (Release-Notizen je Sprache, max. 500 Zeichen). Einfügen unter Test → Closed Test → Release erstellen.
 
