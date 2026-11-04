@@ -323,52 +323,70 @@ def giant_rat(rarity="common"):
 # --------------------------------------------------------------------------- boar
 
 def boar(rarity="common"):
-    M_FUR, M_MANE, M_SNOUT, M_TUSK, M_EYE, M_HOOF = 0, 1, 2, 3, 4, 5
-    fur = fur_material((0.20, 0.145, 0.11), belly=1.3, dirt=0.80, strand=0.0075, clump=0.010, rough=0.88, spec=0.14, y_ref=1.1)
-    mane = fur_material((0.065, 0.05, 0.04), belly=1.0, dirt=0.3, strand=0.012, clump=0.02, rough=0.95, spec=0.1, y_ref=1.1)
-    snout_m = Material((0.32, 0.19, 0.18), rough=0.35, spec=0.6, sss=0.5,
+    M_FUR, M_MANE, M_SNOUT, M_TUSK, M_EYE, M_HOOF, M_BRISTLE = 0, 1, 2, 3, 4, 5, 6
+    # short, coarse hide (no fluff): fine strand bump only, dirty and dark
+    fur = fur_material((0.17, 0.12, 0.09), belly=1.25, dirt=0.85, strand=0.0028, clump=0.004, rough=0.80, spec=0.20, y_ref=1.1)
+    mane = fur_material((0.045, 0.036, 0.03), belly=1.0, dirt=0.3, strand=0.004, clump=0.006, rough=0.85, spec=0.2, y_ref=1.1)
+    bristle = Material((0.08, 0.06, 0.045), rough=0.6, spec=0.35)
+    snout_m = Material((0.30, 0.18, 0.17), rough=0.35, spec=0.6, sss=0.5,
                        bump=lambda p: (fbm(p, 90.0, 3, 15) - 0.5) * 0.004)
-    tusk = bone_material((0.92, 0.86, 0.68))
-    eye = Material((0.10, 0.04, 0.03), rough=0.03, spec=3.0, emissive=0.20)
-    hoof = Material((0.07, 0.06, 0.05), rough=0.4, spec=0.55)
-    DY = 0.18
+    tusk = bone_material((0.90, 0.84, 0.64))
+    eye = Material((1.0, 0.45, 0.05), rough=0.04, spec=3.0, emissive=0.85)
+    hoof = Material((0.06, 0.05, 0.045), rough=0.35, spec=0.6)
+    DY = 0.20
 
     def scene(p):
-        pb = p - v3(0, DY, 0)                   # body group sits on longer legs
-        # barrel with raised shoulder hump
-        body = rc(pb, (0, 0.60, -0.58), (0, 0.70, 0.18), 0.33, 0.39)
-        body = smin(body, ell(pb, (0, 0.48, -0.18), (0.34, 0.31, 0.52)), 0.14)
-        body = smin(body, rc(pb, (0, 0.70, 0.18), (0, 0.62, 0.50), 0.38, 0.32), 0.12)
-        # large wedge head, long snout
-        head = rc(pb, (0, 0.60, 0.46), (0, 0.42, 1.14), 0.31, 0.15)
-        body = smin(body, head, 0.12)
-        body = smin(body, ell(pb, (0.0, 0.72, 0.60), (0.24, 0.12, 0.24)), 0.10)
-        body = smin(body, ell(pb, (0.0, 0.50, 0.90), (0.20, 0.17, 0.28)), 0.10)          # jowls
-        disc = ell(pb, (0, 0.415, 1.235), (0.145, 0.125, 0.055))
-        nostril = np.minimum(ell(pb, (0.056, 0.415, 1.285), (0.028, 0.038, 0.03)), ell(pb, (-0.056, 0.415, 1.285), (0.028, 0.038, 0.03)))
+        pb = p - v3(0, DY, 0)
+        # heavy front, tapering rump (wedge shape)
+        body = rc(pb, (0, 0.58, -0.56), (0, 0.74, 0.20), 0.23, 0.35)
+        body = smin(body, ell(pb, (0, 0.46, -0.10), (0.25, 0.26, 0.58)), 0.14)
+        body = smin(body, ell(pb, (0, 0.78, 0.22), (0.30, 0.28, 0.32)), 0.12)           # shoulder hump
+        body = smin(body, rc(pb, (0, 0.72, 0.30), (0, 0.60, 0.62), 0.32, 0.26), 0.12)
+        head = rc(pb, (0, 0.62, 0.52), (0, 0.44, 1.18), 0.25, 0.11)
+        body = smin(body, head, 0.10)
+        body = smin(body, ell(pb, (0.0, 0.74, 0.66), (0.22, 0.12, 0.22)), 0.09)           # heavy brow
+        body = smin(body, ell(pb, (0.0, 0.50, 0.95), (0.16, 0.14, 0.26)), 0.09)
+        disc = ell(pb, (0, 0.425, 1.255), (0.125, 0.105, 0.05))
+        nostril = np.minimum(ell(pb, (0.050, 0.425, 1.300), (0.024, 0.032, 0.03)), ell(pb, (-0.050, 0.425, 1.300), (0.024, 0.032, 0.03)))
         disc = smax(disc, -nostril, 0.012)
 
-        def leg(sx, zf, thick):
-            return limb(p, [(sx * 0.27, 0.66, zf), (sx * 0.27, 0.36, zf + 0.07), (sx * 0.27, 0.09, zf + 0.05)],
-                        [thick, thick * 0.66, thick * 0.42])
-        legs = np.minimum.reduce([leg(1, 0.22, 0.14), leg(-1, 0.22, 0.14), leg(1, -0.42, 0.16), leg(-1, -0.42, 0.16)])
-        tail = limb(pb, [(0, 0.80, -0.78), (0.10, 0.66, -0.92), (0.07, 0.46, -0.92)], [0.03, 0.022, 0.018])
-        fur_d = np.minimum(np.minimum(body, legs), tail)
-        fur_d = fur_d - shaggy(p, 0.011, 24.0, stretch=(1.0, 2.0, 1.0))
-        mane_d = limb(pb, [(0, 1.04, 0.36), (0, 1.09, 0.02), (0, 1.03, -0.32), (0, 0.90, -0.64)], [0.06, 0.075, 0.065, 0.045])
-        mane_d = mane_d - shaggy(p, 0.05, 24.0, stretch=(1.0, 0.5, 1.0), seed=11)
-        ears = np.minimum(ell(pb, (0.21, 0.88, 0.44), (0.075, 0.15, 0.03), rz=-0.5, ry=-0.4), ell(pb, (-0.21, 0.88, 0.44), (0.075, 0.15, 0.03), rz=0.5, ry=0.4))
-        tusks = np.minimum.reduce([limb(pb, [(sx * 0.13, 0.33, 1.00), (sx * 0.20, 0.27, 1.14), (sx * 0.27, 0.48, 1.24), (sx * 0.25, 0.72, 1.22)],
-                                        [0.056, 0.048, 0.034, 0.012]) for sx in (-1, 1)])
-        eyes = np.minimum(ell(pb, (0.175, 0.665, 0.80), (0.026, 0.024, 0.022)), ell(pb, (-0.175, 0.665, 0.80), (0.026, 0.024, 0.022)))
-        brows = np.minimum(ell(pb, (0.175, 0.70, 0.79), (0.055, 0.020, 0.040), rz=0.35), ell(pb, (-0.175, 0.70, 0.79), (0.055, 0.020, 0.040), rz=-0.35))
+        def leg(sx, zf, thick, front):
+            top = 0.74 if front else 0.62
+            return limb(p, [(sx * 0.25, top + DY * 0.0, zf), (sx * 0.25, 0.38, zf + 0.05), (sx * 0.25, 0.09, zf + 0.03)],
+                        [thick, thick * 0.55, thick * 0.40])
+        legs = np.minimum.reduce([leg(1, 0.24, 0.15, True), leg(-1, 0.24, 0.15, True), leg(1, -0.42, 0.13, False), leg(-1, -0.42, 0.13, False)])
+        tail = limb(pb, [(0, 0.70, -0.74), (0.06, 0.56, -0.88), (0.03, 0.36, -0.90)], [0.025, 0.018, 0.014])
+        fur_d = np.minimum(np.minimum(body, legs), tail) - shaggy(p, 0.0035, 40.0, stretch=(1.0, 2.0, 1.0))
+        # bristle crest: spiky cones along the spine from neck to rump
+        def crest(q):
+            out = None
+            for i in range(14):
+                t = i / 13.0
+                z = 0.52 - t * 1.08
+                y = 1.30 - 0.20 * t - 0.14 * np.sin(t * np.pi) + 0.0 if False else (1.17 + 0.10 * np.sin(min(t * 1.4, 1.0) * np.pi * 0.9) - 0.28 * t)
+                h = 0.17 - 0.07 * t
+                d = rc(q, (0, y - 0.05 + DY, z), (0, y + h + DY, z - 0.05), 0.030, 0.002)
+                out = d if out is None else np.minimum(out, d)
+            return out
+        crest_d = part(p, (0, 1.20, 0.0), 0.75, crest)
+        # sharp pointed ears with tufts
+        ears = np.minimum(ell(pb, (0.17, 1.00, 0.56), (0.05, 0.16, 0.025), rz=-0.35, ry=-0.2),
+                          ell(pb, (-0.17, 1.00, 0.56), (0.05, 0.16, 0.025), rz=0.35, ry=0.2))
+        # curved upper tusks + shorter lower tusks
+        tusks = np.minimum.reduce([limb(pb, [(sx * 0.12, 0.35, 1.04), (sx * 0.19, 0.28, 1.18), (sx * 0.26, 0.46, 1.30), (sx * 0.23, 0.74, 1.30)],
+                                        [0.050, 0.042, 0.030, 0.008]) for sx in (-1, 1)])
+        low = np.minimum.reduce([limb(pb, [(sx * 0.09, 0.36, 1.12), (sx * 0.11, 0.50, 1.20), (sx * 0.10, 0.62, 1.20)],
+                                      [0.026, 0.020, 0.006]) for sx in (-1, 1)])
+        # big glowing eyes in deep sockets under a heavy brow, facing the viewer
+        eyes = np.minimum(ell(pb, (0.15, 0.725, 0.84), (0.040, 0.034, 0.036)), ell(pb, (-0.15, 0.725, 0.84), (0.040, 0.034, 0.036)))
+        brows = np.minimum(ell(pb, (0.15, 0.775, 0.83), (0.075, 0.026, 0.055), rz=0.42), ell(pb, (-0.15, 0.775, 0.83), (0.075, 0.026, 0.055), rz=-0.42))
         hoof_d = part(p, (0, 0.06, 0.0), 0.95, lambda q: np.minimum.reduce([
-            ell(q, (sx * 0.27 + dx, 0.045, zf + 0.12), (0.034, 0.05, 0.064))
-            for sx in (-1, 1) for zf in (0.22, -0.42) for dx in (-0.038, 0.038)]))
-        return union([(np.minimum(fur_d, brows), M_FUR), (mane_d, M_MANE), (disc, M_SNOUT), (ears, M_FUR), (tusks, M_TUSK),
-                      (eyes, M_EYE), (hoof_d, M_HOOF)])
+            ell(q, (sx * 0.25 + dx, 0.045, zf + 0.10), (0.030, 0.05, 0.060))
+            for sx in (-1, 1) for zf in (0.24, -0.42) for dx in (-0.034, 0.034)]))
+        return union([(np.minimum(fur_d, brows), M_FUR), (crest_d, M_BRISTLE), (disc, M_SNOUT), (ears, M_FUR),
+                      (np.minimum(tusks, low), M_TUSK), (eyes, M_EYE), (hoof_d, M_HOOF)])
 
-    return scene, [fur, mane, snout_m, tusk, eye, hoof], 1.5, rot_x(0.20) @ rot_y(0.55)
+    return scene, [fur, mane, snout_m, tusk, eye, hoof, bristle], 1.5, rot_x(0.16) @ rot_y(0.32)
 
 
 BUILDERS = {
