@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.util.lerp
 import com.idlerpg.game.data.Item
@@ -133,6 +134,9 @@ fun FirstPersonWeapon(
         animationSpec = infiniteRepeatable(tween(2600, easing = LinearEasing), RepeatMode.Restart),
         label = "shimmer",
     )
+
+    val resources = LocalContext.current.resources
+    LaunchedEffect(look) { FirstPersonSprites.preload(resources, look) }
 
     Canvas(modifier) {
         drawFirstPersonWeapon(look, progress.value, swayPhase, shimmer, playing)
@@ -427,7 +431,7 @@ fun DrawScope.drawFirstPersonWeapon(
         scale(pose.scale, pose.scale, Offset.Zero)
     }) {
         // Hand space: grip center at origin, weapon points to -y, forearm towards +y.
-        if (kind == WeaponKind.FIST) {
+        if (!drawSpriteArm(look)) if (kind == WeaponKind.FIST) {
             withTransform({ translate(-DaggerPainter.GRIP_CENTER.x, -DaggerPainter.GRIP_CENTER.y) }) {
                 FistPainter.drawWithForearm(this)
             }
@@ -448,6 +452,26 @@ fun DrawScope.drawFirstPersonWeapon(
         val k = (attackProgress - pc) / 0.22f
         if (k in 0f..1f) drawParrySpark(pose.toScreen(pointsOf(kind).contact), k, unit)
     }
+}
+
+/**
+ * Raytraced arm + weapon ([FirstPersonSprites]) in hand space; false while the bitmaps are not decoded yet
+ * (the vector painters draw instead).
+ */
+private fun DrawScope.drawSpriteArm(look: WeaponLook): Boolean = with(FirstPersonSprites) {
+    if (look.kind == WeaponKind.FIST) {
+        val img = peek(fist) ?: return false
+        drawInHandSpace(img, fist)
+        return true
+    }
+    val weapon = weaponOf(look) ?: return false
+    val back = peek(handBack) ?: return false
+    val front = peek(handFront) ?: return false
+    val w = peek(weapon) ?: return false
+    drawInHandSpace(back, handBack)
+    drawInHandSpace(w, weapon)
+    drawInHandSpace(front, handFront)
+    return true
 }
 
 /** Trail window (progress) and how far down the weapon the smear reaches (0 = tip only, 1 = grip). */

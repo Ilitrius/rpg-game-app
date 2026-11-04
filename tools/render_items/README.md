@@ -42,3 +42,4 @@ python -I tools/render_items/render.py mace --rarity epic --out <ordner>   # ein
 - Hintergründe der handgemachten Zonen: `scene_meadow.py --theme meadow|forest|swamp|mountain|cave` (Themen in `THEMES`; `NOTREES=1` für schnelle Vorschau).
 - Generierte Zonen: `render_gen.py <body|all>` rendert die 8 Körperformen aus `monsters_gen.py` je ruhig/furchteinflößend als vier Ebenen (`skin` grau, `eye`, `glow`, `fixed`), aufgeteilt nach Material-Rolle (`Renderer.mat_img`); die App färbt sie pro Biom (`GenMonsterSprites`). `--preview` zeigt eine Beispiel-Einfärbung.
 - Biom-Hintergründe: `scene_biomes.py <id|all>` (Farben spiegeln `BiomeStyles.kt`), Ausgabe `scene_biome_<id>.webp`.
+- Waffen in der Hand (Ich-Perspektive): `render_hand.py [all|hand|fist|weapons|<waffe>] [--ppu 2.4]`, danach `python gen_hand_kotlin.py` (schreibt `FirstPersonSprites.kt` mit den Griff-Pixeln aus `hand_sprites.json`). Arm/Finger sind getrennte Ebenen, damit die Waffe dazwischen liegt.

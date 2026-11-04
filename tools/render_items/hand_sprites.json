@@ -1,0 +1,83 @@
+{
+ "fp_axe_common": [
+  254.0,
+  811.2
+ ],
+ "fp_axe_epic": [
+  254.0,
+  811.2
+ ],
+ "fp_axe_legendary": [
+  254.0,
+  811.2
+ ],
+ "fp_axe_rare": [
+  254.0,
+  811.2
+ ],
+ "fp_axe_uncommon": [
+  254.0,
+  811.2
+ ],
+ "fp_dagger": [
+  113.0,
+  602.0
+ ],
+ "fp_dagger_rusty": [
+  113.0,
+  602.0
+ ],
+ "fp_mace_common": [
+  137.0,
+  776.2
+ ],
+ "fp_mace_epic": [
+  137.0,
+  776.2
+ ],
+ "fp_mace_legendary": [
+  137.0,
+  776.2
+ ],
+ "fp_mace_rare": [
+  137.0,
+  776.2
+ ],
+ "fp_mace_uncommon": [
+  137.0,
+  776.2
+ ],
+ "fp_short_sword_common": [
+  176.0,
+  758.8
+ ],
+ "fp_short_sword_epic": [
+  176.0,
+  758.8
+ ],
+ "fp_short_sword_legendary": [
+  176.0,
+  758.8
+ ],
+ "fp_short_sword_rare": [
+  176.0,
+  758.8
+ ],
+ "fp_short_sword_uncommon": [
+  176.0,
+  758.8
+ ],
+ "hand_back": [
+  62.2,
+  109.0
+ ],
+ "hand_fist": [
+  61.2,
+  228.0
+ ],
+ "hand_front": [
+  61.2,
+  119.0
+ ],
+ "ppu": 2.4
+}
