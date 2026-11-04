@@ -18,12 +18,13 @@ GEMS = {  # rarity -> (body colour, glow)
 
 
 def steel(rough=0.20):
-    streak = lambda p: (value_noise(p * np.array([60.0, 3.0, 60.0], dtype=np.float32), 1.0, 3) - 0.5) * 0.0012
+    # fine brushed finish: many thin, soft streaks (coarse streaks used to show as bands in the reflection)
+    streak = lambda p: (fbm(p * np.array([1.0, 0.0, 1.0], dtype=np.float32), 260.0, 2, 3) - 0.5) * 0.00035
     return Material((0.80, 0.82, 0.85), metal=1.0, rough=rough, spec=0.9, bump=streak)
 
 
 def dark_steel():
-    streak = lambda p: (value_noise(p * np.array([50.0, 3.0, 50.0], dtype=np.float32), 1.0, 5) - 0.5) * 0.0014
+    streak = lambda p: (fbm(p * np.array([1.0, 0.0, 1.0], dtype=np.float32), 220.0, 2, 5) - 0.5) * 0.00045
     return Material((0.55, 0.58, 0.62), metal=1.0, rough=0.38, spec=0.8, bump=streak)
 
 

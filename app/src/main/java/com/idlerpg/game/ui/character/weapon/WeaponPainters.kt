@@ -2,6 +2,11 @@ package com.idlerpg.game.ui.character.weapon
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -17,6 +22,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import com.idlerpg.game.data.Item
@@ -573,6 +579,10 @@ internal object AxePainter : WeaponShape {
  */
 internal fun DrawScope.drawWeaponHeld(look: WeaponLook, shimmer: Float = 0f) {
     val shape = WeaponPainters.shapeOf(look.kind) ?: return
+    // raytraced weapon (same hand space: grip centre at the origin) once decoded, vector otherwise
+    FirstPersonSprites.weaponOf(look)?.let { s ->
+        FirstPersonSprites.peek(s)?.let { img -> with(FirstPersonSprites) { drawInHandSpace(img, s) }; return }
+    }
     withTransform({ translate(-shape.gripCenter.x, -shape.gripCenter.y) }) {
         with(WeaponPainters) { drawWeaponUnits(look, shimmer) }
     }
@@ -590,7 +600,17 @@ fun DrawScope.drawWeaponFitted(
     shimmer: Float = 0f,
 ) {
     val shape = WeaponPainters.shapeOf(look.kind)
-    val b = shape?.bounds ?: FistPainter.BOUNDS
+    // large character-tab picture if decoded, else the first-person sprite, else the vector shape
+    val card = FirstPersonSprites.cardOf(look)?.takeIf { FirstPersonSprites.peek(it) != null }
+    val sprite = card ?: FirstPersonSprites.weaponOf(look)
+    val img = sprite?.let { FirstPersonSprites.peek(it) }
+    val ppu = if (card != null) FirstPersonSprites.CARD_PPU else FirstPersonSprites.PPU
+    // sprite bounds in hand-space units (grip centre = origin), same fitting as the vector shapes
+    val b = if (img != null && sprite != null) {
+        Rect(-sprite.grip.x / ppu, -sprite.grip.y / ppu, (img.width - sprite.grip.x) / ppu, (img.height - sprite.grip.y) / ppu)
+    } else {
+        shape?.bounds ?: FistPainter.BOUNDS
+    }
     val rad = Math.toRadians(rotationDegrees.toDouble())
     val c = abs(cos(rad)).toFloat()
     val s = abs(sin(rad)).toFloat()
@@ -604,12 +624,27 @@ fun DrawScope.drawWeaponFitted(
         scale(scale, scale, Offset.Zero)
         translate(-b.center.x, -b.center.y)
     }) {
-        if (shape == null) {
+        if (img != null && sprite != null) {
+            with(FirstPersonSprites) { drawInHandSpace(img, sprite, ppu) }
+        } else if (shape == null) {
             FistPainter.draw(this)
         } else {
             with(WeaponPainters) { drawWeaponUnits(look, shimmer) }
         }
     }
+}
+
+/**
+ * Starts decoding the raytraced weapon of [look] and returns true once it is ready, so a Canvas that reads
+ * the result redraws with the bitmap (the vector painters show until then; always false for the fist).
+ */
+@Composable
+fun rememberWeaponSpriteReady(look: WeaponLook, card: Boolean = false): Boolean {
+    val sprite = (if (card) FirstPersonSprites.cardOf(look) else FirstPersonSprites.weaponOf(look)) ?: return false
+    val resources = LocalContext.current.resources
+    var ready by remember(sprite.res) { mutableStateOf(FirstPersonSprites.peek(sprite) != null) }
+    LaunchedEffect(sprite.res) { if (!ready) ready = FirstPersonSprites.preloadWeapon(resources, look, card) }
+    return ready
 }
 
 /**
@@ -633,7 +668,11 @@ fun WeaponImage(
     contentDescription: String? = null,
 ) {
     val sem = if (contentDescription != null) Modifier.semantics { this.contentDescription = contentDescription } else Modifier
-    Canvas(modifier.then(sem)) { drawWeaponFitted(look, rotationDegrees, shimmer = 0.45f) }
+    val ready = rememberWeaponSpriteReady(look, card = true)
+    Canvas(modifier.then(sem)) {
+        ready // read so the canvas redraws once the bitmap is decoded
+        drawWeaponFitted(look, rotationDegrees, shimmer = 0.45f)
+    }
 }
 
 /**

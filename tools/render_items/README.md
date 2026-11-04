@@ -34,7 +34,7 @@ python -I tools/render_items/render.py mace --rarity epic --out <ordner>   # ein
 
 - Alle Bilder sind selbst erzeugt (keine fremden Quellen, keine Lizenzfragen).
 - Größe: ca. 1,6 MB für alle 45 Bilder. Laufzeit: einmal off-Main decodiert, LRU-Cache 24 MB.
-- Nicht enthalten: Waffen in der Hand (Ich-Perspektive, Paper-Doll, Charakter-Tab) sind noch Vektor.
+- Waffen in der Hand, Paper-Doll und Charakter-Tab: siehe unten (`render_hand.py`).
 
 ## Alle Zonen (Stand 2026-11-04)
 
@@ -42,4 +42,8 @@ python -I tools/render_items/render.py mace --rarity epic --out <ordner>   # ein
 - Hintergründe der handgemachten Zonen: `scene_meadow.py --theme meadow|forest|swamp|mountain|cave` (Themen in `THEMES`; `NOTREES=1` für schnelle Vorschau).
 - Generierte Zonen: `render_gen.py <body|all>` rendert die 8 Körperformen aus `monsters_gen.py` je ruhig/furchteinflößend als vier Ebenen (`skin` grau, `eye`, `glow`, `fixed`), aufgeteilt nach Material-Rolle (`Renderer.mat_img`); die App färbt sie pro Biom (`GenMonsterSprites`). `--preview` zeigt eine Beispiel-Einfärbung.
 - Biom-Hintergründe: `scene_biomes.py <id|all>` (Farben spiegeln `BiomeStyles.kt`), Ausgabe `scene_biome_<id>.webp`.
+- Elixiere: `render.py elixir_<damage|xp|gold|drop|regen>` (`items_potions.py`; das Glas wird über einen zweiten Durchgang ohne Glas durchsichtig gemacht, `see_through_glass`).
+- Rüstungs-Feinschliff: `items_armor2.py` (Lederkappe, Lederwams, Leder-/Plattenstiefel, überschreibt die alten Builder; Leder mit Nähten `worn_leather`/`dashes`).
+- Edelstein-Funkeln: `render.py` legt ab Seltenheit selten einen Lichtstern auf den hellsten Edelstein-Pixel (`GLINT`).
+- Charakter-Tab: `render_hand.py cards` rendert die Waffen groß (`wc_*`, `CARD_PPU` 4, doppelt gerendert und verkleinert).
 - Waffen in der Hand (Ich-Perspektive): `render_hand.py [all|hand|fist|weapons|<waffe>] [--ppu 2.4]`, danach `python gen_hand_kotlin.py` (schreibt `FirstPersonSprites.kt` mit den Griff-Pixeln aus `hand_sprites.json`). Arm/Finger sind getrennte Ebenen, damit die Waffe dazwischen liegt.

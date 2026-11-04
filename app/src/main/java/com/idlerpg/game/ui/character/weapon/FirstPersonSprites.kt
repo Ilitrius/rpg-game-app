@@ -28,6 +28,9 @@ internal object FirstPersonSprites {
 
     class Sprite(val res: Int, val grip: Offset)
 
+    /** Pixels per hand-space unit of the larger character-tab pictures ([cardOf]). */
+    const val CARD_PPU = 4.0f
+
     val handBack = Sprite(R.drawable.hand_back, Offset(62.2f, 109.0f))
     val handFront = Sprite(R.drawable.hand_front, Offset(61.2f, 119.0f))
     val fist = Sprite(R.drawable.hand_fist, Offset(61.2f, 228.0f))
@@ -59,6 +62,34 @@ internal object FirstPersonSprites {
         WeaponKind.FIST -> null
     }
 
+    /** Large picture of the weapon for the character tab (same model and hand space, higher resolution). */
+    fun cardOf(look: WeaponLook): Sprite? = when (look.kind) {
+        WeaponKind.RUSTY_DAGGER -> Sprite(R.drawable.wc_dagger_rusty, Offset(187.0f, 1002.0f))
+        WeaponKind.DAGGER -> Sprite(R.drawable.wc_dagger, Offset(187.0f, 1002.0f))
+        WeaponKind.SHORT_SWORD -> when (look.rarity) {
+            Rarity.COMMON -> Sprite(R.drawable.wc_short_sword_common, Offset(292.0f, 1264.0f))
+            Rarity.UNCOMMON -> Sprite(R.drawable.wc_short_sword_uncommon, Offset(292.0f, 1264.0f))
+            Rarity.RARE -> Sprite(R.drawable.wc_short_sword_rare, Offset(292.0f, 1264.0f))
+            Rarity.EPIC -> Sprite(R.drawable.wc_short_sword_epic, Offset(292.0f, 1264.0f))
+            Rarity.LEGENDARY -> Sprite(R.drawable.wc_short_sword_legendary, Offset(292.0f, 1264.0f))
+        }
+        WeaponKind.MACE -> when (look.rarity) {
+            Rarity.COMMON -> Sprite(R.drawable.wc_mace_common, Offset(227.0f, 1292.0f))
+            Rarity.UNCOMMON -> Sprite(R.drawable.wc_mace_uncommon, Offset(227.0f, 1292.0f))
+            Rarity.RARE -> Sprite(R.drawable.wc_mace_rare, Offset(227.0f, 1292.0f))
+            Rarity.EPIC -> Sprite(R.drawable.wc_mace_epic, Offset(227.0f, 1292.0f))
+            Rarity.LEGENDARY -> Sprite(R.drawable.wc_mace_legendary, Offset(227.0f, 1292.0f))
+        }
+        WeaponKind.AXE -> when (look.rarity) {
+            Rarity.COMMON -> Sprite(R.drawable.wc_axe_common, Offset(422.0f, 1352.0f))
+            Rarity.UNCOMMON -> Sprite(R.drawable.wc_axe_uncommon, Offset(422.0f, 1352.0f))
+            Rarity.RARE -> Sprite(R.drawable.wc_axe_rare, Offset(422.0f, 1352.0f))
+            Rarity.EPIC -> Sprite(R.drawable.wc_axe_epic, Offset(422.0f, 1352.0f))
+            Rarity.LEGENDARY -> Sprite(R.drawable.wc_axe_legendary, Offset(422.0f, 1352.0f))
+        }
+        WeaponKind.FIST -> null
+    }
+
     private val cache = object : LruCache<Int, ImageBitmap>(24 * 1024 * 1024) {
         override fun sizeOf(key: Int, value: ImageBitmap): Int = value.width * value.height * 4
     }
@@ -77,10 +108,22 @@ internal object FirstPersonSprites {
         }
     }
 
+    /** Decodes only the weapon of [look] (paper doll), or its large picture if [card]; true once cached. */
+    suspend fun preloadWeapon(resources: Resources, look: WeaponLook, card: Boolean = false): Boolean {
+        val s = (if (card) cardOf(look) else weaponOf(look)) ?: return false
+        if (cache.get(s.res) == null) {
+            val bmp = withContext(Dispatchers.Default) {
+                runCatching { BitmapFactory.decodeResource(resources, s.res) }.getOrNull()
+            } ?: return false
+            cache.put(s.res, bmp.asImageBitmap())
+        }
+        return true
+    }
+
     /** Draws [img] in hand space (grip centre at the origin, 1 unit = 1 hand-space unit). */
-    fun DrawScope.drawInHandSpace(img: ImageBitmap, sprite: Sprite) {
+    fun DrawScope.drawInHandSpace(img: ImageBitmap, sprite: Sprite, ppu: Float = PPU) {
         withTransform({
-            scale(1f / PPU, 1f / PPU, Offset.Zero)
+            scale(1f / ppu, 1f / ppu, Offset.Zero)
             translate(-sprite.grip.x, -sprite.grip.y)
         }) {
             val size = IntSize(img.width, img.height)

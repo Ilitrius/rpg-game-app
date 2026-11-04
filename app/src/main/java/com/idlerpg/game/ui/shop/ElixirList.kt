@@ -17,12 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.idlerpg.game.R
-import com.idlerpg.game.data.ActiveBuff
 import com.idlerpg.game.data.GameState
 import com.idlerpg.game.domain.buffs.Buffs
 import com.idlerpg.game.domain.shop.Elixirs
 import com.idlerpg.game.domain.shop.Elixirs.Elixir
-import com.idlerpg.game.ui.adventure.BuffIcon
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -42,7 +40,7 @@ private fun effectRes(e: Elixir) = when (e) {
     Elixir.REGEN -> R.string.shop_elixir_regen_effect
 }
 
-/** One elixir offer: vector icon (shared with the HUD buff bar), effect, remaining time, price and buy button. */
+/** One elixir offer: bottle picture, effect, remaining time, price and buy button. */
 @Composable
 internal fun ElixirRow(state: GameState, elixir: Elixir, onBuy: () -> Unit) {
     val price = Elixirs.price(state, elixir)
@@ -51,7 +49,7 @@ internal fun ElixirRow(state: GameState, elixir: Elixir, onBuy: () -> Unit) {
     val affordable = state.gold >= price
     Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)) {
         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            BuffIcon(ActiveBuff(elixir.type, Elixirs.MAGNITUDE, Elixirs.DURATION_MILLIS), Modifier.size(52.dp))
+            ElixirIcon(elixir, Modifier.size(56.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(stringResource(nameRes(elixir)), style = MaterialTheme.typography.titleMedium)
                 Text(stringResource(effectRes(elixir)), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)

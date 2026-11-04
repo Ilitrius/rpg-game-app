@@ -241,8 +241,14 @@ def job_fist(args):
     return {"hand_fist": (gx - x0, gy - y0)}
 
 
+CARD_PPU = 4.0   # character-tab weapon pictures: rendered at 2 x CARD_PPU, downsampled for clean edges
+
+
 def job_weapon(args):
-    out, ppu, wid, rarity = args
+    out, ppu, wid, rarity = args[:4]
+    card = len(args) > 4 and args[4]
+    if card:
+        ppu = CARD_PPU * 2
     builder, gc, s, mirror, cy, half = WEAPONS[wid]
     scene0, mats, _b, _v = builder(rarity)
 
@@ -258,7 +264,17 @@ def job_weapon(args):
     view = rot_y(0.22)
     img, mat, size = _render(scene, mats, (0.0, cy), half, ppu, view)
     gx, gy = _grip_px((0.0, cy), half, size)
-    name = f"fp_{wid}" + (f"_{rarity}" if wid in GEMMED else "")
+    name = ("wc_" if card else "fp_") + wid + (f"_{rarity}" if wid in GEMMED else "")
+    if card:
+        a = img[..., 3] > 0.01
+        ys, xs = np.nonzero(a)
+        x0, y0 = max(xs.min() - 4, 0) & ~1, max(ys.min() - 4, 0) & ~1
+        x1, y1 = xs.max() + 6, ys.max() + 6
+        crop = np.clip(img[y0:y1, x0:x1] * 255, 0, 255).astype(np.uint8)
+        im = Image.fromarray(crop, "RGBA")
+        im = im.resize((im.width // 2, im.height // 2), Image.LANCZOS)
+        im.save(os.path.join(out, f"{name}.webp"), "WEBP", quality=90, method=6)
+        return {name: ((gx - x0) / 2, (gy - y0) / 2)}
     x0, y0 = _save(img, os.path.join(out, f"{name}.webp"))
     return {name: (gx - x0, gy - y0)}
 
@@ -279,13 +295,18 @@ def main():
         if a.what in ("all", "weapons", wid):
             for r in (RARITIES if wid in GEMMED else ("common",)):
                 jobs.append((job_weapon, (a.out, a.ppu, wid, r)))
+        if a.what in ("all", "cards"):
+            for r in (RARITIES if wid in GEMMED else ("common",)):
+                jobs.append((job_weapon, (a.out, a.ppu, wid, r, True)))
     meta_path = os.path.join(a.out, "..", "..", "..", "..", "..", "tools", "render_items", "hand_sprites.json") \
         if a.out == DEFAULT_OUT else os.path.join(a.out, "hand_sprites.json")
     meta_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "hand_sprites.json")) if a.out == DEFAULT_OUT else meta_path
     meta = {}
     if os.path.exists(meta_path):
         meta = json.load(open(meta_path))
-    meta["ppu"] = a.ppu
+    if a.what != "cards":
+        meta["ppu"] = a.ppu
+    meta["card_ppu"] = CARD_PPU
     with ProcessPoolExecutor() as ex:
         futs = [ex.submit(fn, arg) for fn, arg in jobs]
         for f in futs:

@@ -85,6 +85,7 @@ import com.idlerpg.game.domain.character.get
 import com.idlerpg.game.domain.equipment.Inventory
 import com.idlerpg.game.domain.equipment.InventoryFill
 import com.idlerpg.game.ui.character.weapon.drawWeaponInHand
+import com.idlerpg.game.ui.character.weapon.rememberWeaponSpriteReady
 import com.idlerpg.game.ui.character.weapon.weaponLookOf
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
@@ -285,7 +286,9 @@ private fun SlotView(slot: EquipmentSlot, item: Item?, onClick: (Item) -> Unit) 
 @Composable
 private fun HeroSilhouette(modifier: Modifier, weapon: Item? = null) {
     val glow = MaterialTheme.colorScheme.primary
+    val spriteReady = weapon?.let { rememberWeaponSpriteReady(weaponLookOf(it)) } ?: false
     Canvas(modifier) {
+        spriteReady // redraw once the raytraced weapon is decoded
         val s = min(size.width / 100f, size.height / 200f)
         val dx = (size.width - 100f * s) / 2f
         val dy = (size.height - 200f * s) / 2f

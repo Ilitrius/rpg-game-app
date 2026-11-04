@@ -1,4 +1,5 @@
 {
+ "card_ppu": 4.0,
  "fp_axe_common": [
   254.0,
   811.2
@@ -79,5 +80,73 @@
   61.2,
   119.0
  ],
- "ppu": 2.4
+ "ppu": 2.4,
+ "wc_axe_common": [
+  422.0,
+  1352.0
+ ],
+ "wc_axe_epic": [
+  422.0,
+  1352.0
+ ],
+ "wc_axe_legendary": [
+  422.0,
+  1352.0
+ ],
+ "wc_axe_rare": [
+  422.0,
+  1352.0
+ ],
+ "wc_axe_uncommon": [
+  422.0,
+  1352.0
+ ],
+ "wc_dagger": [
+  187.0,
+  1002.0
+ ],
+ "wc_dagger_rusty": [
+  187.0,
+  1002.0
+ ],
+ "wc_mace_common": [
+  227.0,
+  1292.0
+ ],
+ "wc_mace_epic": [
+  227.0,
+  1292.0
+ ],
+ "wc_mace_legendary": [
+  227.0,
+  1292.0
+ ],
+ "wc_mace_rare": [
+  227.0,
+  1292.0
+ ],
+ "wc_mace_uncommon": [
+  227.0,
+  1292.0
+ ],
+ "wc_short_sword_common": [
+  292.0,
+  1264.0
+ ],
+ "wc_short_sword_epic": [
+  292.0,
+  1264.0
+ ],
+ "wc_short_sword_legendary": [
+  292.0,
+  1264.0
+ ],
+ "wc_short_sword_rare": [
+  292.0,
+  1264.0
+ ],
+ "wc_short_sword_uncommon": [
+  292.0,
+  1264.0
+ ]
 }

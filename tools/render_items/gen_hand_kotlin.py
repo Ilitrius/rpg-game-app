@@ -22,6 +22,16 @@ for kind, base in (("SHORT_SWORD", "fp_short_sword"), ("MACE", "fp_mace"), ("AXE
     rows.append(f"        WeaponKind.{kind} -> when (look.rarity) {{\n{cases}\n        }}")
 table = "\n".join(rows)
 
+card_rows = []
+for kind, base in (("RUSTY_DAGGER", "wc_dagger_rusty"), ("DAGGER", "wc_dagger")):
+    card_rows.append(f"        WeaponKind.{kind} -> Sprite(R.drawable.{base}, {off(base)})")
+for kind, base in (("SHORT_SWORD", "wc_short_sword"), ("MACE", "wc_mace"), ("AXE", "wc_axe")):
+    cases = "\n".join(f"            Rarity.{r.upper()} -> Sprite(R.drawable.{base}_{r}, {off(base + '_' + r)})"
+                      for r in ("common", "uncommon", "rare", "epic", "legendary"))
+    card_rows.append(f"        WeaponKind.{kind} -> when (look.rarity) {{\n{cases}\n        }}")
+card_table = "\n".join(card_rows)
+card_ppu = meta["card_ppu"]
+
 src = f'''package com.idlerpg.game.ui.character.weapon
 
 import android.content.res.Resources
@@ -52,12 +62,21 @@ internal object FirstPersonSprites {{
 
     class Sprite(val res: Int, val grip: Offset)
 
+    /** Pixels per hand-space unit of the larger character-tab pictures ([cardOf]). */
+    const val CARD_PPU = {card_ppu}f
+
     val handBack = Sprite(R.drawable.hand_back, {off("hand_back")})
     val handFront = Sprite(R.drawable.hand_front, {off("hand_front")})
     val fist = Sprite(R.drawable.hand_fist, {off("hand_fist")})
 
     fun weaponOf(look: WeaponLook): Sprite? = when (look.kind) {{
 {table}
+        WeaponKind.FIST -> null
+    }}
+
+    /** Large picture of the weapon for the character tab (same model and hand space, higher resolution). */
+    fun cardOf(look: WeaponLook): Sprite? = when (look.kind) {{
+{card_table}
         WeaponKind.FIST -> null
     }}
 
@@ -79,10 +98,22 @@ internal object FirstPersonSprites {{
         }}
     }}
 
+    /** Decodes only the weapon of [look] (paper doll), or its large picture if [card]; true once cached. */
+    suspend fun preloadWeapon(resources: Resources, look: WeaponLook, card: Boolean = false): Boolean {{
+        val s = (if (card) cardOf(look) else weaponOf(look)) ?: return false
+        if (cache.get(s.res) == null) {{
+            val bmp = withContext(Dispatchers.Default) {{
+                runCatching {{ BitmapFactory.decodeResource(resources, s.res) }}.getOrNull()
+            }} ?: return false
+            cache.put(s.res, bmp.asImageBitmap())
+        }}
+        return true
+    }}
+
     /** Draws [img] in hand space (grip centre at the origin, 1 unit = 1 hand-space unit). */
-    fun DrawScope.drawInHandSpace(img: ImageBitmap, sprite: Sprite) {{
+    fun DrawScope.drawInHandSpace(img: ImageBitmap, sprite: Sprite, ppu: Float = PPU) {{
         withTransform({{
-            scale(1f / PPU, 1f / PPU, Offset.Zero)
+            scale(1f / ppu, 1f / ppu, Offset.Zero)
             translate(-sprite.grip.x, -sprite.grip.y)
         }}) {{
             val size = IntSize(img.width, img.height)
