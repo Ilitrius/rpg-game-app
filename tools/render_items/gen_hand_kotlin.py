@@ -77,7 +77,7 @@ internal object FirstPersonSprites {{
     /** Large picture of the weapon for the character tab (same model and hand space, higher resolution). */
     fun cardOf(look: WeaponLook): Sprite? = when (look.kind) {{
 {card_table}
-        WeaponKind.FIST -> null
+        WeaponKind.FIST -> Sprite(R.drawable.wc_fist, {off("wc_fist")})
     }}
 
     private val cache = object : LruCache<Int, ImageBitmap>(24 * 1024 * 1024) {{

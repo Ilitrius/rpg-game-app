@@ -32,6 +32,9 @@ private fun bottleRes(e: Elixir): Int = when (e) {
     Elixir.REGEN -> R.drawable.item_elixir_regen
 }
 
+/** Bottle picture for a buff type of an elixir (null for buffs without one, e.g. the click buff). */
+internal fun bottleResForType(type: String): Int? = Elixir.entries.firstOrNull { it.type == type }?.let { bottleRes(it) }
+
 private fun glowColor(e: Elixir): Color = when (e) {
     Elixir.XP -> Color(0xFF4FC3F7)
     Elixir.GOLD -> Color(0xFFFFC53D)

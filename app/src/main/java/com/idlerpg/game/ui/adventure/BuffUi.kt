@@ -21,6 +21,18 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+import com.idlerpg.game.ui.equipment.ItemSprites
+import com.idlerpg.game.ui.shop.bottleResForType
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -101,11 +113,16 @@ internal fun BuffBar(buffs: List<ActiveBuff>, onClick: () -> Unit, modifier: Mod
     }
 }
 
-/** Vector icon of a buff type with a remaining-time ring around it. */
+/** Icon of a buff type (raytraced elixir bottle, vector glyph until decoded or for buffs without a bottle) with a remaining-time ring. */
 @Composable
 internal fun BuffIcon(buff: ActiveBuff, modifier: Modifier = Modifier) {
     val accent = buffAccent(buff.type)
     val fraction = (buff.remainingMillis.toFloat() / RING_REFERENCE_MILLIS).coerceIn(0.03f, 1f)
+    val res = bottleResForType(buff.type)
+    val resources = LocalContext.current.resources
+    var bottle by remember(res) { mutableStateOf<ImageBitmap?>(res?.let { ItemSprites.cached(it) }) }
+    LaunchedEffect(res) { if (res != null && bottle == null) bottle = ItemSprites.load(resources, res) }
+    val img = bottle
     Canvas(modifier) {
         val s = size.minDimension
         val stroke = s * 0.08f
@@ -116,7 +133,16 @@ internal fun BuffIcon(buff: ActiveBuff, modifier: Modifier = Modifier) {
             topLeft = Offset(stroke / 2f, stroke / 2f), size = Size(s - stroke, s - stroke),
             style = Stroke(stroke, cap = StrokeCap.Round),
         )
-        drawBuffGlyph(buff.type, s)
+        if (img != null) {
+            val side = (s * 0.80f).toInt()
+            drawImage(
+                img, IntOffset.Zero, IntSize(img.width, img.height),
+                IntOffset(((s - side) / 2f).toInt(), ((s - side) / 2f).toInt()), IntSize(side, side),
+                filterQuality = FilterQuality.High,
+            )
+        } else {
+            drawBuffGlyph(buff.type, s)
+        }
     }
 }
 

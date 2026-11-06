@@ -44,6 +44,7 @@ python -I tools/render_items/render.py mace --rarity epic --out <ordner>   # ein
 - Biom-Hintergründe: `scene_biomes.py <id|all>` (Farben spiegeln `BiomeStyles.kt`), Ausgabe `scene_biome_<id>.webp`.
 - Elixiere: `render.py elixir_<damage|xp|gold|drop|regen>` (`items_potions.py`; das Glas wird über einen zweiten Durchgang ohne Glas durchsichtig gemacht, `see_through_glass`).
 - Rüstungs-Feinschliff: `items_armor2.py` (Lederkappe, Lederwams, Leder-/Plattenstiefel, überschreibt die alten Builder; Leder mit Nähten `worn_leather`/`dashes`).
+- Handschuhe: `items_gloves.py` (Leder-/Panzerhandschuhe, überschreibt `items_armor.py`); Faust fürs Charakter-Tab: `render_hand.py fist_card` (`wc_fist`, danach `gen_hand_kotlin.py`).
 - Edelstein-Funkeln: `render.py` legt ab Seltenheit selten einen Lichtstern auf den hellsten Edelstein-Pixel (`GLINT`).
 - Charakter-Tab: `render_hand.py cards` rendert die Waffen groß (`wc_*`, `CARD_PPU` 4, doppelt gerendert und verkleinert).
 - Waffen in der Hand (Ich-Perspektive): `render_hand.py [all|hand|fist|weapons|<waffe>] [--ppu 2.4]`, danach `python gen_hand_kotlin.py` (schreibt `FirstPersonSprites.kt` mit den Griff-Pixeln aus `hand_sprites.json`). Arm/Finger sind getrennte Ebenen, damit die Waffe dazwischen liegt.

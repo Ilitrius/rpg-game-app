@@ -87,7 +87,7 @@ internal object FirstPersonSprites {
             Rarity.EPIC -> Sprite(R.drawable.wc_axe_epic, Offset(422.0f, 1352.0f))
             Rarity.LEGENDARY -> Sprite(R.drawable.wc_axe_legendary, Offset(422.0f, 1352.0f))
         }
-        WeaponKind.FIST -> null
+        WeaponKind.FIST -> Sprite(R.drawable.wc_fist, Offset(72.0f, 378.0f))
     }
 
     private val cache = object : LruCache<Int, ImageBitmap>(24 * 1024 * 1024) {

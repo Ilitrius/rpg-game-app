@@ -9,7 +9,7 @@ only needs the pixel position of the grip centre (written to hand_sprites.json a
     hand_fist.webp   bare fist with forearm (no weapon)
     fp_<weapon>[_<rarity>].webp  the weapon itself, grip centre at the origin
 
-Usage:  python render_hand.py [all|hand|fist|weapons|<weapon>] [--ppu 2.4] [--out DIR] [--preview]
+Usage:  python render_hand.py [all|hand|fist|weapons|cards|fist_card|<weapon>] [--ppu 2.4] [--out DIR] [--preview]
 """
 from __future__ import annotations
 
@@ -279,6 +279,38 @@ def job_weapon(args):
     return {name: (gx - x0, gy - y0)}
 
 
+def job_fist_card(args):
+    """Character-tab picture of the bare (gloved) fist: hand, cuff and the start of the vambrace, cut below the
+    first strap and faded out, rendered at 2 x CARD_PPU and downsampled like the weapon cards."""
+    out, _ppu = args
+    scene0, mats = arm_scene(fist=True)
+    cut = -150.0
+
+    def scene(p):
+        d, m = scene0(p)
+        return np.maximum(d, -(p[:, 1] / U - cut) * U), m
+
+    ppu = CARD_PPU * 2
+    center, half = (0.40, -0.10), 1.55
+    img, mat, size = _render(scene, mats, center, half, ppu, ARM_VIEW)
+    gx, gy = _grip_px(center, half, size)
+    # soft fade over the last 30 units above the cut so the arm does not end in a hard edge
+    ys = np.arange(size, dtype=np.float32)
+    yu = (center[1] + half) / U - ys / ppu
+    fade = np.clip((yu - cut) / 30.0, 0, 1)
+    img = img.copy()
+    img[..., 3] *= fade[:, None]
+    a = img[..., 3] > 0.01
+    yy, xx = np.nonzero(a)
+    x0, y0 = max(xx.min() - 4, 0) & ~1, max(yy.min() - 4, 0) & ~1
+    x1, y1 = xx.max() + 6, yy.max() + 6
+    crop = np.clip(img[y0:y1, x0:x1] * 255, 0, 255).astype(np.uint8)
+    im = Image.fromarray(crop, "RGBA")
+    im = im.resize((im.width // 2, im.height // 2), Image.LANCZOS)
+    im.save(os.path.join(out, "wc_fist.webp"), "WEBP", quality=90, method=6)
+    return {"wc_fist": ((gx - x0) / 2, (gy - y0) / 2)}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("what", default="all", nargs="?")
@@ -298,13 +330,15 @@ def main():
         if a.what in ("all", "cards"):
             for r in (RARITIES if wid in GEMMED else ("common",)):
                 jobs.append((job_weapon, (a.out, a.ppu, wid, r, True)))
+    if a.what in ("all", "cards", "fist_card"):
+        jobs.append((job_fist_card, (a.out, a.ppu)))
     meta_path = os.path.join(a.out, "..", "..", "..", "..", "..", "tools", "render_items", "hand_sprites.json") \
         if a.out == DEFAULT_OUT else os.path.join(a.out, "hand_sprites.json")
     meta_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "hand_sprites.json")) if a.out == DEFAULT_OUT else meta_path
     meta = {}
     if os.path.exists(meta_path):
         meta = json.load(open(meta_path))
-    if a.what != "cards":
+    if a.what not in ("cards", "fist_card"):
         meta["ppu"] = a.ppu
     meta["card_ppu"] = CARD_PPU
     with ProcessPoolExecutor() as ex:
