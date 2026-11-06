@@ -1,0 +1,19 @@
+Neu
+• Neu: Ränge für deinen Helden! Ab Level 30 siehst du im Charakter-Tab die Rang-Karte. Mit Gold kaufst du bis zu 15 Ränge (Knappe bis Halbgott, danach Mythos I–V). Jeder Rang macht dich dauerhaft stärker: mehr Schaden, Leben und Tempo, ab Ritter auch mehr Gold und Inventarplätze. Ränge bleiben nach der Wiedergeburt erhalten.
+• Neu: Rang-Abzeichen als realistische Schilde in Bronze, Silber, Gold und Violett, bei Mythos mit Edelsteinen.
+• Neue Ziele: „Kaufe Ränge“.
+• Realistische Grafik in allen 100 Gebieten: Sumpf, Gebirge und Höhle haben neue Monster und Landschaften, alle 19 Biome danach eigene, detailreiche Hintergründe.
+• Die Monster der späteren Gebiete wurden neu gestaltet (acht Körperformen von Schleim bis Drache) und tragen die Farben ihres Bioms. Bosse und besonders gefährliche Gegner wirken bedrohlicher, mit Stacheln, Hörnern und glühenden Rissen.
+• Waffen in der Hand: Arm, Handschuh, Faust und alle Waffen in der Ich-Perspektive sind jetzt realistisch. Bei Kurzschwert, Streitkolben und Axt siehst du die Seltenheit am Edelstein.
+• Neuer Wald-Hintergrund mit Bäumen, Licht und Moos.
+• Neue Leder- und Panzerhandschuhe mit Nähten, Lamellen und Nieten; ohne Waffe zeigt der Charakter-Tab eine realistische Faust.
+• Elixiere im Shop als echte Flaschen mit durchsichtigem Glas und leuchtender Flüssigkeit.
+• Deine Waffe im Charakter-Tab und an der Ausrüstungsfigur ist jetzt ebenfalls realistisch.
+
+Verbessert
+• Das Wildschwein ist jetzt ein wilder Eber mit Borstenfell, Borstenkamm, Hauern und leuchtenden Augen.
+• Das Tutorial erklärt mehr: Ziele, Wiedergeburt, Ausrüstung, Shop und Elixiere, Auto-Boss, Endlos-Stufen und den Offline-Fortschritt (9 Schritte).
+• Lederkappe, Lederwams, Leder- und Plattenstiefel sind detailreicher: Nähte, Narbung, Riemen und Platten.
+• Klingen glänzen gleichmäßig ohne Streifen; Edelsteine funkeln ab Seltenheit „selten“.
+• Die Monster und Hintergründe werden im Hintergrund geladen, damit der Kampf beim Gebietswechsel flüssig bleibt.
+• Die Buff-Symbole im Kampf zeigen jetzt die Elixier-Flaschen.
