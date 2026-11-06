@@ -34,4 +34,11 @@
     <string name="rank_name_8">Conqueror</string>
     <string name="rank_name_9">Legend</string>
     <string name="rank_name_10">Demigod</string>
+    <string name="rank_name_11">Mythos I</string>
+    <string name="rank_name_12">Mythos II</string>
+    <string name="rank_name_13">Mythos III</string>
+    <string name="rank_name_14">Mythos IV</string>
+    <string name="rank_name_15">Mythos V</string>
+    <string name="rank_requires_level_rebirths">From level %1$d and %2$d rebirths</string>
+    <string name="rank_rebirths_missing">You still need rebirths: %1$d (so far: %2$d).</string>
 </resources>

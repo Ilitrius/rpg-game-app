@@ -33,6 +33,10 @@
         <item quantity="one">Schalte %1$d neues Gebiet frei</item>
         <item quantity="other">Schalte %1$d neue Gebiete frei</item>
     </plurals>
+    <plurals name="goals_rank">
+        <item quantity="one">Kaufe %1$d Rang</item>
+        <item quantity="other">Kaufe %1$d Ränge</item>
+    </plurals>
     <!-- Import (Optionen) -->
     <string name="options_field_daily_last_claim">Zeit der letzten Tagesbelohnung</string>
     <string name="options_field_daily_streak">Tagesbelohnungs-Serie</string>

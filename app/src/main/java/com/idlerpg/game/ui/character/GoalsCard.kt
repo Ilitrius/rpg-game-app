@@ -192,6 +192,7 @@ private fun goalTitle(type: String, target: Long): String {
         GoalTypes.KILLS -> R.plurals.goals_kills
         GoalTypes.BOSSES -> R.plurals.goals_bosses
         GoalTypes.LEVEL -> R.plurals.goals_level
+        GoalTypes.RANK -> R.plurals.goals_rank
         else -> R.plurals.goals_zones
     }
     val n = target.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()

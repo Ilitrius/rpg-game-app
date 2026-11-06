@@ -3,6 +3,7 @@ package com.idlerpg.game.domain.progress
 import com.idlerpg.game.data.GameState
 import com.idlerpg.game.data.GoalState
 import kotlin.math.roundToLong
+import com.idlerpg.game.domain.rank.RankConfig
 import com.idlerpg.game.domain.stats.Stats
 
 /** Goal counter names (values of [GoalState.type]). Plain strings: unknown ones in a save must not crash. */
@@ -11,7 +12,8 @@ object GoalTypes {
     const val BOSSES = "bosses"
     const val LEVEL = "level"
     const val ZONES = "zones"
-    val all = listOf(KILLS, BOSSES, LEVEL, ZONES)
+    const val RANK = "rank"
+    val all = listOf(KILLS, BOSSES, LEVEL, ZONES, RANK)
 
     /** Current value of the counter behind [type], or null for unknown types. */
     fun counter(state: GameState, type: String): Long? = when (type) {
@@ -19,6 +21,7 @@ object GoalTypes {
         BOSSES -> state.world.defeatedBossIds.size.toLong()
         LEVEL -> state.character.level.toLong()
         ZONES -> state.world.unlockedZoneIds.size.toLong()
+        RANK -> state.rank.rank.coerceIn(0, RankConfig.MAX_RANK).toLong()
         else -> null
     }
 }
@@ -41,20 +44,23 @@ object Goals {
     private val bossTargets = listOf(1L, 2, 3, 5, 8, 12, 20, 30)
     private val levelTargets = listOf(1L, 2, 3, 5, 8, 12, 20, 35, 60, 100)
     private val zoneTargets = listOf(1L, 2, 3, 5, 8, 12)
+    private val rankTargets = listOf(1L, 2, 3, 5, 8)
 
     private fun killReward(t: Long) = maxOf(15.0, t * 0.4)
     private fun bossReward(t: Long) = 80.0 * t
     private fun levelReward(t: Long) = 40.0 * t
     private fun zoneReward(t: Long) = 120.0 * t
+    private fun rankReward(t: Long) = 250.0 * t
 
     /** Interleaved by tier (one entry per type per tier), each type strictly ascending. */
     val catalog: List<GoalDef> = buildList {
-        val tiers = maxOf(killTargets.size, bossTargets.size, levelTargets.size, zoneTargets.size)
+        val tiers = maxOf(killTargets.size, bossTargets.size, levelTargets.size, zoneTargets.size, rankTargets.size)
         for (i in 0 until tiers) {
             killTargets.getOrNull(i)?.let { add(GoalDef("kills_$it", GoalTypes.KILLS, it, killReward(it))) }
             bossTargets.getOrNull(i)?.let { add(GoalDef("bosses_$it", GoalTypes.BOSSES, it, bossReward(it))) }
             levelTargets.getOrNull(i)?.let { add(GoalDef("level_$it", GoalTypes.LEVEL, it, levelReward(it))) }
             zoneTargets.getOrNull(i)?.let { add(GoalDef("zones_$it", GoalTypes.ZONES, it, zoneReward(it))) }
+            rankTargets.getOrNull(i)?.let { add(GoalDef("rank_$it", GoalTypes.RANK, it, rankReward(it))) }
         }
     }
 
@@ -85,10 +91,14 @@ object Goals {
     fun active(state: GameState): List<GoalState> =
         state.progress.goals.filter { !it.claimed && defOf(it) != null }.take(ACTIVE_COUNT)
 
-    /** Catalog entries not yet in the goal list, in catalog order. */
+    /** A rank goal "buy N more ranks" is only offered while N more ranks still exist (never unreachable). */
+    private fun reachable(state: GameState, def: GoalDef): Boolean =
+        def.type != GoalTypes.RANK || (GoalTypes.counter(state, def.type) ?: 0L) + def.target <= RankConfig.MAX_RANK
+
+    /** Catalog entries not yet in the goal list (and still reachable), in catalog order. */
     private fun pending(state: GameState): List<GoalDef> {
         val known = state.progress.goals.map { it.id }.toSet()
-        return catalog.filter { it.id !in known }
+        return catalog.filter { it.id !in known && reachable(state, it) }
     }
 
     /** True when [ensureActive] would add goals. */

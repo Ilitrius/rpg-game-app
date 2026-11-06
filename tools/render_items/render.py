@@ -19,10 +19,11 @@ import items_jewelry  # noqa: E402
 import items_potions  # noqa: E402
 import items_armor2  # noqa: E402
 import items_gloves  # noqa: E402
+import badges  # noqa: E402
 import items_weapons  # noqa: E402
 
 BUILDERS = {}
-for _m in (_B1, items_weapons.BUILDERS, items_armor.BUILDERS, items_jewelry.BUILDERS, items_potions.BUILDERS, items_armor2.BUILDERS, items_gloves.BUILDERS):
+for _m in (_B1, items_weapons.BUILDERS, items_armor.BUILDERS, items_jewelry.BUILDERS, items_potions.BUILDERS, items_armor2.BUILDERS, items_gloves.BUILDERS, badges.BUILDERS):
     BUILDERS.update(_m)
 from sdf import Renderer, save_webp  # noqa: E402
 

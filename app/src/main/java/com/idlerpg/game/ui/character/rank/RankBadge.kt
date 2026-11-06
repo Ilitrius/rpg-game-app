@@ -1,8 +1,19 @@
 package com.idlerpg.game.ui.character.rank
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.platform.LocalContext
+import com.idlerpg.game.R
+import com.idlerpg.game.ui.equipment.ItemSprites
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -23,7 +34,7 @@ internal fun rankTones(rank: Int): Pair<Color, Color> = when {
     rank <= 0 -> Color(0xFF5B5B63) to Color(0xFF2C2C32)
     rank <= 3 -> Color(0xFFE0A877) to Color(0xFF7A4A22)
     rank <= 6 -> Color(0xFFEFF2F5) to Color(0xFF7C8793)
-    rank <= 9 -> Color(0xFFFFE08A) to Color(0xFFB07A12)
+    rank <= 10 -> Color(0xFFFFE08A) to Color(0xFFB07A12)
     else -> Color(0xFFC9A6FF) to Color(0xFF5A2FB0)
 }
 
@@ -33,7 +44,37 @@ internal fun rankTones(rank: Int): Pair<Color, Color> = when {
  */
 @Composable
 fun RankBadge(rank: Int, modifier: Modifier = Modifier, size: Dp = 56.dp) {
-    Canvas(modifier.size(size)) { drawRankBadge(rank.coerceIn(0, 10)) }
+    val r = rank.coerceIn(0, 15)
+    val res = badgeRes(r)
+    val resources = LocalContext.current.resources
+    var bitmap by remember(res) { mutableStateOf<ImageBitmap?>(ItemSprites.cached(res)) }
+    LaunchedEffect(res) { if (bitmap == null) bitmap = ItemSprites.load(resources, res) }
+    val img = bitmap
+    if (img != null) {
+        Image(img, contentDescription = null, modifier = modifier.size(size), filterQuality = FilterQuality.High)
+    } else {
+        Canvas(modifier.size(size)) { drawRankBadge(r) }
+    }
+}
+
+/** Raytraced badge of a rank (`tools/render_items/badges.py`). */
+private fun badgeRes(rank: Int): Int = when (rank) {
+    0 -> R.drawable.item_rank_badge_0
+    1 -> R.drawable.item_rank_badge_1
+    2 -> R.drawable.item_rank_badge_2
+    3 -> R.drawable.item_rank_badge_3
+    4 -> R.drawable.item_rank_badge_4
+    5 -> R.drawable.item_rank_badge_5
+    6 -> R.drawable.item_rank_badge_6
+    7 -> R.drawable.item_rank_badge_7
+    8 -> R.drawable.item_rank_badge_8
+    9 -> R.drawable.item_rank_badge_9
+    10 -> R.drawable.item_rank_badge_10
+    11 -> R.drawable.item_rank_badge_11
+    12 -> R.drawable.item_rank_badge_12
+    13 -> R.drawable.item_rank_badge_13
+    14 -> R.drawable.item_rank_badge_14
+    else -> R.drawable.item_rank_badge_15
 }
 
 private fun DrawScope.drawRankBadge(rank: Int) {
@@ -64,7 +105,7 @@ private fun DrawScope.drawRankBadge(rank: Int) {
         }
         drawPath(p, ink, style = Stroke(w * 0.055f, cap = StrokeCap.Round, join = StrokeJoin.Round))
     }
-    val stars = (rank - 5).coerceAtLeast(0)
+    val stars = (rank - 5).coerceIn(0, 5)
     for (i in 0 until stars) {
         val cx = w * (0.50f + (i - (stars - 1) / 2f) * 0.13f)
         star(Offset(cx, h * 0.20f), w * 0.055f, ink)

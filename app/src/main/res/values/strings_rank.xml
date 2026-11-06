@@ -34,4 +34,11 @@
     <string name="rank_name_8">Eroberer</string>
     <string name="rank_name_9">Legende</string>
     <string name="rank_name_10">Halbgott</string>
+    <string name="rank_name_11">Mythos I</string>
+    <string name="rank_name_12">Mythos II</string>
+    <string name="rank_name_13">Mythos III</string>
+    <string name="rank_name_14">Mythos IV</string>
+    <string name="rank_name_15">Mythos V</string>
+    <string name="rank_requires_level_rebirths">Ab Level %1$d und %2$d Wiedergeburten</string>
+    <string name="rank_rebirths_missing">Dir fehlen noch Wiedergeburten: %1$d (bisher %2$d).</string>
 </resources>

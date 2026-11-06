@@ -7,16 +7,22 @@ import kotlin.math.pow
 import kotlin.math.roundToLong
 
 /**
- * Hero ranks (Squire ... Demigod): bought with gold once the hero (or his best level) reached the rank's level.
+ * Hero ranks (Squire ... Demigod, then Mythos I-V): bought with gold once the hero (or his best level) reached the rank's level.
  * Every rank permanently raises damage/HP/speed; from rank 4 on also gold, every 2nd rank an inventory slot.
  * Ranks survive a rebirth (a permanent investment, like prestige).
  */
 object RankConfig {
-    /** Number of ranks; rank 0 = no rank yet. */
-    const val MAX_RANK = 10
+    /** Number of ranks (10 regular + 5 Mythos); rank 0 = no rank yet. */
+    const val MAX_RANK = 15
 
-    /** Hero level needed to buy rank `i + 1` (index `i`). */
-    val LEVELS: IntArray = intArrayOf(50, 100, 175, 250, 350, 450, 575, 700, 850, 999)
+    /** First Mythos rank: also needs rebirths ([MYTHOS_REBIRTHS]). */
+    const val FIRST_MYTHOS = 11
+
+    /** Hero level needed to buy rank `i + 1` (index `i`); the Mythos ranks all need the maximum level. */
+    val LEVELS: IntArray = intArrayOf(50, 100, 175, 250, 350, 450, 575, 700, 850, 999, 999, 999, 999, 999, 999)
+
+    /** Rebirths needed for Mythos I..V (ranks 11..15). */
+    val MYTHOS_REBIRTHS: IntArray = intArrayOf(1, 2, 4, 7, 10)
 
     const val DAMAGE_PER_RANK = 0.06
     const val HP_PER_RANK = 0.06
@@ -58,7 +64,7 @@ data class RankBonuses(
     }
 }
 
-enum class RankBuyResult { OK, MAX_RANK, LEVEL_TOO_LOW, NOT_ENOUGH_GOLD }
+enum class RankBuyResult { OK, MAX_RANK, LEVEL_TOO_LOW, REBIRTHS_TOO_LOW, NOT_ENOUGH_GOLD }
 
 object Ranks {
     /** Current rank, clamped into the valid range (tampered saves cannot exceed the catalog). */
@@ -69,6 +75,12 @@ object Ranks {
 
     /** Level needed for rank [rank] (1..MAX_RANK). */
     fun requiredLevel(rank: Int): Int = RankConfig.LEVELS[rank.coerceIn(1, RankConfig.MAX_RANK) - 1]
+
+    /** Rebirths needed for rank [rank] (0 for the regular ranks). */
+    fun requiredRebirths(rank: Int): Int {
+        val i = rank.coerceIn(1, RankConfig.MAX_RANK) - RankConfig.FIRST_MYTHOS
+        return if (i < 0) 0 else RankConfig.MYTHOS_REBIRTHS[i]
+    }
 
     /** Gold price of rank [rank] (1..MAX_RANK): [RankConfig.BASE_KILLS] x growth^(rank-1) kills at its reference zone. */
     fun price(rank: Int): Long = PRICES[rank.coerceIn(1, RankConfig.MAX_RANK) - 1]
@@ -88,6 +100,7 @@ object Ranks {
         val next = current + 1
         return when {
             heroLevel(state) < requiredLevel(next) -> RankBuyResult.LEVEL_TOO_LOW
+            state.prestige.rebirths < requiredRebirths(next) -> RankBuyResult.REBIRTHS_TOO_LOW
             state.gold < price(next) -> RankBuyResult.NOT_ENOUGH_GOLD
             else -> RankBuyResult.OK
         }

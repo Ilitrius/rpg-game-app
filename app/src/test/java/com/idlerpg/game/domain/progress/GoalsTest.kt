@@ -110,6 +110,27 @@ class GoalsTest {
     }
 
     @Test
+    fun rankGoalsFollowTheRankCounter() {
+        val s = GameState()
+        val goal = com.idlerpg.game.data.GoalState("rank_1", GoalTypes.RANK, 1, baseline = 0)
+        assertEquals(0L, Goals.progress(s, goal))
+        val ranked = s.copy(rank = com.idlerpg.game.data.RankState(1))
+        assertEquals(1L, Goals.progress(ranked, goal))
+        assertTrue(Goals.isComplete(ranked, goal))
+    }
+
+    @Test
+    fun rankGoalsAreNeverOfferedWhenUnreachable() {
+        // At Mythos IV only "+1 rank" can still be reached.
+        val s = GameState(rank = com.idlerpg.game.data.RankState(14))
+        val offered = Goals.ensureActive(s).progress.goals.map { it.id }
+        assertTrue(offered.none { it.startsWith("rank_") && it != "rank_1" })
+        // At the top there is none at all, and refilling terminates.
+        val max = GameState(rank = com.idlerpg.game.data.RankState(15))
+        assertTrue(Goals.ensureActive(max).progress.goals.none { it.type == GoalTypes.RANK })
+    }
+
+    @Test
     fun catalogCanBeExhaustedWithoutCrash() {
         var s = GameState()
         repeat(Goals.catalog.size + 5) {

@@ -50,6 +50,11 @@ internal fun rankNameRes(rank: Int): Int = when (rank.coerceIn(0, RankConfig.MAX
     8 -> R.string.rank_name_8
     9 -> R.string.rank_name_9
     10 -> R.string.rank_name_10
+    11 -> R.string.rank_name_11
+    12 -> R.string.rank_name_12
+    13 -> R.string.rank_name_13
+    14 -> R.string.rank_name_14
+    15 -> R.string.rank_name_15
     else -> R.string.rank_name_0
 }
 
@@ -92,7 +97,11 @@ fun RankCard(state: GameState) {
             } else {
                 Text(
                     stringResource(R.string.rank_next, stringResource(rankNameRes(next))) + " · " +
-                        stringResource(R.string.rank_requires_level, Ranks.requiredLevel(next)),
+                        if (Ranks.requiredRebirths(next) > 0) {
+                            stringResource(R.string.rank_requires_level_rebirths, Ranks.requiredLevel(next), Ranks.requiredRebirths(next))
+                        } else {
+                            stringResource(R.string.rank_requires_level, Ranks.requiredLevel(next))
+                        },
                     style = MaterialTheme.typography.titleSmall,
                 )
                 Text(
@@ -103,6 +112,10 @@ fun RankCard(state: GameState) {
                 when (result) {
                     RankBuyResult.LEVEL_TOO_LOW -> Text(
                         stringResource(R.string.rank_level_missing, Ranks.requiredLevel(next), Ranks.heroLevel(state)),
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error,
+                    )
+                    RankBuyResult.REBIRTHS_TOO_LOW -> Text(
+                        stringResource(R.string.rank_rebirths_missing, Ranks.requiredRebirths(next), state.prestige.rebirths),
                         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error,
                     )
                     RankBuyResult.NOT_ENOUGH_GOLD -> Text(

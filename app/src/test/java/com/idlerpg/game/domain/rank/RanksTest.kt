@@ -50,19 +50,24 @@ class RanksTest {
         val r4 = RankBonuses.of(4) // Knight: first gold bonus
         assertEquals(1.02, r4.gold, 1e-9)
         assertEquals(2, r4.extraSlots)
-        val top = RankBonuses.of(10)
-        assertEquals(1.6, top.damage, 1e-9)
-        assertEquals(1.14, top.gold, 1e-9)
-        assertEquals(5, top.extraSlots)
+        val demigod = RankBonuses.of(10)
+        assertEquals(1.6, demigod.damage, 1e-9)
+        assertEquals(1.14, demigod.gold, 1e-9)
+        assertEquals(5, demigod.extraSlots)
+        val top = RankBonuses.of(RankConfig.MAX_RANK) // Mythos V
+        assertEquals(1.9, top.damage, 1e-9)
+        assertEquals(1.24, top.gold, 1e-9)
+        assertEquals(7, top.extraSlots)
         assertEquals(top, RankBonuses.of(999)) // tampered values cannot exceed the catalog
     }
 
     @Test
     fun levelsAndPricesAscend() {
         for (r in 2..RankConfig.MAX_RANK) {
-            assertTrue(Ranks.requiredLevel(r) > Ranks.requiredLevel(r - 1))
+            assertTrue(Ranks.requiredLevel(r) >= Ranks.requiredLevel(r - 1))
             assertTrue("price of rank $r", Ranks.price(r) > Ranks.price(r - 1))
         }
+        assertEquals(999, Ranks.requiredLevel(10))
         assertEquals(999, Ranks.requiredLevel(RankConfig.MAX_RANK))
         assertTrue(Ranks.price(1) > 0)
     }
@@ -94,6 +99,21 @@ class RanksTest {
     fun bestLevelOpensTheGateAfterARebirth() {
         val s = hero(level = 1, gold = Ranks.price(1), best = 120)
         assertEquals(RankBuyResult.OK, Ranks.check(s))
+    }
+
+    @Test
+    fun mythosRanksNeedRebirthsOnTopOfLevelAndGold() {
+        val rich = hero(level = 999, gold = Long.MAX_VALUE, rank = 10)
+        assertEquals(RankBuyResult.REBIRTHS_TOO_LOW, Ranks.check(rich))
+        assertEquals(0, Ranks.requiredRebirths(10))
+        assertEquals(1, Ranks.requiredRebirths(11))
+        assertEquals(10, Ranks.requiredRebirths(15))
+        val reborn = rich.copy(prestige = rich.prestige.copy(rebirths = 1))
+        assertEquals(RankBuyResult.OK, Ranks.check(reborn))
+        val bought = Ranks.buy(reborn)
+        assertEquals(11, bought.rank.rank)
+        // Mythos II needs two rebirths
+        assertEquals(RankBuyResult.REBIRTHS_TOO_LOW, Ranks.check(bought))
     }
 
     @Test

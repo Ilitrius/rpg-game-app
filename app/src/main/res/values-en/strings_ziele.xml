@@ -33,6 +33,10 @@
         <item quantity="one">Unlock %1$d new area</item>
         <item quantity="other">Unlock %1$d new areas</item>
     </plurals>
+    <plurals name="goals_rank">
+        <item quantity="one">Buy %1$d rank</item>
+        <item quantity="other">Buy %1$d ranks</item>
+    </plurals>
     <!-- Import (Options) -->
     <string name="options_field_daily_last_claim">time of last daily reward</string>
     <string name="options_field_daily_streak">daily reward streak</string>
