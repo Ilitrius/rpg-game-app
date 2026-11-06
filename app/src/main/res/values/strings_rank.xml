@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rank_title">Rang</string>
+    <string name="rank_subtitle">Kaufe dir Ränge mit Gold: jeder Rang macht deinen Helden dauerhaft stärker, auch nach einer Wiedergeburt.</string>
+    <string name="rank_current">Aktueller Rang: %1$s</string>
+    <string name="rank_none">Noch kein Rang</string>
+    <string name="rank_next">Nächster Rang: %1$s</string>
+    <string name="rank_requires_level">Ab Level %1$d</string>
+    <string name="rank_buy_price">Kaufen (%1$s Gold)</string>
+    <string name="rank_level_missing">Dir fehlt noch Level %1$d (bestes Level: %2$d).</string>
+    <string name="rank_gold_missing">Dir fehlen noch %1$s Gold.</string>
+    <string name="rank_max">Höchster Rang erreicht.</string>
+    <string name="rank_bonus_now">Deine Boni: %1$s</string>
+    <string name="rank_bonus_next">Mit dem nächsten Rang: %1$s</string>
+    <string name="rank_bonus_none">keine</string>
+    <string name="rank_bonus_damage">Schaden +%1$d%%</string>
+    <string name="rank_bonus_hp">Leben +%1$d%%</string>
+    <string name="rank_bonus_speed">Tempo +%1$d%%</string>
+    <string name="rank_bonus_gold">Gold +%1$d%%</string>
+    <string name="rank_bonus_slots">Inventar +%1$d</string>
+    <string name="rank_dialog_title">%1$s kaufen?</string>
+    <string name="rank_dialog_text">Der Rang kostet %1$s Gold und bleibt dauerhaft bestehen.</string>
+    <string name="rank_dialog_confirm">Kaufen</string>
+    <string name="rank_dialog_cancel">Abbrechen</string>
+    <string name="rank_bought">Neuer Rang: %1$s</string>
+    <string name="rank_name_0">Rekrut</string>
+    <string name="rank_name_1">Knappe</string>
+    <string name="rank_name_2">Waffenknecht</string>
+    <string name="rank_name_3">Kämpe</string>
+    <string name="rank_name_4">Ritter</string>
+    <string name="rank_name_5">Hauptmann</string>
+    <string name="rank_name_6">Kommandant</string>
+    <string name="rank_name_7">Kriegsherr</string>
+    <string name="rank_name_8">Eroberer</string>
+    <string name="rank_name_9">Legende</string>
+    <string name="rank_name_10">Halbgott</string>
+</resources>

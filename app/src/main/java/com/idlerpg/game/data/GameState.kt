@@ -28,6 +28,8 @@ data class GameState(
     val inventoryExtraSlots: Int = 0,
     /** Rebirth progress; survives a rebirth reset (domain/prestige). */
     val prestige: PrestigeState = PrestigeState(),
+    /** Hero rank bought with gold (domain/rank); survives a rebirth. */
+    val rank: RankState = RankState(),
 ) {
     companion object {
         const val SCHEMA_VERSION = 1
@@ -228,4 +230,10 @@ data class PrestigeState(
     val goldTalentLevels: Map<String, Int> = emptyMap(),
     val bestZoneOrder: Int = 0,
     val bestLevel: Int = 0,
+)
+
+/** Hero rank (0 = none .. 10), see domain/rank. */
+@Serializable
+data class RankState(
+    val rank: Int = 0,
 )

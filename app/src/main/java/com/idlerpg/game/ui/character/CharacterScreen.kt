@@ -111,6 +111,7 @@ fun CharacterScreen() {
             scope.launch { repository.update { Progression.spendPoint(it, type) } }
         }
         DerivedCard(combat)
+        com.idlerpg.game.ui.character.rank.RankCard(current)
         com.idlerpg.game.ui.character.prestige.PrestigeCard(current)
         GoalsCard(current)
         TapCard(combat, clickBonus = TapStats.clickBonus(current))

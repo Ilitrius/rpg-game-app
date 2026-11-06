@@ -16,6 +16,7 @@ import com.idlerpg.game.domain.equipment.Enchanting
 import com.idlerpg.game.domain.equipment.Inventory
 import com.idlerpg.game.domain.equipment.ItemGenerator
 import com.idlerpg.game.domain.prestige.Talents
+import com.idlerpg.game.domain.rank.RankConfig
 import com.idlerpg.game.domain.progress.Goals
 import com.idlerpg.game.domain.character.Progression
 import com.idlerpg.game.domain.world.Zones
@@ -77,6 +78,7 @@ enum class SaveField(val key: String) {
     GOLD_TALENT_LEVEL("goldTalentLevels"),
     BEST_ZONE_ORDER("bestZoneOrder"),
     BEST_LEVEL("bestLevel"),
+    RANK("rank"),
 }
 
 /** Where a rejected value sits in the save, so the error message can point the player to it. */
@@ -279,6 +281,10 @@ object SaveTransfer {
                 SaveField.INVENTORY_EXTRA_SLOTS, SaveLocation.Root, 0, GameState.MAX_EXTRA_SLOTS.toLong(),
                 state.inventoryExtraSlots.toLong(),
             )
+        }
+
+        if (state.rank.rank !in 0..RankConfig.MAX_RANK) {
+            return SaveError.OutOfRange(SaveField.RANK, SaveLocation.Root, 0, RankConfig.MAX_RANK.toLong(), state.rank.rank.toLong())
         }
 
         // Equipped items in slot order (deterministic, independent of the key order in the file).

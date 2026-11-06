@@ -864,6 +864,7 @@ private fun fieldLabel(context: Context, field: SaveField): String = context.get
         SaveField.GOLD_TALENT_LEVEL -> R.string.options_field_gold_talent_level
         SaveField.BEST_ZONE_ORDER -> R.string.options_field_best_zone
         SaveField.BEST_LEVEL -> R.string.options_field_best_level
+        SaveField.RANK -> R.string.options_field_rank
     },
 )
 

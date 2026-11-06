@@ -8,6 +8,7 @@ import com.idlerpg.game.data.PrestigeState
  * Neutral (no talents) = all multipliers 1.0, additive parts 0. Unknown talent ids and levels above the
  * maximum are ignored/clamped, so tampered saves cannot exceed the catalog.
  *
+ * [of] (GameState) also folds in the hero rank bonuses.
  * Wiring status: [damage]/[speed]/[hp]/[critBonus] in `CombatStats.of`, [click] via `TapStats.clickBonus`.
  * [xp]/[gold]/[drop]/[extraSlots]/[restFactor]/[comboWindowMillis] are API for spielwelt/ausruestung.
  */
@@ -38,7 +39,19 @@ data class PrestigeBonuses(
     companion object {
         val NEUTRAL = PrestigeBonuses()
 
-        fun of(state: GameState): PrestigeBonuses = of(state.prestige)
+        /** Talent bonuses combined with the permanent hero-rank bonuses (domain/rank): one place for all permanent boni. */
+        fun of(state: GameState): PrestigeBonuses {
+            val talents = of(state.prestige)
+            val r = com.idlerpg.game.domain.rank.RankBonuses.of(state)
+            if (r == com.idlerpg.game.domain.rank.RankBonuses.NEUTRAL) return talents
+            return talents.copy(
+                damage = talents.damage * r.damage,
+                hp = talents.hp * r.hp,
+                speed = talents.speed * r.speed,
+                gold = talents.gold * r.gold,
+                extraSlots = talents.extraSlots + r.extraSlots,
+            )
+        }
 
         /** Extra levels the next run starts with (+2 per talent level). */
         fun startLevelBonus(p: PrestigeState): Int =

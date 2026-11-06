@@ -47,9 +47,14 @@ object DailyReward {
     /** Average gold of one regular kill in the hero's current zone at a fitting level (>= 1). */
     fun goldPerKill(state: GameState): Double {
         val zone = Zones.byId(state.world.currentZoneId)
-        val level = state.character.level.coerceIn(zone.minLevel, zone.maxLevel)
+        return goldPerKillAt(zone, state.character.level)
+    }
+
+    /** Average gold of one regular kill in [zone] at hero [level] (clamped into the zone's level range, >= 1). */
+    fun goldPerKillAt(zone: com.idlerpg.game.domain.world.Zone, level: Int): Double {
+        val lv = level.coerceIn(zone.minLevel, zone.maxLevel)
         val total = zone.monsters.sumOf { it.spawnWeight }.coerceAtLeast(1)
-        val avg = zone.monsters.sumOf { MonsterScaling.stats(it, zone, level).gold.toDouble() * it.spawnWeight } / total
+        val avg = zone.monsters.sumOf { MonsterScaling.stats(it, zone, lv).gold.toDouble() * it.spawnWeight } / total
         return avg.coerceAtLeast(1.0)
     }
 

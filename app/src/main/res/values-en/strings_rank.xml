@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rank_title">Rank</string>
+    <string name="rank_subtitle">Buy ranks with gold: every rank makes your hero permanently stronger, even after a rebirth.</string>
+    <string name="rank_current">Current rank: %1$s</string>
+    <string name="rank_none">No rank yet</string>
+    <string name="rank_next">Next rank: %1$s</string>
+    <string name="rank_requires_level">From level %1$d</string>
+    <string name="rank_buy_price">Buy (%1$s gold)</string>
+    <string name="rank_level_missing">You still need level %1$d (best level: %2$d).</string>
+    <string name="rank_gold_missing">You still need %1$s gold.</string>
+    <string name="rank_max">Highest rank reached.</string>
+    <string name="rank_bonus_now">Your bonuses: %1$s</string>
+    <string name="rank_bonus_next">With the next rank: %1$s</string>
+    <string name="rank_bonus_none">none</string>
+    <string name="rank_bonus_damage">Damage +%1$d%%</string>
+    <string name="rank_bonus_hp">Health +%1$d%%</string>
+    <string name="rank_bonus_speed">Speed +%1$d%%</string>
+    <string name="rank_bonus_gold">Gold +%1$d%%</string>
+    <string name="rank_bonus_slots">Inventory +%1$d</string>
+    <string name="rank_dialog_title">Buy %1$s?</string>
+    <string name="rank_dialog_text">The rank costs %1$s gold and lasts permanently.</string>
+    <string name="rank_dialog_confirm">Buy</string>
+    <string name="rank_dialog_cancel">Cancel</string>
+    <string name="rank_bought">New rank: %1$s</string>
+    <string name="rank_name_0">Recruit</string>
+    <string name="rank_name_1">Squire</string>
+    <string name="rank_name_2">Man-at-Arms</string>
+    <string name="rank_name_3">Champion</string>
+    <string name="rank_name_4">Knight</string>
+    <string name="rank_name_5">Captain</string>
+    <string name="rank_name_6">Commander</string>
+    <string name="rank_name_7">Warlord</string>
+    <string name="rank_name_8">Conqueror</string>
+    <string name="rank_name_9">Legend</string>
+    <string name="rank_name_10">Demigod</string>
+</resources>
