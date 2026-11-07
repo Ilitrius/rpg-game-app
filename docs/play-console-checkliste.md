@@ -26,7 +26,7 @@ Quelle der Ablehnung: Programmrichtlinien + Play-Console-Anforderungen. Genauen 
 ## Store-Eintrag
 - Titel max. 30 Zeichen, keine Keyword-Listen, keine Wörter wie "Beste", "#1", "Gratis".
 - Beschreibung ohne Vergleiche/Markennamen anderer Spiele, keine Fake-Bewertungen.
-- Screenshots (in `design/screens`) zeigen echte App-Ansichten – ok. Feature-Grafik ohne irreführenden Text.
+- Screenshots (in `design/screens/store-2026-11`, 8 Phone-Bilder 1080x1920, neue Grafik, 2026-11-07 im Standardeintrag als Entwurf gespeichert; vorher lagen dort nur Symbol und Feature-Grafik als Platzhalter) zeigen echte App-Ansichten – ok. Zum Einreichen in der Console unter Veröffentlichungen – Übersicht „Änderungen zur Überprüfung senden“. Feature-Grafik ohne irreführenden Text.
 
 ## Neues privates Entwicklerkonto
 - Closed Test mit mindestens 12 Testern, 14 Tage durchgehend, dann "Produktionszugang beantragen".
