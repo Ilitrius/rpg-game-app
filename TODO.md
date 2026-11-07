@@ -26,7 +26,7 @@ Quelle: bezahlter Testanbieter, Reports `rp_feedback_de.pdf` + `rp_production_de
 - [x] **"App teilen"** (rc16, wie oben) in Optionen. Analyse: `Intent.ACTION_SEND` (`text/plain`) mit Store-Link, Chooser; keine Berechtigung. Optional "Link kopieren". Ermunternder Hinweis nach Meilenstein nur sparsam, um nicht mit Spendenbitte zu konkurrieren. Aufwand: klein.
 - [x] **ASO (Store-Beschreibung)**: Text DE+EN in `docs/store-listing.md` (in die Play Console einfügen).
   Analyse: nur Play-Console-Text, kein Code. Keywords natürlich einbauen (Idle RPG, Idle-Rollenspiel, Ich-Perspektive, Beute, Ausrüstung, offline), ausführlicher auf Gameplay/Charakter/Alleinstellung eingehen. Regeln aus `docs/play-console-checkliste.md` beachten: keine Keyword-Listen, keine Wörter wie "Beste"/"#1"/"Gratis", keine Vergleiche mit anderen Spielen. DE + EN.
-- [ ] rc18 (signiertes Bundle gebaut, `Idle-RPG-0.1.0-rc18-release.aab`) auf Gerät prüfen und in den Closed Test hochladen. Dann Fragebogen-Antworten gegenprüfen, `docs/play-console-checkliste.md` + `PLAN.md` (Anforderungstabelle) nachziehen.
+- [x] (überholt: inzwischen rc25, siehe unten) rc18 (signiertes Bundle gebaut, `Idle-RPG-0.1.0-rc18-release.aab`) auf Gerät prüfen und in den Closed Test hochladen. Dann Fragebogen-Antworten gegenprüfen, `docs/play-console-checkliste.md` + `PLAN.md` (Anforderungstabelle) nachziehen.
 
 **Zusätzliche Empfehlungen des Reports (unverbindlich, Einordnung):**
 - [x] Feedback-Kanal (rc19): Optionen → Bewerten & teilen → „Problem melden“ (`AppLinks.reportProblem`, Mail-Entwurf an rene.puf@gmail.com mit Version/Android/Gerät, keine Berechtigung; auf Gerät prüfen).
@@ -36,13 +36,24 @@ Quelle: bezahlter Testanbieter, Reports `rp_feedback_de.pdf` + `rp_production_de
 
 - [x] **Tutorial anpassen und erweitern** (umgesetzt 2026-11-03 für rc21: 9 Schritte inkl. Ziele, Wiedergeburt, Ausrüstung, Shop/Elixiere, Auto-Boss/Endlos; auf Gerät prüfen) (Wunsch des Nutzers, 2026-11-03): `ui/tutorial` (6 Schritte) an den aktuellen Stand anpassen und um neue Systeme erweitern (z. B. Endlos-Stufen, Wiedergeburt/Seelen, Buffs/Elixiere, Verzaubern, Ziele/Tagesbelohnung, Auto-Boss, Schnellverkauf, "Beste ausrüsten", Problem melden); Texte DE+EN in `strings_tutorial.xml`, Hervorhebungen auf Gerät prüfen.
 
+## Offen: Play Console / Release (Stand 2026-11-07)
+- [ ] rc25 (`Idle-RPG-0.1.0-rc25-release.aab`, enthält alles seit rc20) in die Play Console hochladen bzw. bestätigen (Nutzer); Play-Text: `docs/play-release-notes-rc25.md`.
+- [ ] **Store-Eintrag zur Überprüfung senden** (Console → Veröffentlichungen – Übersicht): Entwurf mit neuen Screenshots (Telefon, 7"-, 10"-Tablet, je 8) und neuer Feature-Grafik liegt seit 2026-11-07 vor (`design/screens/store-2026-11`, `design/feature-graphic-2026-11-1024x500.png`).
+- [ ] **Store-Beschreibung aktualisieren**: neuer Text (Ränge, Elixire, realistische Grafik, optionale Erfolge) steht in `docs/store-listing.md`, noch nicht in der Console.
+- [ ] **Datenschutz prüfen (wichtig, vor Veröffentlichung der Erfolge):** Play-Games-Anmeldung (optional) überträgt die Konto-ID an Google und braucht Internet. `docs/index.html` (GitHub Pages), In-App-Datenschutz-Kurzfassung und Datensicherheitsformular erwähnen das noch nicht; Aussagen „kein Konto“/„keine Internetverbindung nötig“ in Store-Text und Erklärung angleichen (Opt-in bleibt, Spiel ohne Anmeldung voll nutzbar).
+- [ ] **Play Games veröffentlichen:** Projekt, Android-Anmeldedaten (SHA-1 des Release-Schlüssels bzw. Play-App-Signing prüfen) und die 10 Erfolge stehen auf Entwurf; Symbole (512x512 PNG) fehlen, Punkte der 4 neuen Erfolge (je 5) nach Wunsch anpassen. Danach Bestenliste/Cloud-Spielstand (siehe unten) entscheiden.
+- [ ] **Gerätetest rc25:** Play-Games-Anmeldung und Erfolge (nur mit Tester-Konto), Mythos-Ränge und Rang-Ziele (Mythos erst nach Wiedergeburten erreichbar), Handschuhe/Faust im Charakter-Tab, Buff-Flaschen im HUD, Rang-Karte.
+- [ ] Gebirge: Der Steingolem wirkt im Kampf ausgebleicht/halbtransparent (Treffer-Blitz oder Material?), auf Emulator-Bildern 2026-11-07 aufgefallen, prüfen und ggf. Sprite/Treffer-Effekt korrigieren.
+- [ ] Rang-System: Balance auf dem Gerät beobachten (Bonus je Rang +6 % Schaden/Leben, Preise ca. 0,28 Mio bis ~2 Mrd Gold); Rang-Ziele (+1/2/3/5/8 Ränge) und Mythos-Wiedergeburtsschwellen (1/2/4/7/10) bei Bedarf anpassen.
+- [ ] Optional: Rang-Anzeige im HUD (Abzeichen neben dem Heldennamen), Hinweispunkt, wenn ein Rang kaufbar ist.
+
 ## Offen: Lint
 - [x] `lintDebug` grün (rc16): `androidx.fragment:fragment-ktx` 1.8.5 ergänzt (Play app-update zog altes Fragment, `InAppUpdater` braucht >= 1.3.0 für die ActivityResult-API); `app_name` als `translatable="false"` (Markenname, gleich in DE/EN).
 - [x] rc16: Sprach-Split im App Bundle abgeschaltet (`bundle.language.enableSplit = false`), sonst fehlt bei Play-Installationen die zweite Sprache für die Sprachwahl in den Optionen (Lint `AppBundleLocaleChanges`).
 
 ## Später geplant (Ideen, noch nicht umgesetzt)
 
-- [x] **Ränge für den Helden** (umgesetzt 2026-11-06, noch kein Release; Mythos-Ränge I-V, Rang-Ziele und Raytracing-Abzeichen ebenfalls umgesetzt; Release Notes bei rc24). Ursprünglicher Entwurf (Wunsch des Nutzers): Ab einem Mindestlevel kann der Held einen Rang kaufen, teuer (Gold), jeder Rang erhöht die Stats. Vorschlag (noch nicht entschieden): 10 Ränge mit Level-Schwelle, danach Endlos-Sterne.
+- [x] **Ränge für den Helden** (umgesetzt 2026-11-06 inkl. Mythos-Ränge I-V, Rang-Ziele und Raytracing-Abzeichen; in rc24/rc25 enthalten, rc24 vom Nutzer hochgeladen; auf Gerät prüfen). Ursprünglicher Entwurf (Wunsch des Nutzers): Ab einem Mindestlevel kann der Held einen Rang kaufen, teuer (Gold), jeder Rang erhöht die Stats. Vorschlag (noch nicht entschieden): 10 Ränge mit Level-Schwelle, danach Endlos-Sterne.
   - Ränge (Level-Schwelle): Knappe (50), Waffenknecht (100), Kämpe (175), Ritter (250), Hauptmann (350), Kommandant (450), Kriegsherr (575), Held (700), Legende (850), Halbgott (999); danach „Mythos I, II, …“ (je +1 Stern, Preis steigt weiter).
   - Bonus je Rang: +6 % auf alle Grundwerte (Stärke/Geschick/Vitalität/Glück, multiplikativ in `CombatStats.of`), dazu ab Ritter je ein Extra (z. B. +1 % Krit, +5 % Gold, +1 Inventarplatz).
   - Preis: ~2-3 h Gold-Einkommen der aktuellen Zone bei Erreichen der Schwelle (fester Katalogpreis, steigt pro Rang exponentiell); optional zusätzlich Boss-Marken als zweite Währung.

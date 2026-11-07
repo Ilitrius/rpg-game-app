@@ -1,6 +1,6 @@
-# Play-Store-Eintrag (ASO), Stand rc16
+# Play-Store-Eintrag (ASO), Stand rc25 (Text aktualisiert 2026-11-07, noch nicht in der Console)
 
-**In der Play Console eingetragen: 2026-11-02.** Bei Funktionsänderungen (z. B. Tutorial) hier und in der Console nachziehen.
+**In der Play Console eingetragen: 2026-11-02 (Text rc16). Die Beschreibungen unten sind auf rc25 aktualisiert, aber noch NICHT in der Console: dort einfügen, wenn rc25 live ist.** Bei Funktionsänderungen (z. B. Tutorial) hier und in der Console nachziehen.
 
 Regeln: Titel max. 30 Zeichen, Kurzbeschreibung max. 80, Beschreibung max. 4000. Keine Keyword-Listen, keine Wörter wie „Beste“, „#1“, „Gratis“ in Titel/Kurzbeschreibung, keine Vergleiche mit anderen Spielen. Nur beschreiben, was im Build wirklich drin ist. Tutorial ist ab rc16 drin: Zeile unten erst nach Veröffentlichung von rc16 in der Console ergänzen.
 
@@ -31,7 +31,10 @@ BEUTE UND AUSRÜSTUNG
 Monster lassen Gold und Ausrüstung fallen. Gegenstände gibt es in fünf Seltenheitsstufen, von gewöhnlich bis legendär. Rüste die besten Stücke aus, vergleiche Werte direkt im Inventar und verkaufe, was du nicht brauchst, einzeln oder auf einen Schlag. Dein Inventar fasst 40 Gegenstände. Ist es voll, wird überschüssige Beute automatisch zu Gold gemacht.
 
 DER SHOP
-Gib dein Gold für neue Waffen und Rüstungen aus. Das Sortiment wechselt regelmäßig und wächst mit deinem Helden. Du kannst es auch gegen Gold neu auffüllen, wenn du auf der Suche nach einem Upgrade bist.
+Gib dein Gold für neue Waffen und Rüstungen aus. Das Sortiment wechselt regelmäßig und wächst mit deinem Helden. Du kannst es auch gegen Gold neu auffüllen, wenn du auf der Suche nach einem Upgrade bist. Elixiere geben dir für kurze Zeit mehr Schaden, Erfahrung, Gold oder Beute.
+
+RÄNGE UND WIEDERGEBURT
+Kaufe dir mit Gold Ränge, vom Knappen bis zu Mythos V. Jeder Rang macht deinen Helden dauerhaft stärker. Am Ende eines Laufs kannst du per Wiedergeburt von vorn beginnen und behältst dauerhafte Boni.
 
 ZIELE, TAGESBELOHNUNG UND STATISTIKEN
 Erfülle Ziele für Bonus-Gold, hol dir jeden Tag deine Belohnung ab und baue eine Serie auf. In den Statistiken siehst du deinen härtesten Treffer, dein verdientes Gold und deine Spielzeit.
@@ -43,19 +46,23 @@ SPIELSTAND SICHERN
 Exportiere deinen Spielstand als Datei und importiere ihn wieder, zum Beispiel beim Gerätewechsel.
 
 GRAFIK UND TON
-Hochauflösende Vektorgrafik für scharfe Darstellung auch auf modernen Displays, dazu Soundeffekte mit einstellbarer Lautstärke. Spielbar auf Deutsch und Englisch.
+Realistische, hochauflösende Grafik: Monster, Landschaften, Waffen und Rüstungen sind aufwendig gerendert und bleiben auch auf modernen Displays scharf. Dazu Soundeffekte mit einstellbarer Lautstärke. Spielbar auf Deutsch und Englisch.
+
+ERFOLGE (OPTIONAL)
+Du kannst dich bei Google Play Spiele anmelden und Erfolge freischalten. Das Spiel funktioniert auch ohne Anmeldung vollständig.
 
 DATENSCHUTZ
 • Dein Spielstand bleibt auf deinem Gerät
-• Kein Konto, keine Werbung, kein Tracking
-• Keine Internetverbindung nötig
+• Kein Konto nötig, keine Werbung, kein Tracking
+• Ohne Anmeldung keine Internetverbindung nötig
 
 HIGHLIGHTS
 • Idle-Kämpfe in Ich-Perspektive, mit Tippen und Combos
 • Freie Verteilung der Stat-Punkte
 • 100 Gebiete mit eigenen Monstern und Bossen
 • Beute in fünf Seltenheitsstufen
-• Shop mit wechselndem Sortiment
+• Shop mit wechselndem Sortiment und Elixieren
+• Ränge und Wiedergeburt mit dauerhaften Boni
 • Ziele, Tagesbelohnung und Statistiken
 • Offline-Fortschritt bis zu 8 Stunden
 • Spielstand-Export und -Import
@@ -90,7 +97,10 @@ LOOT AND GEAR
 Monsters drop gold and equipment. Items come in five rarities, from common to legendary. Equip the best pieces, compare stats right in the inventory and sell what you don't need, one by one or all at once. Your inventory holds 40 items. When it's full, extra loot is turned into gold automatically.
 
 THE SHOP
-Spend your gold on new weapons and armor. The stock changes regularly and grows with your hero. You can also restock it for gold when you're hunting for an upgrade.
+Spend your gold on new weapons and armor. The stock changes regularly and grows with your hero. You can also restock it for gold when you're hunting for an upgrade. Elixirs give you more damage, experience, gold or loot for a short time.
+
+RANKS AND REBIRTH
+Buy ranks with gold, from Squire up to Mythos V. Every rank makes your hero permanently stronger. At the end of a run you can start over with a rebirth and keep permanent bonuses.
 
 GOALS, DAILY REWARD AND STATISTICS
 Complete goals for bonus gold, claim your daily reward and build a streak. Statistics show your biggest hit, the gold you've earned and your play time.
@@ -102,19 +112,23 @@ BACK UP YOUR SAVE
 Export your save as a file and import it again, for example when you switch devices.
 
 GRAPHICS AND SOUND
-High-resolution vector graphics that stay sharp on modern displays, plus sound effects with adjustable volume. Playable in English and German.
+Realistic, high-resolution graphics: monsters, landscapes, weapons and armor are carefully rendered and stay sharp on modern displays. Plus sound effects with adjustable volume. Playable in English and German.
+
+ACHIEVEMENTS (OPTIONAL)
+You can sign in to Google Play Games and unlock achievements. The game works fully without signing in.
 
 PRIVACY
 • Your save stays on your device
-• No account, no ads, no tracking
-• No internet connection required
+• No account needed, no ads, no tracking
+• No internet connection needed unless you sign in
 
 HIGHLIGHTS
 • First-person idle combat with taps and combos
 • Free stat point distribution
 • 100 zones with their own monsters and bosses
 • Loot in five rarities
-• Shop with rotating stock
+• Shop with rotating stock and elixirs
+• Ranks and rebirth with permanent bonuses
 • Goals, daily reward and statistics
 • Offline progress up to 8 hours
 • Save export and import
@@ -132,3 +146,7 @@ Start now, and your hero sets out on their journey.
 - Fakten gegen den hochgeladenen Build: 100 Zonen, Auto-Boss, Combo, Ziele/Tagesbelohnung/Statistiken, Sound, Sprachwahl (alle seit rc9+ im Code).
 - „Keine Internetverbindung nötig“: stimmt (kein INTERNET-Recht); Update-Hinweis und Spenden-/Datenschutz-Link laufen über Play-Dienste bzw. Browser.
 - Datensicherheitsformular und Datenschutzerklärung müssen dazu passen (tun sie, Stand rc16).
+
+## Stand rc25 (2026-11-07)
+- Neu im Text: Elixiere, Ränge/Wiedergeburt, realistische Grafik (statt „Vektorgrafik“), optionale Erfolge über Google Play Spiele, angepasste Datenschutz-Zeilen. Zeichenlänge der Beschreibungen vor dem Einfügen in der Console prüfen (max. 4000).
+- **Vor dem Einfügen klären:** Die Datenschutzzeilen („Kein Konto nötig“, „Ohne Anmeldung keine Internetverbindung nötig“) stimmen nur, wenn Datenschutzerklärung (`docs/index.html`) und Datensicherheitsformular die optionale Play-Games-Anmeldung (Konto-ID geht an Google) nennen. Siehe TODO.md.
