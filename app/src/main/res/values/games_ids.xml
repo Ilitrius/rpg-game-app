@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Play Console > Spiel > Play Games Services > Konfiguration: numerische Projekt-ID eintragen. -->
-    <string name="game_services_project_id" translatable="false">000000000000</string>
+    <!-- Play Console > Spiel > Play Games Services > Konfiguration: numerische Projekt-ID (Stand 2026-11-07 eingetragen). -->
+    <string name="game_services_project_id" translatable="false">299703633283</string>
 
-    <!-- Erfolgs-IDs aus der Play Console (Erfolge). Leer = noch nicht angelegt, wird übersprungen. -->
-    <string name="achievement_kills_100" translatable="false"></string>
-    <string name="achievement_kills_1000" translatable="false"></string>
-    <string name="achievement_kills_10000" translatable="false"></string>
-    <string name="achievement_level_10" translatable="false"></string>
-    <string name="achievement_level_50" translatable="false"></string>
-    <string name="achievement_level_100" translatable="false"></string>
+    <!-- Erfolgs-IDs aus der Play Console (Erfolge). Leer = noch nicht angelegt, wird übersprungen (Stand 2026-11-07: boss_first, boss_10, zones_10, gold_1m fehlen noch in der Console). -->
+    <string name="achievement_kills_100" translatable="false">CgkIg4vqvdwIEAIQAQ</string>
+    <string name="achievement_kills_1000" translatable="false">CgkIg4vqvdwIEAIQAg</string>
+    <string name="achievement_kills_10000" translatable="false">CgkIg4vqvdwIEAIQAw</string>
+    <string name="achievement_level_10" translatable="false">CgkIg4vqvdwIEAIQBA</string>
+    <string name="achievement_level_50" translatable="false">CgkIg4vqvdwIEAIQBQ</string>
+    <string name="achievement_level_100" translatable="false">CgkIg4vqvdwIEAIQBg</string>
     <string name="achievement_boss_first" translatable="false"></string>
     <string name="achievement_boss_10" translatable="false"></string>
     <string name="achievement_zones_10" translatable="false"></string>
