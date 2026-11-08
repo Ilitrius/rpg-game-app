@@ -53,8 +53,8 @@ Du kannst dich bei Google Play Spiele anmelden und Erfolge freischalten. Das Spi
 
 DATENSCHUTZ
 • Dein Spielstand bleibt auf deinem Gerät
-• Kein Konto nötig, keine Werbung, kein Tracking
-• Ohne Anmeldung keine Internetverbindung nötig
+• Kein eigenes Konto nötig, keine Werbung, kein Tracking
+• Ohne Anmeldung bei Google Play Spiele überträgt die App nichts und braucht kein Internet
 
 HIGHLIGHTS
 • Idle-Kämpfe in Ich-Perspektive, mit Tippen und Combos
@@ -119,8 +119,8 @@ You can sign in to Google Play Games and unlock achievements. The game works ful
 
 PRIVACY
 • Your save stays on your device
-• No account needed, no ads, no tracking
-• No internet connection needed unless you sign in
+• No account of your own needed, no ads, no tracking
+• Without signing in to Google Play Games the app transmits nothing and needs no internet
 
 HIGHLIGHTS
 • First-person idle combat with taps and combos
@@ -149,4 +149,4 @@ Start now, and your hero sets out on their journey.
 
 ## Stand rc25 (2026-11-07)
 - Neu im Text: Elixiere, Ränge/Wiedergeburt, realistische Grafik (statt „Vektorgrafik“), optionale Erfolge über Google Play Spiele, angepasste Datenschutz-Zeilen. Zeichenlänge der Beschreibungen vor dem Einfügen in der Console prüfen (max. 4000).
-- **Vor dem Einfügen klären:** Die Datenschutzzeilen („Kein Konto nötig“, „Ohne Anmeldung keine Internetverbindung nötig“) stimmen nur, wenn Datenschutzerklärung (`docs/index.html`) und Datensicherheitsformular die optionale Play-Games-Anmeldung (Konto-ID geht an Google) nennen. Siehe TODO.md.
+- Datenschutzzeilen angepasst (2026-11-08): Datenschutzerklärung (`docs/index.html`) und In-App-Kurzfassung nennen die optionale Play-Games-Anmeldung (Spieler-Kennung, Profil und Erfolge gehen an Google). Datensicherheitsformular in der Console: siehe `docs/play-console-checkliste.md`.
