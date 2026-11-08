@@ -97,7 +97,7 @@ object MonsterPainters {
                 }
                 if (flash > 0f) {
                     drawRect(
-                        Color(0xFFFFF6EE).copy(alpha = (flash * 0.8f).coerceIn(0f, 1f)),
+                        Color(0xFFFFF6EE).copy(alpha = (flash * 0.55f).coerceIn(0f, 1f)),
                         topLeft = bounds.topLeft, size = bounds.size, blendMode = BlendMode.SrcAtop,
                     )
                 }

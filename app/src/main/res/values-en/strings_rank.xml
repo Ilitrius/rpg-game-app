@@ -41,4 +41,5 @@
     <string name="rank_name_15">Mythos V</string>
     <string name="rank_requires_level_rebirths">From level %1$d and %2$d rebirths</string>
     <string name="rank_rebirths_missing">You still need rebirths: %1$d (so far: %2$d).</string>
+    <string name="rank_locked_endlevel">The rank system is only active from the end level %1$d (best level: %2$d). Ranks you already bought take effect then.</string>
 </resources>

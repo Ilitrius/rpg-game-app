@@ -4,6 +4,7 @@ import com.idlerpg.game.data.GameState
 import com.idlerpg.game.data.GoalState
 import kotlin.math.roundToLong
 import com.idlerpg.game.domain.rank.RankConfig
+import com.idlerpg.game.domain.rank.Ranks
 import com.idlerpg.game.domain.stats.Stats
 
 /** Goal counter names (values of [GoalState.type]). Plain strings: unknown ones in a save must not crash. */
@@ -91,9 +92,13 @@ object Goals {
     fun active(state: GameState): List<GoalState> =
         state.progress.goals.filter { !it.claimed && defOf(it) != null }.take(ACTIVE_COUNT)
 
-    /** A rank goal "buy N more ranks" is only offered while N more ranks still exist (never unreachable). */
+    /**
+     * A rank goal "buy N more ranks" is only offered once the rank system is active (end level reached) and while
+     * N more ranks still exist, so it never blocks one of the active slots without being achievable.
+     */
     private fun reachable(state: GameState, def: GoalDef): Boolean =
-        def.type != GoalTypes.RANK || (GoalTypes.counter(state, def.type) ?: 0L) + def.target <= RankConfig.MAX_RANK
+        def.type != GoalTypes.RANK ||
+            (Ranks.isActive(state) && (GoalTypes.counter(state, def.type) ?: 0L) + def.target <= RankConfig.MAX_RANK)
 
     /** Catalog entries not yet in the goal list (and still reachable), in catalog order. */
     private fun pending(state: GameState): List<GoalDef> {

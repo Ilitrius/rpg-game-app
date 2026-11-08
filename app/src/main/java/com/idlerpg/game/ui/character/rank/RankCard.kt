@@ -91,6 +91,12 @@ fun RankCard(state: GameState) {
                 }
             }
             Text(stringResource(R.string.rank_subtitle), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (!Ranks.isActive(state)) {
+                Text(
+                    stringResource(R.string.rank_locked_endlevel, RankConfig.UNLOCK_LEVEL, Ranks.heroLevel(state)),
+                    style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error,
+                )
+            }
             Text(stringResource(R.string.rank_bonus_now, bonusText(RankBonuses.of(rank))), style = MaterialTheme.typography.bodyMedium)
             if (result == RankBuyResult.MAX_RANK) {
                 Text(stringResource(R.string.rank_max), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)

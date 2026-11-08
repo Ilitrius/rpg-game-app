@@ -7,7 +7,8 @@ import kotlin.math.pow
 import kotlin.math.roundToLong
 
 /**
- * Hero ranks (Squire ... Demigod, then Mythos I-V): bought with gold once the hero (or his best level) reached the rank's level.
+ * Hero ranks (Squire ... Demigod, then Mythos I-V): an end-game system. Buying ranks and their bonuses only work
+ * once the hero (or his best level, which survives a rebirth) reached the end level [UNLOCK_LEVEL].
  * Every rank permanently raises damage/HP/speed; from rank 4 on also gold, every 2nd rank an inventory slot.
  * Ranks survive a rebirth (a permanent investment, like prestige).
  */
@@ -18,8 +19,11 @@ object RankConfig {
     /** First Mythos rank: also needs rebirths ([MYTHOS_REBIRTHS]). */
     const val FIRST_MYTHOS = 11
 
-    /** Hero level needed to buy rank `i + 1` (index `i`); the Mythos ranks all need the maximum level. */
-    val LEVELS: IntArray = intArrayOf(50, 100, 175, 250, 350, 450, 575, 700, 850, 999, 999, 999, 999, 999, 999)
+    /** End level (maximum hero level): the rank system is only active from here on. */
+    const val UNLOCK_LEVEL = 999
+
+    /** Hero level needed to buy rank `i + 1` (index `i`): all ranks need the end level. Prices are derived from it. */
+    val LEVELS: IntArray = IntArray(MAX_RANK) { UNLOCK_LEVEL }
 
     /** Rebirths needed for Mythos I..V (ranks 11..15). */
     val MYTHOS_REBIRTHS: IntArray = intArrayOf(1, 2, 4, 7, 10)
@@ -60,7 +64,9 @@ data class RankBonuses(
             )
         }
 
-        fun of(state: GameState): RankBonuses = of(state.rank.rank)
+        /** Bonuses of the hero in [state]: neutral until the end level was reached (bought ranks stay, but sleep). */
+        fun of(state: GameState): RankBonuses =
+            if (Ranks.isActive(state)) of(state.rank.rank) else NEUTRAL
     }
 }
 
@@ -69,6 +75,9 @@ enum class RankBuyResult { OK, MAX_RANK, LEVEL_TOO_LOW, REBIRTHS_TOO_LOW, NOT_EN
 object Ranks {
     /** Current rank, clamped into the valid range (tampered saves cannot exceed the catalog). */
     fun rank(state: GameState): Int = state.rank.rank.coerceIn(0, RankConfig.MAX_RANK)
+
+    /** True once the rank system is active: the hero (or his best level) reached [RankConfig.UNLOCK_LEVEL]. */
+    fun isActive(state: GameState): Boolean = heroLevel(state) >= RankConfig.UNLOCK_LEVEL
 
     /** Hero level that counts for rank gates: the best level ever reached (survives a rebirth). */
     fun heroLevel(state: GameState): Int = maxOf(state.character.level, state.prestige.bestLevel)

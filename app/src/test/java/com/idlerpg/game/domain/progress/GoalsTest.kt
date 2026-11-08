@@ -120,13 +120,26 @@ class GoalsTest {
     }
 
     @Test
+    fun rankGoalsOnlyAppearOnceTheRankSystemIsActive() {
+        val early = GameState()
+        assertTrue(Goals.ensureActive(early).progress.goals.none { it.type == GoalTypes.RANK })
+        val endgame = GameState(character = com.idlerpg.game.data.CharacterState(level = 999))
+        val rankGoalsOffered = Goals.catalog.filter { it.type == GoalTypes.RANK }
+        assertTrue(rankGoalsOffered.isNotEmpty())
+        // the first pending entries of the catalog are rank goals for an endgame hero with all other goals done
+        var s = endgame
+        repeat(Goals.catalog.size) { s = Goals.ensureActive(s); Goals.active(s).forEach { g -> s = s.copy(progress = s.progress.copy(goals = s.progress.goals.map { x -> if (x.id == g.id) x.copy(claimed = true) else x })) } }
+        assertTrue(s.progress.goals.any { it.type == GoalTypes.RANK })
+    }
+
+    @Test
     fun rankGoalsAreNeverOfferedWhenUnreachable() {
         // At Mythos IV only "+1 rank" can still be reached.
-        val s = GameState(rank = com.idlerpg.game.data.RankState(14))
+        val s = GameState(character = com.idlerpg.game.data.CharacterState(level = 999), rank = com.idlerpg.game.data.RankState(14))
         val offered = Goals.ensureActive(s).progress.goals.map { it.id }
         assertTrue(offered.none { it.startsWith("rank_") && it != "rank_1" })
         // At the top there is none at all, and refilling terminates.
-        val max = GameState(rank = com.idlerpg.game.data.RankState(15))
+        val max = GameState(character = com.idlerpg.game.data.CharacterState(level = 999), rank = com.idlerpg.game.data.RankState(15))
         assertTrue(Goals.ensureActive(max).progress.goals.none { it.type == GoalTypes.RANK })
     }
 

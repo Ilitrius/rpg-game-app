@@ -172,7 +172,7 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
                     attacks++ // short weapon swing as feedback; no pending hit queued, damage is already applied
                     scope.launch {
                         hitFlash.snapTo(1f)
-                        hitFlash.animateTo(0f, tween(if (e.hit.critical) 380 else 260))
+                        hitFlash.animateTo(0f, tween(if (e.hit.critical) 320 else 200))
                     }
                 }
                 is AdventureEvent.TapMiss -> {
@@ -333,7 +333,7 @@ fun AdventureScreen(modifier: Modifier = Modifier, vm: AdventureViewModel = view
                     )
                     scope.launch {
                         hitFlash.snapTo(1f)
-                        hitFlash.animateTo(0f, tween(if (hit.critical) 380 else 260))
+                        hitFlash.animateTo(0f, tween(if (hit.critical) 320 else 200))
                     }
                 }
             },

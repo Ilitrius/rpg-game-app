@@ -73,32 +73,39 @@ class RanksTest {
     }
 
     @Test
-    fun cannotBuyBelowLevelOrWithoutGold() {
-        val poor = hero(level = 60)
+    fun cannotBuyBelowEndLevelOrWithoutGold() {
+        val poor = hero(level = 999)
         assertEquals(RankBuyResult.NOT_ENOUGH_GOLD, Ranks.check(poor))
         assertSame(poor, Ranks.buy(poor))
-        val low = hero(level = 49, gold = Long.MAX_VALUE)
+        // the rank system only starts at the end level, however much gold the hero has
+        val low = hero(level = 998, gold = Long.MAX_VALUE)
         assertEquals(RankBuyResult.LEVEL_TOO_LOW, Ranks.check(low))
         assertSame(low, Ranks.buy(low))
+        assertEquals(RankConfig.UNLOCK_LEVEL, Ranks.requiredLevel(1))
+        assertTrue(!Ranks.isActive(low))
+        assertTrue(Ranks.isActive(poor))
     }
 
     @Test
     fun buyingPaysGoldAndRaisesRankOneAtATime() {
-        val rich = hero(level = 100, gold = Ranks.price(1) + Ranks.price(2) + 7)
+        val rich = hero(level = 999, gold = Ranks.price(1) + Ranks.price(2) + 7)
         val one = Ranks.buy(rich)
         assertEquals(1, one.rank.rank)
         assertEquals(rich.gold - Ranks.price(1), one.gold)
         val two = Ranks.buy(one)
         assertEquals(2, two.rank.rank)
         assertEquals(7, two.gold)
-        // rank 3 needs level 175: level 100 is not enough even with plenty of gold
-        assertEquals(RankBuyResult.LEVEL_TOO_LOW, Ranks.check(two.copy(gold = Long.MAX_VALUE)))
+        // with gold the next rank is buyable again, without it not
+        assertEquals(RankBuyResult.NOT_ENOUGH_GOLD, Ranks.check(two))
+        assertEquals(RankBuyResult.OK, Ranks.check(two.copy(gold = Long.MAX_VALUE)))
     }
 
     @Test
     fun bestLevelOpensTheGateAfterARebirth() {
-        val s = hero(level = 1, gold = Ranks.price(1), best = 120)
+        val s = hero(level = 1, gold = Ranks.price(1), best = 999)
         assertEquals(RankBuyResult.OK, Ranks.check(s))
+        // a best level below the end level does not count
+        assertEquals(RankBuyResult.LEVEL_TOO_LOW, Ranks.check(hero(level = 1, gold = Ranks.price(1), best = 500)))
     }
 
     @Test
@@ -124,8 +131,8 @@ class RanksTest {
     }
 
     @Test
-    fun rankBoostsCombatValuesAndInventory() {
-        val base = hero(level = 100)
+    fun rankBoostsCombatValuesAndInventoryOnlyFromTheEndLevel() {
+        val base = hero(level = 999)
         val ranked = base.copy(rank = RankState(10))
         val a = CombatStats.of(base)
         val b = CombatStats.of(ranked)
@@ -133,6 +140,20 @@ class RanksTest {
         assertTrue(b.maxHp > a.maxHp)
         assertTrue(b.attacksPerSecond > a.attacksPerSecond)
         assertEquals(Inventory.capacity(base) + 5, Inventory.capacity(ranked))
+    }
+
+    @Test
+    fun bonusesSleepBelowTheEndLevelAndWakeUpWithIt() {
+        val sleeping = hero(level = 500, rank = 10)
+        assertEquals(RankBonuses.NEUTRAL, RankBonuses.of(sleeping))
+        assertTrue(PrestigeBonuses.of(sleeping).isNeutral)
+        val a = CombatStats.of(hero(level = 500))
+        val b = CombatStats.of(sleeping)
+        assertEquals(a.damageMax, b.damageMax)
+        assertEquals(a.maxHp, b.maxHp)
+        // the best level counts, so a reborn hero keeps the benefit of his ranks
+        val reborn = hero(level = 3, rank = 10, best = 999)
+        assertTrue(RankBonuses.of(reborn).damage > 1.0)
     }
 
     @Test

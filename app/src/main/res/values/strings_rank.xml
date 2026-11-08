@@ -41,4 +41,5 @@
     <string name="rank_name_15">Mythos V</string>
     <string name="rank_requires_level_rebirths">Ab Level %1$d und %2$d Wiedergeburten</string>
     <string name="rank_rebirths_missing">Dir fehlen noch Wiedergeburten: %1$d (bisher %2$d).</string>
+    <string name="rank_locked_endlevel">Das Rang-System ist erst ab dem Endlevel %1$d aktiv (bestes Level: %2$d). Bereits gekaufte Ränge wirken dann sofort.</string>
 </resources>
