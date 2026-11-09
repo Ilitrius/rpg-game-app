@@ -21,16 +21,20 @@ data class LootDrop(
 /**
  * Item drops from monsters (uses the Ausrüstung API [ItemGenerator] / [Inventory]).
  *
- * - Regular monsters: [dropChance] = 8 % + 0.2 % per luck point, max 16 %; item level = monster level.
+ * - Regular monsters: [dropChance] = 3.5 % + 0.1 % per luck point, max 8 %, at least Uncommon; item level = monster level.
  * - Bosses: guaranteed drop, at least [Rarity.RARE] with rarity boost 1.0.
  * - Offline: expected number of drops for the counted kills, at most [MAX_OFFLINE_ITEMS].
  */
 object Loot {
-    const val BASE_DROP_CHANCE = 0.08
-    const val DROP_CHANCE_PER_LUCK = 0.002
-    const val MAX_DROP_CHANCE = 0.16
-    const val MAX_OFFLINE_ITEMS = 20
+    const val BASE_DROP_CHANCE = 0.035
+    const val DROP_CHANCE_PER_LUCK = 0.001
+    const val MAX_DROP_CHANCE = 0.08
+    const val MAX_OFFLINE_ITEMS = 10
     const val BOSS_RARITY_BOOST = 1.0
+
+    /** Regular drops are rarer but better: at least Uncommon, shifted slightly towards rarer tiers. */
+    val NORMAL_MIN_RARITY = Rarity.UNCOMMON
+    const val NORMAL_RARITY_BOOST = 0.5
 
     /** Drop chance; [multiplier] is the drop buff (1.0 = none), which may lift it up to twice [MAX_DROP_CHANCE]. */
     fun dropChance(luck: Int, multiplier: Double = 1.0): Double {
@@ -43,7 +47,7 @@ object Loot {
 
     /** Rolls the drop of a regular monster of [monsterLevel]; null = nothing dropped. */
     fun rollDrop(monsterLevel: Int, luck: Int, random: Random = Random.Default, dropMultiplier: Double = 1.0): Item? =
-        if (random.nextDouble() < dropChance(luck, dropMultiplier)) ItemGenerator.roll(monsterLevel, random) else null
+        if (random.nextDouble() < dropChance(luck, dropMultiplier)) ItemGenerator.roll(monsterLevel, random, NORMAL_MIN_RARITY, NORMAL_RARITY_BOOST) else null
 
     /** Guaranteed boss drop. */
     fun bossDrop(bossLevel: Int, random: Random = Random.Default): Item =

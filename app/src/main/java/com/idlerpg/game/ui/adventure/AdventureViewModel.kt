@@ -713,7 +713,10 @@ class AdventureViewModel(app: Application) : AndroidViewModel(app) {
         waitWithRegen(CombatRules.DEATH_MILLIS * 2)
         _ui.update { it.copy(monster = null, phase = MonsterPhase.GONE) }
         if (next != null) {
-            travelTo(next.id) // restarts the loop in the next zone
+            // The victory just unlocked [next]; the UI world may not have caught up with the async save yet,
+            // so travel directly instead of going through the unlock check of travelTo (which would silently
+            // fail and leave pendingZoneId stuck on the old zone).
+            startTravel(next) // restarts the loop in the next zone
             currentCoroutineContext().ensureActive()
         }
     }

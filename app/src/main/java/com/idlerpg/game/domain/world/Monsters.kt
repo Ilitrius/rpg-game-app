@@ -104,6 +104,9 @@ object MonsterScaling {
     const val XP_PER_LEVEL = 0.50
     const val GOLD_PER_LEVEL = 0.35
 
+    /** Global gold damping (2026-11-09: gold came in too fast); applies to every monster and boss. */
+    const val GOLD_SCALE = 0.5
+
     fun stats(type: MonsterType, zone: Zone, level: Int): MonsterStats {
         val l = (level.coerceAtLeast(1) - 1).toDouble()
         val hp = (type.baseHp * (1 + HP_PER_LEVEL * l) * zone.hpMultiplier).roundToLong().coerceAtLeast(1)
@@ -113,7 +116,7 @@ object MonsterScaling {
         val interval = (type.baseAttackIntervalMillis *
             (1 - INTERVAL_REDUCTION_PER_LEVEL * l).coerceAtLeast(MIN_INTERVAL_FACTOR)).roundToLong()
         val xp = (type.baseXp * (1 + XP_PER_LEVEL * l) * zone.rewardMultiplier).roundToLong().coerceAtLeast(1)
-        val gold = (type.baseGold * (1 + GOLD_PER_LEVEL * l) * zone.goldMultiplier).roundToLong().coerceAtLeast(1)
+        val gold = (type.baseGold * (1 + GOLD_PER_LEVEL * l) * zone.goldMultiplier * GOLD_SCALE).roundToLong().coerceAtLeast(1)
         return MonsterStats(type, level.coerceAtLeast(1), hp, dMin, dMax, interval, xp, gold)
     }
 

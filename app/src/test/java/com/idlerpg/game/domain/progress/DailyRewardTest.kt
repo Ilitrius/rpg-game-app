@@ -79,7 +79,7 @@ class DailyRewardTest {
     @Test
     fun rewardIsGenerousAndScalesWithZone() {
         val low = DailyReward.reward(state(), 1)
-        assertTrue(low >= 150 * 2)
+        assertTrue(low >= 150)
         val high = GameState(
             character = com.idlerpg.game.data.CharacterState(level = 35),
             world = com.idlerpg.game.data.WorldState(currentZoneId = "hoehle"),

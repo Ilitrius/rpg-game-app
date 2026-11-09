@@ -8,7 +8,7 @@ plugins {
 }
 
 // Release candidate: version + release number, e.g. 0.1.0-rc19. Output files are named "Idle-RPG-<versionName>-<variant>.apk/.aab".
-val appVersionName = "0.1.0-rc27"
+val appVersionName = "0.1.0-rc28"
 
 base.archivesName.set("Idle-RPG-$appVersionName")
 
@@ -31,7 +31,7 @@ android {
         applicationId = "com.rp.IDLEGAMERP"
         minSdk = 26
         targetSdk = 36
-        versionCode = 27
+        versionCode = 28
         versionName = appVersionName
     }
 

@@ -228,11 +228,11 @@ class LootTest {
 
     @Test
     fun dropChanceGrowsWithLuckAndIsCapped() {
-        assertEquals(0.08, Loot.dropChance(0), 1e-9)
-        assertEquals(0.09, Loot.dropChance(5), 1e-9)
+        assertEquals(0.035, Loot.dropChance(0), 1e-9)
+        assertEquals(0.04, Loot.dropChance(5), 1e-9)
         assertTrue(Loot.dropChance(20) > Loot.dropChance(5))
         assertEquals(Loot.MAX_DROP_CHANCE, Loot.dropChance(1000), 1e-9)
-        assertEquals(0.08, Loot.dropChance(-5), 1e-9)
+        assertEquals(0.035, Loot.dropChance(-5), 1e-9)
     }
 
     @Test
@@ -240,7 +240,7 @@ class LootTest {
         val r = Random(42)
         var drops = 0
         repeat(20_000) { Loot.rollDrop(7, luck = 5, random = r)?.let { drops++; assertEquals(7, it.itemLevel) } }
-        assertEquals(0.09, drops / 20_000.0, 0.008)
+        assertEquals(0.04, drops / 20_000.0, 0.006)
         // same seed -> same result
         assertEquals(Loot.rollDrop(3, 5, Random(9))?.name, Loot.rollDrop(3, 5, Random(9))?.name)
     }

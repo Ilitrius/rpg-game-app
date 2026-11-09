@@ -206,15 +206,15 @@ class BalanceTest {
 
     /**
      * Offline gold of a full night buys some, but not all, of the shop's offers at the current level:
-     * at least two typical (median) offers, at most 60 % of the whole assortment — even when every
+     * at least one typical (median) offer, at most 60 % of the whole assortment — even when every
      * offline drop is auto-sold because the inventory is full.
      */
     @Test
     fun offlineNightBuysSomeButNotAllShopOffers() {
         situations().forEach { sit ->
             val e = economy(sit)
-            assertTrue("$sit some: night ${e.nightGold} vs median offer ${e.medianOffer}", e.nightGold >= 2 * e.medianOffer)
-            assertTrue("$sit not all: ${e.nightShare}", e.nightShare in 0.2..0.6)
+            assertTrue("$sit some: night ${e.nightGold} vs median offer ${e.medianOffer}", e.nightGold >= e.medianOffer)
+            assertTrue("$sit not all: ${e.nightShare}", e.nightShare in 0.08..0.6)
             assertTrue("$sit not all (inventory full): ${e.nightShareFullInventory}", e.nightShareFullInventory <= 0.6)
         }
     }
@@ -225,7 +225,7 @@ class BalanceTest {
         situations().forEach { sit ->
             val e = economy(sit, seeds = 60)
             assertTrue("$sit levels ${e.nightLevels}", e.nightLevels in 1.0..4.0)
-            assertTrue("$sit items ${e.nightItems}", e.nightItems in 3.0..Loot.MAX_OFFLINE_ITEMS.toDouble())
+            assertTrue("$sit items ${e.nightItems}", e.nightItems in 1.5..Loot.MAX_OFFLINE_ITEMS.toDouble())
             // Offline is clearly slower than playing: a night is worth less than 15 minutes online.
             assertTrue("$sit night xp ${e.nightXp} vs ${e.onlineXpPerHour}/h", e.nightXp < e.onlineXpPerHour / 4)
         }

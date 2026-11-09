@@ -140,7 +140,7 @@ class BuffsTest {
     @Test
     fun dropBuffRaisesChance() {
         assertEquals(Loot.dropChance(0), Loot.dropChance(0, 1.0), 1e-9)
-        assertEquals(0.16, Loot.dropChance(0, 2.0), 1e-9)
+        assertEquals(0.07, Loot.dropChance(0, 2.0), 1e-9)
         assertTrue(Loot.dropChance(1000, 2.0) <= Loot.MAX_DROP_CHANCE * 2)
         val r = Random(3)
         var plain = 0; var buffed = 0

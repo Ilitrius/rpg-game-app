@@ -27,7 +27,7 @@ class MonsterScalingTest {
             assertEquals(t.baseDamageMax, s.damageMax)
             assertEquals(t.baseAttackIntervalMillis, s.attackIntervalMillis)
             assertEquals(t.baseXp.toLong(), s.xp)
-            assertEquals(t.baseGold.toLong(), s.gold)
+            assertEquals(Math.round(t.baseGold * MonsterScaling.GOLD_SCALE).coerceAtLeast(1L), s.gold)
         }
     }
 
@@ -49,11 +49,11 @@ class MonsterScalingTest {
 
     @Test
     fun knownScaledValues() {
-        // Slime L5: hp 20 * 2.2 = 44, xp 6 * 3 = 18, gold 2 * 2.4 = 4.8 -> 5
+        // Slime L5: hp 20 * 2.2 = 44, xp 6 * 3 = 18, gold 2 * 2.4 * GOLD_SCALE 0.5 = 2.4 -> 2
         val s = MonsterScaling.stats(MonsterType.SLIME, zone, 5)
         assertEquals(44L, s.maxHp)
         assertEquals(18L, s.xp)
-        assertEquals(5L, s.gold)
+        assertEquals(2L, s.gold)
         assertEquals(Math.round(1700 * 0.92), s.attackIntervalMillis)
     }
 

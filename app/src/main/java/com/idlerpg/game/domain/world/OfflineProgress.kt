@@ -84,7 +84,7 @@ object OfflineProgress {
         val levels = Progression.applyXp(state.character, xp).levelsGained
 
         val dropCount = Loot.offlineDropCount(kills, Loot.dropChance(hero.totalStats.luck, PrestigeBonuses.of(state).drop), random)
-        val items = List(dropCount) { ItemGenerator.roll(level, random) }
+        val items = List(dropCount) { ItemGenerator.roll(level, random, Loot.NORMAL_MIN_RARITY, Loot.NORMAL_RARITY_BOOST) }
         val free = (Inventory.capacity(state) - state.equipment.inventory.size).coerceAtLeast(0)
         val sold = items.drop(free)
         return OfflineReward(
