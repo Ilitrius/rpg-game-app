@@ -10,7 +10,7 @@ import os
 import urllib.request
 import zipfile
 
-NAMES = ["Bark013", "Rock064", "Rock051", "Leather008", "Leather026", "Moss002"]
+NAMES = ["Bark013", "Rock064", "Rock051", "Leather008", "Leather026", "Leather037", "Leather039", "Moss002", "Fabric044", "Fabric045"]
 OUT = os.path.join(os.path.dirname(__file__), "textures")
 
 

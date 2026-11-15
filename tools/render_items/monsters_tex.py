@@ -97,7 +97,26 @@ mire_toad = _retex(
     {0: dict(tint=_toad_tint, bump=lambda p: -(_toad.height(p) - 0.5) * 0.022)},
 )
 
+
+# ---- mushroom sprite: fine skin pores (Leather037 height) on cap and stem
+_pores = Tex("Leather037", tile=0.7, shear=0.1)
+mushroom = _retex(
+    monsters_forest.mushroom,
+    {0: dict(bump=bump_fn(_pores, 0.018, fine=lambda p: (fbm(p, 40.0, 3, 6) - 0.5) * 0.004)),
+     2: dict(bump=bump_fn(_pores, 0.012))},
+)
+
+# ---- cave spider: hard glossy chitin plates (Leather008 grooves) over the hairy base
+_chitin = Tex("Leather008", tile=0.5, shear=0.3)
+cave_spider = _retex(
+    partial(monsters_forest.forest_spider, body_c=(0.22, 0.20, 0.26), leg_c=(0.30, 0.28, 0.34), eye_col=(0.3, 0.9, 0.5), mark_c=(0.35, 0.80, 0.55)),
+    {0: dict(bump=lambda p: -(_chitin.height(p) - 0.5) * 0.018, rough=0.30, spec=0.9),
+     1: dict(bump=lambda p: -(_chitin.height(p) - 0.5) * 0.012, rough=0.32, spec=0.9)},
+)
+
 BUILDERS = {
+    "mushroom": mushroom,
+    "cave_spider": cave_spider,
     "crystal_golem": crystal_golem,
     "treant": treant,
     "dragon": dragon,

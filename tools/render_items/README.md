@@ -49,3 +49,9 @@ python -I tools/render_items/render.py mace --rarity epic --out <ordner>   # ein
 - Edelstein-Funkeln: `render.py` legt ab Seltenheit selten einen Lichtstern auf den hellsten Edelstein-Pixel (`GLINT`).
 - Charakter-Tab: `render_hand.py cards` rendert die Waffen groß (`wc_*`, `CARD_PPU` 4, doppelt gerendert und verkleinert).
 - Waffen in der Hand (Ich-Perspektive): `render_hand.py [all|hand|fist|weapons|<waffe>] [--ppu 2.4]`, danach `python gen_hand_kotlin.py` (schreibt `FirstPersonSprites.kt` mit den Griff-Pixeln aus `hand_sprites.json`). Arm/Finger sind getrennte Ebenen, damit die Waffe dazwischen liegt.
+
+## Foto-Texturen (seit 2026-11-15)
+
+- `textures.py` legt CC0-Fototexturen (ambientCG, 1K) auf die Modelle (planare Projektion, `tint_fn`/`bump_fn`); die Texturen liegen **nicht** im Git, `python tools/render_items/fetch_textures.py` lädt sie nach `tools/render_items/textures/`.
+- `monsters_tex.py` überschreibt die Haut-Materialien von Kristallgolem, Baumhüter, Drache, Fledermaus, Kröte, Pilzling, Höhlenspinne; `monsters_gen.py` nutzt Schuppen (`Leather008`), Fels (`Rock051`), Hautporen (`Leather037`) und Filz (`Fabric044`) für die acht Körperformen der Zonen 6-100 (graue Ebenen, im Spiel pro Biom eingefärbt).
+- Rendern: `python -I render_monsters.py <name>` bzw. `python -I render_gen.py all --fear both` (die 16 Körperformen brauchen je ca. 5-17 min).

@@ -25,16 +25,30 @@ def pair(f):
 
 # --------------------------------------------------------------------------- shared materials
 
+from textures import Tex  # noqa: E402  (photo textures, CC0 - see textures.py)
+
+_LUM = np.array([0.299, 0.587, 0.114], dtype=np.float32)
+_CROC = Tex("Leather008", tile=1.2, shear=0.3)
+_ROCK = Tex("Rock051", tile=1.5)
+_PORES = Tex("Leather037", tile=0.45, shear=0.2)
+_FELT = Tex("Fabric044", tile=0.55, shear=0.1)
+
+
 def skin_scaly():
-    return Material(GREY, rough=0.38, spec=0.75, sss=0.35,
-                    tint_fn=lambda p, a: a * (0.62 + 0.62 * fbm(p, 6.0, 4, 2))[:, None],
-                    bump=lambda p: (value_noise(p, 70.0, 7) - 0.5) * 0.009 + (fbm(p, 16.0, 3, 9) - 0.5) * 0.014)
+    def tint(p, a):
+        lum = _CROC.color(p) @ _LUM
+        groove = np.clip((lum - 0.10) * 3.2, 0.0, 1.0)             # dark joints between the scale cells
+        cell = 0.62 + 0.62 * fbm(p, 6.0, 4, 2)
+        return a * (cell * (1.0 - 0.7 * groove))[:, None]
+    return Material(GREY, rough=0.38, spec=0.75, sss=0.35, tint_fn=tint,
+                    bump=lambda p: -(_CROC.height(p) - 0.5) * 0.020 + (value_noise(p, 70.0, 7) - 0.5) * 0.004)
 
 
 def skin_hide():
-    return Material(GREY, rough=0.55, spec=0.45, sss=0.5,
-                    tint_fn=lambda p, a: a * (0.60 + 0.65 * fbm(p, 5.0, 4, 4))[:, None],
-                    bump=lambda p: (fbm(p, 40.0, 3, 5) - 0.5) * 0.012 + (fbm(p, 9.0, 3, 6) - 0.5) * 0.02)
+    def tint(p, a):
+        return a * (0.60 + 0.65 * fbm(p, 5.0, 4, 4))[:, None]
+    return Material(GREY, rough=0.55, spec=0.45, sss=0.5, tint_fn=tint,
+                    bump=lambda p: (_PORES.height(p) - 0.5) * 0.030 + (fbm(p, 9.0, 3, 6) - 0.5) * 0.02)
 
 
 def skin_fur():
@@ -42,9 +56,11 @@ def skin_fur():
 
 
 def skin_rock():
-    return Material(GREY, rough=0.88, spec=0.12,
-                    tint_fn=lambda p, a: a * (0.52 + 0.85 * fbm(p, 5.0, 4, 3))[:, None],
-                    bump=lambda p: (value_noise(p, 14.0, 3) - 0.5) * 0.045 + (value_noise(p, 55.0, 6) - 0.5) * 0.012)
+    def tint(p, a):
+        lum = _ROCK.color(p) @ _LUM
+        return a * np.clip(0.35 + 1.5 * lum, 0.2, 1.6)[:, None]
+    return Material(GREY, rough=0.88, spec=0.12, tint_fn=tint,
+                    bump=lambda p: (_ROCK.height(p) - 0.5) * 0.07 + (value_noise(p, 55.0, 6) - 0.5) * 0.008)
 
 
 def skin_gel():
@@ -56,9 +72,12 @@ def skin_gel():
 
 
 def skin_cloth():
-    return Material(GREY, rough=0.85, spec=0.08, sss=0.6,
-                    tint_fn=lambda p, a: a * (0.55 + 0.6 * fbm(p * np.array([3.0, 0.6, 3.0], dtype=np.float32), 6.0, 4, 3))[:, None],
-                    bump=lambda p: (value_noise(p * np.array([4.0, 0.5, 4.0], dtype=np.float32), 20.0, 4) - 0.5) * 0.006)
+    def tint(p, a):
+        lum = _FELT.color(p) @ _LUM
+        folds = 0.55 + 0.6 * fbm(p * np.array([3.0, 0.6, 3.0], dtype=np.float32), 6.0, 4, 3)
+        return a * (folds * np.clip(0.5 + 1.1 * lum, 0.3, 1.5))[:, None]
+    return Material(GREY, rough=0.85, spec=0.08, sss=0.6, tint_fn=tint,
+                    bump=lambda p: (_FELT.height(p) - 0.5) * 0.012 + (value_noise(p * np.array([4.0, 0.5, 4.0], dtype=np.float32), 20.0, 4) - 0.5) * 0.004)
 
 
 EYE = Material((1.0, 1.0, 1.0), rough=0.03, spec=3.0, emissive=1.0)
