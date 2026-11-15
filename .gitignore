@@ -20,3 +20,4 @@
 # Python caches
 __pycache__/
 *.pyc
+tools/render_items/textures/

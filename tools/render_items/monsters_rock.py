@@ -146,8 +146,8 @@ def bat(rarity="common"):
             return np.minimum(arm, fingers)
         bones = pair(wing_s)
         def membrane_s(s):
-            m = ell(p, (s * 0.72, 0.72, -0.04), (0.56, 0.38, 0.012), rz=s * 0.45)
-            return m
+            # flight membrane stretched between arm, wrist and the three finger tips (straight leading edge, pointed lower edge)
+            return sheet(p, [(s * 0.20, 0.92), (s * 1.12, 0.99), (s * 1.44, 0.34), (s * 1.62, -0.04), (s * 0.34, 0.16)], -0.045, half=0.010)
         memb = pair(membrane_s)
         return union([(body, M_FUR), (np.minimum(bones, 1e3), M_FUR), (memb, M_WING), (eyes, M_EYE), (fangs, M_TOOTH), (ears, M_EAR)])
     return scene, [fur, wing, eye, tooth, ear], 1.9, rot_x(0.10) @ rot_y(0.0)
