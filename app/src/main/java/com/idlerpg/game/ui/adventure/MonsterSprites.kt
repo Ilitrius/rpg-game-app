@@ -78,7 +78,7 @@ internal object MonsterSprites {
      * [MonsterPainters.GROUND]): full box height, narrowed if the sprite is wider than the box.
      */
     fun draw(scope: DrawScope, sprite: ImageBitmap) = with(scope) {
-        val maxW = 270f
+        val maxW = 225f // wide sprites (bat, hydra) must stay on screen even with the boss size factor
         val aspect = sprite.width.toFloat() / sprite.height
         val hUnits = min(190f, maxW / aspect)
         val wUnits = hUnits * aspect
