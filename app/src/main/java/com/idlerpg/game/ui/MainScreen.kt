@@ -2,6 +2,7 @@ package com.idlerpg.game.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
+import com.idlerpg.game.ads.AdBanner
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -73,14 +74,18 @@ fun MainScreen(updater: InAppUpdater? = null) {
         Scaffold(
             snackbarHost = { SnackbarHost(snackbar) },
             bottomBar = {
-                MainMenuBar(
-                    selected = selectedTab,
-                    onTabPositioned = { tab, rect -> tabBounds[tab] = rect },
-                    onSelect = { tab ->
-                        sound.play(Sfx.CLICK)
-                        selectedTab = if (selectedTab == tab) null else tab
-                    },
-                )
+                Column {
+                    // Banner (AdMob) sits above the menu bar; invisible until an ad is loaded.
+                    AdBanner()
+                    MainMenuBar(
+                        selected = selectedTab,
+                        onTabPositioned = { tab, rect -> tabBounds[tab] = rect },
+                        onSelect = { tab ->
+                            sound.play(Sfx.CLICK)
+                            selectedTab = if (selectedTab == tab) null else tab
+                        },
+                    )
+                }
             },
         ) { innerPadding ->
             Box(

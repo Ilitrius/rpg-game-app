@@ -72,6 +72,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import com.idlerpg.game.ads.AdConsent
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.compose.ui.text.AnnotatedString
@@ -367,6 +368,16 @@ private fun PrivacyCard(onShowSummary: () -> Unit, onOpenPolicy: () -> Unit) {
             )
             ActionButton(Icons.Outlined.Info, stringResource(R.string.options_privacy_summary_button), primary = false, onClick = onShowSummary)
             ActionButton(Icons.Outlined.OpenInBrowser, stringResource(R.string.options_privacy_open), primary = false, onClick = onOpenPolicy)
+            val privacyOptions by AdConsent.privacyOptionsRequired.collectAsStateWithLifecycle()
+            if (privacyOptions) {
+                val activity = LocalContext.current as? android.app.Activity
+                ActionButton(
+                    Icons.Outlined.PrivacyTip,
+                    stringResource(R.string.options_ads_privacy_options),
+                    primary = false,
+                    onClick = { activity?.let { AdConsent.showPrivacyOptions(it) } },
+                )
+            }
         }
     }
 }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- AdMob (Konto ca-app-pub-2109805482260954). Debug-Builds nutzen Googles Test-Anzeigenblock (ads/AdBanner). -->
+    <string name="admob_app_id" translatable="false">ca-app-pub-2109805482260954~7836980498</string>
+    <string name="admob_banner_unit_id" translatable="false">ca-app-pub-2109805482260954/2155077277</string>
+</resources>

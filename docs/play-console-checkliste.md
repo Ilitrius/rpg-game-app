@@ -15,8 +15,8 @@ Quelle der Ablehnung: Programmrichtlinien + Play-Console-Anforderungen. Genauen 
 - URL eintragen: Play Console → Richtlinie → App-Inhalt → Datenschutzerklärung.
 
 ## App-Inhalt (alle Formulare ausfüllen & absenden)
-- Datensicherheit: "Keine Daten erhoben" / "Keine Daten geteilt"; Verschlüsselung/Löschung nicht zutreffend. Der Update-Hinweis nutzt die Play-Bibliothek `app-update` (In-App Updates): Sie fragt nur den Update-Status der eigenen App über die Play-Dienste ab, die App sendet keine Nutzerdaten; keine zusätzliche Berechtigung (kein INTERNET). In der Console daher weiterhin keine Datenerhebung angeben; Abfrage dennoch in der Datenschutzerklärung erwähnt (erledigt). Vor dem Release im Manifest-Merge prüfen, dass keine neue Berechtigung hinzukam.
-- Werbung: "Enthält keine Werbung".
+- Datensicherheit (**seit rc18 mit AdMob: NICHT mehr "Keine Daten erhoben"** – siehe Werbung unten; die folgende Angabe gilt nur für die App ohne Werbung): "Keine Daten erhoben" / "Keine Daten geteilt"; Verschlüsselung/Löschung nicht zutreffend. Der Update-Hinweis nutzt die Play-Bibliothek `app-update` (In-App Updates): Sie fragt nur den Update-Status der eigenen App über die Play-Dienste ab, die App sendet keine Nutzerdaten; keine zusätzliche Berechtigung (kein INTERNET). In der Console daher weiterhin keine Datenerhebung angeben; Abfrage dennoch in der Datenschutzerklärung erwähnt (erledigt). Vor dem Release im Manifest-Merge prüfen, dass keine neue Berechtigung hinzukam.
+- Werbung: **"Enthält Werbung"** (AdMob-Banner, seit rc18). Datensicherheit entsprechend anpassen: Geräte-/Werbe-ID und ungefähre Nutzungsdaten werden über AdMob erhoben/geteilt (Zweck: Werbung, Analytics/Missbrauchsschutz); Werbe-ID-Angabe in der App-Inhalte-Seite auf "Ja" (Permission `AD_ID` kommt mit der Ads-Bibliothek). Familienrichtlinie: App nicht für Kinder konzipiert (siehe Zielgruppe).
 - Inhaltseinstufung (IARC): Fantasy-Gewalt gegen Monster, keine Glücksspiel-/Echtgeld-Elemente.
 - Zielgruppe: 13+ (nicht "Kinder" wählen, sonst Families-Richtlinie).
 - App-Zugriff: "Alle Funktionen ohne Anmeldung nutzbar".

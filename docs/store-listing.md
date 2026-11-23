@@ -47,8 +47,8 @@ Hochauflösende Vektorgrafik für scharfe Darstellung auch auf modernen Displays
 
 DATENSCHUTZ
 • Dein Spielstand bleibt auf deinem Gerät
-• Kein Konto, keine Werbung, kein Tracking
-• Keine Internetverbindung nötig
+• Kein Konto, Spielstand bleibt lokal
+• Ein Werbebanner (Google AdMob), Einwilligung wird abgefragt
 
 HIGHLIGHTS
 • Idle-Kämpfe in Ich-Perspektive, mit Tippen und Combos
@@ -106,8 +106,8 @@ High-resolution vector graphics that stay sharp on modern displays, plus sound e
 
 PRIVACY
 • Your save stays on your device
-• No account, no ads, no tracking
-• No internet connection required
+• No account, save stays local
+• One ad banner (Google AdMob), consent is requested
 
 HIGHLIGHTS
 • First-person idle combat with taps and combos
@@ -130,5 +130,5 @@ Start now, and your hero sets out on their journey.
 
 ## Vor dem Einfügen prüfen
 - Fakten gegen den hochgeladenen Build: 100 Zonen, Auto-Boss, Combo, Ziele/Tagesbelohnung/Statistiken, Sound, Sprachwahl (alle seit rc9+ im Code).
-- „Keine Internetverbindung nötig“: stimmt (kein INTERNET-Recht); Update-Hinweis und Spenden-/Datenschutz-Link laufen über Play-Dienste bzw. Browser.
+- Seit AdMob: INTERNET-Recht vorhanden, Werbebanner (Aussagen „keine Werbung“/„kein Internet nötig“ sind überholt, oben bereits angepasst); Update-Hinweis und Spenden-/Datenschutz-Link laufen über Play-Dienste bzw. Browser.
 - Datensicherheitsformular und Datenschutzerklärung müssen dazu passen (tun sie, Stand rc16).

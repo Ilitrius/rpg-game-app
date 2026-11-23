@@ -62,6 +62,8 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         lifecycle.addObserver(soundLifecycle)
+        // Ads: consent form (EU/UK) first, SDK only after consent; fail-safe.
+        com.idlerpg.game.ads.AdConsent.gather(this)
         // Achievements follow the saved game; sync re-runs when sign-in completes.
         val repository = (application as IdleRpgApp).repository
         lifecycleScope.launch {

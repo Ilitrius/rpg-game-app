@@ -8,7 +8,7 @@ plugins {
 }
 
 // Release candidate: version + release number, e.g. 0.1.0-rc17. Output files are named "Idle-RPG-<versionName>-<variant>.apk/.aab".
-val appVersionName = "0.1.0-rc17"
+val appVersionName = "0.1.0-rc18"
 
 base.archivesName.set("Idle-RPG-$appVersionName")
 
@@ -31,7 +31,7 @@ android {
         applicationId = "com.rp.IDLEGAMERP"
         minSdk = 26
         targetSdk = 36
-        versionCode = 17
+        versionCode = 18
         versionName = appVersionName
     }
 
@@ -95,6 +95,8 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.play.app.update)
     implementation(libs.play.games)
+    implementation(libs.play.ads)
+    implementation(libs.ump)
     debugImplementation(libs.androidx.ui.tooling)
     testImplementation(libs.junit)
     testImplementation(libs.robolectric) // offscreen zone previews (ZonePreviewTest)
