@@ -1,13 +1,14 @@
-# Übergabe (Stand 2026-10-27)
+# Übergabe (Stand 2026-11-23)
 
-## Allgemein
-- Dieser Stand wurde in einer Cloud-Sitzung (ohne Android-SDK) erstellt: **nichts davon wurde gebaut, gelintet oder getestet.**
-- Branch `ccr-4dfc41dd-r2vb0x` ist nicht in main/master gemergt; `versionCode`/`versionName` nicht erhöht; keine PR.
-- Erster Schritt lokal: `.\gradlew.bat assembleDebug lintDebug test`, Fehler beheben, dann im Emulator `Pixel_API35` prüfen (Sprachumschaltung System/DE/EN in allen Menüfeldern).
-- Danach: mergen, Version erhöhen, `.\gradlew.bat bundleRelease` (Keystore unter `D:\AI_KI\...`), Upload in die Play Console macht der Nutzer selbst.
-- Neue Update-Bibliothek `com.google.android.play:app-update` 2.1.0 (Version nicht gegen Maven geprüft): im gemergten Manifest prüfen, dass keine neue Berechtigung hinzukommt; Update-Flow nur über Play-Test-Track testbar (nicht per adb/Sideload).
-- Offene Punkte stehen in `TODO.md`.
+## Stand
+- Version 0.1.0-rc29 (versionCode 29) in `master` (fee495c); Bundle `Idle-RPG-0.1.0-rc29-release.aab` gebaut, Upload in die Play Console macht der Nutzer.
+- Gebaut/getestet wird lokal bzw. im Emulator; der frühere Hinweis "nichts gebaut" (2026-10-27) ist überholt.
 
-## Idle RPG
-- Umgesetzt (ungebaut): lokalisierte Itemnamen (Shop, Beute-Popup, Charakter, Import-Meldungen), Locale-Reset bei „System", Offline-Dauer als „Tg./Std.", Update-Hinweis (`update/InAppUpdater`), Akku (Lifecycle-Flows, Shop-Ticker), Sound (`audio/SoundManager`, `res/raw/sfx_*.wav` via `tools/generate_sounds.py`, Lautstärke in `GameSettings.soundVolume`).
-- **Offen:** Ursache der falschen Offline-Zeitanzeige nach längerer Pause nicht gefunden (Screenshot + Zeit der letzten Sitzung nötig); Sounds anhören/Pegel prüfen; Compile-Risiken in `InAppUpdater`, `MainScreen`, `OptionsScreen`; Datenschutztexte („kein Internet") wurden angepasst, vor Release gegenlesen.
+## Play Store
+- Richtlinienmeldung "Unklare Bilder" (de-DE): am 2026-11-22 8 beschriftete Screenshots (Phone, 7"- und 10"-Tablet, de/en, Quelle `design/screens/store-captioned`) ersetzt und 6 Änderungen eingereicht. Entscheidung ca. 7 Tage, Frist 2026-11-25.
+- Risiken: de-Screenshots zeigen noch die englische Oberfläche; Reihenfolge der Bilder ("Dein Held kämpft von allein" zuerst). Bei Ablehnung: Einspruch bzw. deutsche Screenshots.
+
+## Offen
+- Play Games: Symbole (512x512) für die 10 Erfolge, Veröffentlichung, Bestenliste, Cloud-Spielstand.
+- Geräteprüfung: Prestige, Offline-Anzeige, Sounds, Endlos-Balance; Gold-Talent Stufe 20 (Offline-Nacht).
+- Weitere Punkte: `TODO.md`.
